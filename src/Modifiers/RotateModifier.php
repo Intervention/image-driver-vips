@@ -29,7 +29,7 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
             90.0, -270.0 => $core->rot90(),
             180.0, -180.0 => $core->rot180(),
             -90.0, 270.0 => $core->rot270(),
-            default => $this->rotate($core, $image),
+            default => $this->rotate($core),
         };
 
         $image->core()->setNative($core);
@@ -37,7 +37,7 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
         return $image;
     }
 
-    public function rotate(VipsImage $core, ImageInterface $image): VipsImage
+    public function rotate(VipsImage $core): VipsImage
     {
         $color = $this->driver()->handleInput($this->background);
 
