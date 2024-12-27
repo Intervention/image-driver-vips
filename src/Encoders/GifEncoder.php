@@ -22,6 +22,6 @@ class GifEncoder extends GenericGifEncoder implements SpecializedInterface
             'interlace' => $this->interlaced,
         ]);
 
-        return new EncodedImage($result);
+        return new EncodedImage($result, 'image/gif');
     }
 }

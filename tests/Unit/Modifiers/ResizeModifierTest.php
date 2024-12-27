@@ -8,8 +8,8 @@ use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Modifiers\ResizeModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(\Intervention\Image\Drivers\ResizeModifier::class)]
-#[CoversClass(\Intervention\Image\Drivers\Imagick\Modifiers\ResizeModifier::class)]
+#[CoversClass(ResizeModifier::class)]
+#[CoversClass(\Intervention\Image\Drivers\Vips\Modifiers\ResizeModifier::class)]
 final class ResizeModifierTest extends BaseTestCase
 {
     public function testModify(): void

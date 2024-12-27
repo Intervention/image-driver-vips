@@ -115,17 +115,25 @@ class Frame implements FrameInterface
 
     public function offsetLeft(): int
     {
+        return $this->native()->get('xoffset');
     }
 
     public function setOffsetLeft(int $offset): FrameInterface
     {
+        $this->native()->set('xoffset', $offset);
+
+        return $this;
     }
 
     public function offsetTop(): int
     {
+        return $this->native()->get('yoffset');
     }
 
     public function setOffsetTop(int $offset): FrameInterface
     {
+        $this->native()->set('yoffset', $offset);
+
+        return $this;
     }
 }

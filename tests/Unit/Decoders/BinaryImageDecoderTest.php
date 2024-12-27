@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Intervention\Image\Drivers\Vips\Tests\Decoders;
+namespace Intervention\Image\Drivers\Vips\Tests\Unit\Decoders;
 
 use Intervention\Image\Colors\Cmyk\Colorspace as CmykColorspace;
 use Intervention\Image\Colors\Rgb\Colorspace as RgbColorspace;

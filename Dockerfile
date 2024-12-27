@@ -16,5 +16,8 @@ RUN apt update \
             ffi \
         && apt-get clean
 
+# ffi config
+COPY --link docker/ffi.ini /usr/local/etc/php/conf.d/10-ffi.ini
+
 # install composer
 COPY --from=composer /usr/bin/composer /usr/bin/composer

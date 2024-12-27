@@ -102,5 +102,9 @@ class Driver extends AbstractDriver
                 'PHP extension FFI or VIPS must be enabled to use this driver.'
             );
         }
+
+        if (version_compare(PHP_VERSION, '8.3', '>=') && ini_get('zend.max_allowed_stack_size') != '-1') {
+            throw new DriverException("zend.max_allowed_stack_size not set to '-1'");
+        }
     }
 }

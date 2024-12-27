@@ -9,10 +9,19 @@ use Intervention\Image\Colors\Rgb\Channels\Blue;
 use Intervention\Image\Colors\Rgb\Channels\Green;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 use Intervention\Image\Colors\Rgb\Color as RgbColor;
+use Intervention\Image\Colors\Rgb\Colorspace;
+use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
+use Intervention\Image\EncodedImage;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ColorInterface;
+use Intervention\Image\Interfaces\ImageInterface;
+use Intervention\Image\Vips\Color;
+use Jcupitt\Vips\BandFormat;
+use Jcupitt\Vips\Extend;
+use Jcupitt\Vips\Image as VipsImage;
+use Jcupitt\Vips\Interpretation;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 
 abstract class BaseTestCase extends MockeryTestCase
@@ -32,6 +41,23 @@ abstract class BaseTestCase extends MockeryTestCase
         return (new Driver())->specialize(new FilePathImageDecoder())->decode(
             static::getTestResourcePath($filename)
         );
+    }
+
+    public function newImage(int $width, int $height, ?array $background = null): VipsImage
+    {
+        $driver = new Driver();
+        $background = $driver->colorProcessor(new Colorspace())->nativeToColor($background ?? [255, 255, 255, 0]);
+
+        return VipsImage::black(1, 1)
+            ->add($background->channel(Red::class)->value())
+            ->cast(BandFormat::UCHAR)
+            ->embed(0, 0, $width, $height, ['extend' => Extend::COPY])
+            ->copy(['interpretation' => Interpretation::SRGB])
+            ->bandjoin([
+                $background->channel(Green::class)->value(),
+                $background->channel(Blue::class)->value(),
+                $background->channel(Alpha::class)->value(),
+            ]);
     }
 
     /**
@@ -93,6 +119,21 @@ abstract class BaseTestCase extends MockeryTestCase
             $color->channel(Alpha::class)->value(),
             $range($a, $tolerance),
             $errorMessage($r, $g, $b, $a, $color)
+        );
+    }
+  
+    protected function assertMediaType(string|array $allowed, string|EncodedImage $input): void
+    {
+        $pointer = fopen('php://temp', 'rw');
+        fputs($pointer, (string) $input);
+        rewind($pointer);
+        $detected = mime_content_type($pointer);
+        fclose($pointer);
+
+        $allowed = is_string($allowed) ? [$allowed] : $allowed;
+        $this->assertTrue(
+            in_array($detected, $allowed),
+            'Detected media type ' . $detected . ' is not in allowed types [' . implode(', ', $allowed) . ']'
         );
     }
 

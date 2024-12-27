@@ -8,8 +8,8 @@ use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Modifiers\BlurModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(\Intervention\Image\Drivers\BlurModifier::class)]
-#[CoversClass(\Intervention\Image\Drivers\Imagick\Modifiers\BlurModifier::class)]
+#[CoversClass(BlurModifier::class)]
+#[CoversClass(\Intervention\Image\Drivers\Vips\Modifiers\BlurModifier::class)]
 final class BlurModifierTest extends BaseTestCase
 {
     public function testColorChange(): void

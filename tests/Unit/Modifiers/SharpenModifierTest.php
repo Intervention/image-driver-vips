@@ -8,7 +8,7 @@ use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Modifiers\SharpenModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(\Intervention\Image\Modifiers\SharpenModifier::class)]
+#[CoversClass(SharpenModifier::class)]
 #[CoversClass(\Intervention\Image\Drivers\Vips\Modifiers\SharpenModifier::class)]
 final class SharpenModifierTest extends BaseTestCase
 {

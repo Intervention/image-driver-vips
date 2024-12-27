@@ -47,6 +47,8 @@ final class FilePathImageDecoderTest extends BaseTestCase
             [self::getTestResourcePath('blue.gif'), true],
             [self::getTestResourcePath('gradient.bmp'), true],
             [self::getTestResourcePath('circle.png'), true],
+            [self::getTestResourcePath('test.jpg'), true],
+            [self::getTestResourcePath('test.jpeg'), true],
             ['no-path', false],
             [str_repeat('x', PHP_MAXPATHLEN + 1), false],
         ];
