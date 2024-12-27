@@ -48,15 +48,19 @@ class TrimModifier extends GenericTrimModifier implements SpecializedInterface
                 'background' => $point,
             ]);
 
-            $image->core()->setNative(
-                $core->crop(
-                    min($trim['top'], $image->height() - 1),
-                    min($trim['left'], $image->width() - 1),
-                    max($trim['width'], 1),
-                    max($trim['height'], 1)
-                )
+            $core = $core->crop(
+                min($trim['top'], $image->height() - 1),
+                min($trim['left'], $image->width() - 1),
+                max($trim['width'], 1),
+                max($trim['height'], 1)
             );
+
+            if (empty($trim['width']) || empty($trim['height'])) {
+                break;
+            }
         }
+
+        $image->core()->setNative($core);
 
         return $image;
     }
