@@ -37,6 +37,9 @@
             "Intervention\\Image\\Drivers\\Vips\\Tests\\": "tests"
         }
     },
+    "scripts": {
+        "phpstan": "phpstan analyse --ansi"
+    },
     "config": {
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true

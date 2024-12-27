@@ -8,6 +8,7 @@ use Intervention\Image\Colors\Rgb\Channels\Alpha;
 use Intervention\Image\Colors\Rgb\Channels\Blue;
 use Intervention\Image\Colors\Rgb\Channels\Green;
 use Intervention\Image\Colors\Rgb\Channels\Red;
+use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Interfaces\ColorInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
@@ -20,9 +21,15 @@ use Jcupitt\Vips\Interpretation;
 
 class FillModifier extends GenericFillModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @throws RuntimeException|\Jcupitt\Vips\Exception
+     * @see ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
-        $color = $this->color($image);
+        $color = $this->color();
 
         $overlay = VipsImage::black(1, 1)
             ->add($color->channel(Red::class)->value())
@@ -65,7 +72,10 @@ class FillModifier extends GenericFillModifier implements SpecializedInterface
         return $image;
     }
 
-    private function color(ImageInterface $image): ColorInterface
+    /**
+     * @throws RuntimeException
+     */
+    private function color(): ColorInterface
     {
         return $this->driver()->handleInput($this->color);
     }

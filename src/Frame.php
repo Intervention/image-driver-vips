@@ -119,6 +119,10 @@ class Frame implements FrameInterface
 
     public function setOffset(int $left, int $top): FrameInterface
     {
+        $this->setOffsetLeft($left);
+        $this->setOffsetTop($top);
+
+        return $this;
     }
 
     /**

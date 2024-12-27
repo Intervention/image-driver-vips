@@ -8,6 +8,7 @@ use Intervention\Image\Colors\Rgb\Channels\Alpha;
 use Intervention\Image\Colors\Rgb\Channels\Blue;
 use Intervention\Image\Colors\Rgb\Channels\Green;
 use Intervention\Image\Colors\Rgb\Channels\Red;
+use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SizeInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
@@ -22,6 +23,12 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
 {
     public const INTERESTING_PREFIX = 'interesting-';
 
+    /**
+     * {@inheritdoc}
+     *
+     * @throws RuntimeException|\Jcupitt\Vips\Exception
+     * @see ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
         $originalSize = $image->size();
@@ -69,6 +76,9 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
         return $image;
     }
 
+    /**
+     * @throws RuntimeException|\Jcupitt\Vips\Exception
+     */
     private function background(SizeInterface $resizeTo): VipsImage
     {
         $bgColor = $this->driver()->handleInput($this->background);
@@ -87,6 +97,8 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
 
     /**
      * Smart crop interesting positions, prefixed with `interesting-`.
+     *
+     * @return list<string>
      */
     private function getInterestingPositions(): array
     {

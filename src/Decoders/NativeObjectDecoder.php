@@ -7,6 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Decoders;
 use Intervention\Image\Drivers\SpecializableDecoder;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Exceptions\DecoderException;
+use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\ColorInterface;
@@ -18,9 +19,7 @@ use Jcupitt\Vips\Image as VipsImage;
 class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInterface
 {
     /**
-     * @param mixed $input
-     * @return ImageInterface|ColorInterface
-     * @throws DecoderException
+     * @throws DecoderException|RuntimeException
      */
     public function decode(mixed $input): ImageInterface|ColorInterface
     {
