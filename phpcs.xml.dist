@@ -29,8 +29,8 @@
   <rule ref="SlevomatCodingStandard.Files.TypeNameMatchesFileName">
     <properties>
       <property name="rootNamespaces" type="array">
-        <element key="src" value="Intervention\Image"/>
-        <element key="tests" value="Intervention\Image\Tests"/>
+        <element key="src" value="Intervention\Image\Drivers\Vips"/>
+        <element key="tests" value="Intervention\Image\Drivers\Vips\Tests"/>
       </property>
     </properties>
   </rule>

@@ -10,14 +10,11 @@ use Intervention\Image\Colors\Rgb\Channels\Green;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 use Intervention\Image\Colors\Rgb\Color as RgbColor;
 use Intervention\Image\Colors\Rgb\Colorspace;
-use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ColorInterface;
-use Intervention\Image\Interfaces\ImageInterface;
-use Intervention\Image\Vips\Color;
 use Jcupitt\Vips\BandFormat;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
@@ -121,7 +118,7 @@ abstract class BaseTestCase extends MockeryTestCase
             $errorMessage($r, $g, $b, $a, $color)
         );
     }
-  
+
     protected function assertMediaType(string|array $allowed, string|EncodedImage $input): void
     {
         $pointer = fopen('php://temp', 'rw');
