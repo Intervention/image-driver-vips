@@ -5,24 +5,20 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips;
 
 use Intervention\Image\Colors\Cmyk\Color as CmykColor;
-use Intervention\Image\Exceptions\ColorException;
-use Intervention\Image\Interfaces\ColorProcessorInterface;
-use Intervention\Image\Interfaces\ColorspaceInterface;
-use Intervention\Image\Interfaces\ColorInterface;
 use Intervention\Image\Colors\Cmyk\Colorspace as CmykColorspace;
 use Intervention\Image\Colors\Rgb\Color as RgbColor;
+use Intervention\Image\Exceptions\ColorException;
+use Intervention\Image\Interfaces\ColorInterface;
+use Intervention\Image\Interfaces\ColorProcessorInterface;
+use Intervention\Image\Interfaces\ColorspaceInterface;
 
 class ColorProcessor implements ColorProcessorInterface
 {
     /**
      * Create new ColorProcessor instance
-     *
-     * @param ColorspaceInterfaca $colorspace
-     * @return void
      */
     public function __construct(protected ColorspaceInterface $colorspace)
     {
-        //
     }
 
     /**

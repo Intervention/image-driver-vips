@@ -8,6 +8,7 @@ use Intervention\Image\Colors\Rgb\Channels\Alpha;
 use Intervention\Image\Colors\Rgb\Channels\Blue;
 use Intervention\Image\Colors\Rgb\Channels\Green;
 use Intervention\Image\Colors\Rgb\Channels\Red;
+use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\RotateModifier as GenericRotateModifier;
@@ -25,7 +26,7 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
         $core = $image->core()->native();
 
         $core = match ($this->rotationAngle()) {
-            0 => $core,
+            0.0 => $core,
             90.0, -270.0 => $core->rot90(),
             180.0, -180.0 => $core->rot180(),
             -90.0, 270.0 => $core->rot270(),
@@ -37,6 +38,9 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
         return $image;
     }
 
+    /**
+     * @throws RuntimeException
+     */
     public function rotate(VipsImage $core): VipsImage
     {
         $color = $this->driver()->handleInput($this->background);

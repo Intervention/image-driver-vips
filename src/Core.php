@@ -10,9 +10,13 @@ use Intervention\Image\Interfaces\CollectionInterface;
 use Intervention\Image\Interfaces\CoreInterface;
 use Intervention\Image\Interfaces\FrameInterface;
 use IteratorAggregate;
+use Jcupitt\Vips\Exception;
 use Jcupitt\Vips\Image as VipsImage;
 use Traversable;
 
+/**
+ * @implements IteratorAggregate<int, FrameInterface>
+ */
 class Core implements CoreInterface, IteratorAggregate
 {
     /**
@@ -51,6 +55,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CoreInterface::count()
+     * @throws Exception
      */
     public function count(): int
     {
@@ -61,6 +66,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CoreInterface::frame()
+     * @throws AnimationException|Exception
      */
     public function frame(int $position): FrameInterface
     {
@@ -89,6 +95,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CoreInterface::add()
+     * @throws AnimationException|Exception
      */
     public function add(FrameInterface $frame): CoreInterface
     {
@@ -101,7 +108,7 @@ class Core implements CoreInterface, IteratorAggregate
         $this->vipsImage = VipsImage::arrayjoin($frames, ['across' => 1]);
 
         $this->vipsImage->set('delay', $delay);
-        $this->vipsImage->set('loop', 0);
+        $this->vipsImage->set('loop', $this->loops());
         $this->vipsImage->set('page-height', $frame->size()->height());
         $this->vipsImage->set('n-pages', count($frames));
 
@@ -112,6 +119,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CoreInterface::loops()
+     * @throws Exception
      */
     public function loops(): int
     {
@@ -122,6 +130,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CoreInterface::setLoops()
+     * @throws Exception
      */
     public function setLoops(int $loops): CoreInterface
     {
@@ -134,6 +143,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CollectionInterface::first()
+     * @throws AnimationException|Exception
      */
     public function first(): FrameInterface
     {
@@ -144,6 +154,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CollectableInterface::last()
+     * @throws AnimationException|Exception
      */
     public function last(): FrameInterface
     {
@@ -154,11 +165,12 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CollectionInterface::has()
+     * @throws Exception
      */
     public function has(int|string $key): bool
     {
         try {
-            return !empty($this->frame($key));
+            return (bool) $this->frame($key);
         } catch (AnimationException) {
             return false;
         }
@@ -168,6 +180,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CollectionInterface::push()
+     * @throws AnimationException|Exception
      */
     public function push($item): CollectionInterface
     {
@@ -178,6 +191,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CollectionInterface::get()
+     * @throws Exception
      */
     public function get(int|string $key, $default = null): mixed
     {
@@ -192,6 +206,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CollectionInterface::getAtPosition()
+     * @throws Exception
      */
     public function getAtPosition(int $key = 0, $default = null): mixed
     {
@@ -210,6 +225,11 @@ class Core implements CoreInterface, IteratorAggregate
         return $this;
     }
 
+    /**
+     * @return list<VipsImage>
+     *
+     * @throws AnimationException|Exception
+     */
     public function toArray(): array
     {
         $frames = [];
@@ -229,9 +249,24 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CollectionInterface::slice()
+     * @throws AnimationException|Exception
      */
     public function slice(int $offset, ?int $length = 0): CollectionInterface
     {
+        $frames = $this->toArray();
+        $delay = $this->vipsImage->get('delay') ?? [];
+
+        $frames = array_slice($frames, $offset, $length);
+        $delay = array_slice($delay, $offset, $length);
+
+        $this->vipsImage = VipsImage::arrayjoin($frames, ['across' => 1]);
+
+        $this->vipsImage->set('delay', $delay);
+        $this->vipsImage->set('loop', $this->loops());
+        $this->vipsImage->set('page-height', $frames[0]->height);
+        $this->vipsImage->set('n-pages', count($frames));
+
+        return $this;
     }
 
     /**
@@ -241,6 +276,6 @@ class Core implements CoreInterface, IteratorAggregate
      */
     public function getIterator(): Traversable
     {
-        return new ArrayIterator($this);
+        return new ArrayIterator($this); // @phpstan-ignore-line
     }
 }

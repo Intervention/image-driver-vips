@@ -105,6 +105,14 @@ class CoreTest extends BaseTestCase
         $this->assertEquals('foo', $this->core->get(3, 'foo'));
     }
 
+    public function testSlice(): void
+    {
+        $this->assertEquals(3, $this->core->count());
+        $result = $this->core->slice(1, 2);
+        $this->assertEquals(2, $this->core->count());
+        $this->assertEquals(2, $result->count());
+    }
+
     public function testIteratorAggregate(): void
     {
         foreach ($this->core as $frame) {

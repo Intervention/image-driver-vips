@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
+use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Geometry\Rectangle;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\PointInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
@@ -13,6 +15,11 @@ use Jcupitt\Vips\Extend;
 
 class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
         $watermark = $this->driver()->handleInput($this->element);
@@ -37,13 +44,18 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
         return $image;
     }
 
+    /**
+     * @throws RuntimeException
+     */
     private function placeWatermark(
         mixed $watermarkNative,
         PointInterface $position,
         ImageInterface $image
     ): void {
         if ($watermarkNative->hasAlpha()) {
-            $imageSize = $image->size()->align($this->position);
+            /** @var Rectangle $size */
+            $size = $image->size();
+            $imageSize = $size->align($this->position);
 
             $watermarkNative = $watermarkNative->embed(
                 $position->x(),
