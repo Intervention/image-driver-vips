@@ -55,7 +55,7 @@ class TrimModifier extends GenericTrimModifier implements SpecializedInterface
                 max($trim['height'], 1)
             );
 
-            if (empty($trim['width']) || empty($trim['height'])) {
+            if ($trim['width'] === 0 || $trim['height'] === 0) {
                 break;
             }
         }
