@@ -29,6 +29,8 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
         $result = $image->core()->native()->writeToBuffer('.jpg', [
             'Q' => $this->quality,
             'interlace' => $this->progressive,
+            'strip' => true,
+            'optimize_coding' => true,
             // 'background' => $blendingColor->toArray(),
         ]);
 

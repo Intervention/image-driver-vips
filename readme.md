@@ -20,3 +20,9 @@ Just request the package with the following command:
 ```bash
 composer require intervention/image-driver-vips
 ```
+
+## Contributing
+Check out the [documentation](https://github.com/Intervention/image/blob/develop/CONTRIBUTING.md)
+```bash
+composer test
+```

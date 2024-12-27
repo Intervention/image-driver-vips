@@ -12,6 +12,10 @@
             "name": "Oliver Vogel",
             "email": "oliver@intervention.io",
             "homepage": "https://intervention.io/"
+        },
+        {
+            "name": "Thomas Picquet",
+            "email": "thomas@sctr.net"
         }
     ],
     "require": {
@@ -38,7 +42,14 @@
         }
     },
     "scripts": {
-        "phpstan": "phpstan analyse --ansi"
+        "test": [
+            "@phpunit",
+            "@phpcs",
+            "@phpstan"
+        ],
+        "phpstan": "phpstan analyse --ansi",
+        "phpunit": "phpunit",
+        "phpcs": "phpcs"
     },
     "config": {
         "allow-plugins": {
