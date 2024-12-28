@@ -1,4 +1,5 @@
-# libvips driver for Intervention Image
+# intervention/image-driver-vips
+## libvips driver for Intervention Image
 
 [![Latest Version](https://img.shields.io/packagist/v/intervention/image-driver-vips.svg)](https://packagist.org/packages/intervention/image-driver-vips)
 [![Build Status](https://github.com/Intervention/image-driver-vips/actions/workflows/run-tests.yml/badge.svg)](https://github.com/Intervention/image-driver-vips/actions)
@@ -10,6 +11,10 @@ The code is in a very early and experimental stage of development. Many
 features are not yet implemented and tested. There may still be significant
 changes. Therefore, it is not recommended to use the driver in production
 environments.
+
+Driver to use [libvips](https://github.com/libvips/libvips) with [Intervention
+Image](https://github.com/Intervention/image). Combines the easy-to-use API of
+Intervention Image with the technical performance of libvips.
 
 ## Requirements
 
