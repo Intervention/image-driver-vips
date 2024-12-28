@@ -30,6 +30,37 @@ Just request the package with the following command:
 composer require intervention/image-driver-vips
 ```
 
+## Getting Started
+
+The public [API](https://image.intervention.io/v3) of Intervention Image can be
+used unchanged. The only [configuration](https://image.intervention.io/v3/basics/image-manager) that needs to be done is to ensure that
+the `libvips` driver is used by `Intervention\Image\ImageManager`.
+
+## Code Examples
+
+```php
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Vips\Driver as VipsDriver;
+
+// create image manager with vips driver
+$manager = ImageManager::withDriver(VipsDriver::class);
+
+// open an image file
+$image = $manager->read('images/example.gif');
+
+// resize image instance
+$image->resize(height: 300);
+
+// insert a watermark
+$image->place('images/watermark.png');
+
+// encode edited image
+$encoded = $image->toJpg();
+
+// save encoded image
+$encoded->save('images/example.jpg');
+```
+
 ## Contributing
 Check out the [documentation](https://github.com/Intervention/image/blob/develop/CONTRIBUTING.md)
 ```bash
