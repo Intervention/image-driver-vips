@@ -6,6 +6,7 @@ namespace Intervention\Image\Drivers\Vips;
 
 use Intervention\Image\Drivers\AbstractDriver;
 use Intervention\Image\Exceptions\DriverException;
+use Intervention\Image\Exceptions\NotSupportedException;
 use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\FileExtension;
 use Intervention\Image\Format;
@@ -18,7 +19,7 @@ use Intervention\Image\Interfaces\ColorProcessorInterface;
 use Intervention\Image\Interfaces\FontProcessorInterface;
 use Intervention\Image\MediaType;
 use Jcupitt\Vips\BandFormat;
-use Jcupitt\Vips\Exception;
+use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
 use Jcupitt\Vips\Interpretation;
@@ -39,7 +40,7 @@ class Driver extends AbstractDriver
      * {@inheritdoc}
      *
      * @see DriverInterface::createImage()
-     * @throws Exception|RuntimeException
+     * @throws VipsException|RuntimeException
      */
     public function createImage(int $width, int $height): ImageInterface
     {
@@ -61,7 +62,7 @@ class Driver extends AbstractDriver
      * {@inheritdoc}
      *
      * @see DriverInterface::createAnimation()
-     * @throws RuntimeException|Exception
+     * @throws RuntimeException|VipsException
      */
     public function createAnimation(callable $init): ImageInterface
     {
@@ -75,6 +76,7 @@ class Driver extends AbstractDriver
             public function __construct(
                 protected DriverInterface $driver,
             ) {
+                //
             }
 
             /**
@@ -88,7 +90,7 @@ class Driver extends AbstractDriver
             }
 
             /**
-             * @throws RuntimeException|Exception
+             * @throws RuntimeException|VipsException
              */
             public function __invoke(): ImageInterface
             {
@@ -145,6 +147,16 @@ class Driver extends AbstractDriver
      */
     public function supports(string|Format|FileExtension|MediaType $identifier): bool
     {
+        try {
+            $format = Format::create($identifier);
+            $this->createImage(1, 1)
+                ->core()
+                ->native()
+                ->writeToBuffer('.' . $format->fileExtension()->value);
+        } catch (NotSupportedException | VipsException) {
+            return false;
+        }
+
         return true;
     }
 
