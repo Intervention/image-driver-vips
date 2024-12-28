@@ -143,6 +143,7 @@ class Driver extends AbstractDriver
     /**
      * {@inheritdoc}
      *
+     * @throws RuntimeException
      * @see DriverInterface::supports()
      */
     public function supports(string|Format|FileExtension|MediaType $identifier): bool
