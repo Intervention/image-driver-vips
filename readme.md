@@ -19,7 +19,7 @@ Intervention Image with the technical performance of libvips.
 ## Requirements
 
 - PHP >= 8.1
-- Intervention Image 3
+- Intervention Image >= 3
 
 ## Installation
 
