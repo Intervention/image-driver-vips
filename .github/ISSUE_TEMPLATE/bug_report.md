@@ -24,3 +24,4 @@ If applicable, add problematic images or screenshots to help explain your proble
  - OS:
  - Intervention Image Version:
  - php-vips Version:
+ - libvips Version:
