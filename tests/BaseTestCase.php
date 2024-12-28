@@ -11,6 +11,7 @@ use Intervention\Image\Colors\Rgb\Channels\Red;
 use Intervention\Image\Colors\Rgb\Color as RgbColor;
 use Intervention\Image\Colors\Rgb\Colorspace;
 use Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder;
+use Intervention\Image\Drivers\Vips\Decoders\FilePointerImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Image;
@@ -38,6 +39,11 @@ abstract class BaseTestCase extends MockeryTestCase
         return (new Driver())->specialize(new FilePathImageDecoder())->decode(
             static::getTestResourcePath($filename)
         );
+    }
+
+    public static function readFilePointer(mixed $fp): Image
+    {
+        return (new Driver())->specialize(new FilePointerImageDecoder())->decode($fp);
     }
 
     public function newImage(int $width, int $height, ?array $background = null): VipsImage
