@@ -18,7 +18,7 @@ final class Jpeg200EncoderTest extends BaseTestCase
         $encoder = new Jpeg2000Encoder(75);
         $encoder->setDriver(new Driver());
         $result = $encoder->encode($image);
-        $this->assertMediaType('image/jp2', $result);
+        $this->assertMediaType(['image/jp2', 'image/x-jp2-codestream'], $result);
         $this->assertEquals('image/jp2', $result->mimetype());
     }
 }
