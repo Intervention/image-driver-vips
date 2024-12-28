@@ -22,20 +22,22 @@ class PixelColorAnalyzer extends GenericPixelColorAnalyzer implements Specialize
     {
         return $this->colorAt(
             $image->colorspace(),
-            $image->core()->native()
+            $image->core()->native(),
+            $this->x,
+            $this->y,
         );
     }
 
     /**
      * @throws ColorException
      */
-    protected function colorAt(ColorspaceInterface $colorspace, VipsImage $vipsImage): ColorInterface
+    protected function colorAt(ColorspaceInterface $colorspace, VipsImage $vipsImage, int $x, int $y): ColorInterface
     {
         return $this->driver()
             ->colorProcessor($colorspace)
             ->nativeToColor(array_map(
                 fn ($value): int => (int) min($value, 255),
-                $vipsImage->getpoint($this->x, $this->y)
+                $vipsImage->getpoint($x, $y)
             ));
     }
 }
