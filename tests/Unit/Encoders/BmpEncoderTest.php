@@ -18,7 +18,7 @@ final class BmpEncoderTest extends BaseTestCase
         $encoder = new BmpEncoder();
         $encoder->setDriver(new Driver());
         $result = $encoder->encode($image);
-        $this->assertMediaType('image/x-ms-bmp', $result);
+        $this->assertMediaType(['image/bmp', 'image/x-ms-bmp'], $result);
         $this->assertEquals('image/bmp', $result->mimetype());
     }
 }
