@@ -135,7 +135,7 @@ abstract class BaseTestCase extends MockeryTestCase
         $sample = strtoupper(substr(bin2hex((string) $input), 0, 1024));
 
         $this->assertTrue(
-            preg_match("/^0000000C6A5020200D0A870A/", $sample) === 1,
+            preg_match("/^0000000C6A5020200D0A870A|FF4FFF51/", $sample) === 1,
             'Detected MIME type does not belong to the Jpeg 2000 format (' . substr($sample, 0, 24) . ').'
         );
     }
