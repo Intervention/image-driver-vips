@@ -289,7 +289,7 @@ class Core implements CoreInterface, IteratorAggregate
     {
         $debug = [];
 
-        foreach ($this->vipsImage->getFields() as &$name) {
+        foreach ($this->vipsImage->getFields() as $name) {
             $value = $this->vipsImage->get($name);
 
             if (str_ends_with($name, "-data")) {
