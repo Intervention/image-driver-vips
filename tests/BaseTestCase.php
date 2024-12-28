@@ -130,6 +130,16 @@ abstract class BaseTestCase extends MockeryTestCase
         );
     }
 
+    protected function assertMediaTypeJpeg2000(string|EncodedImage $input): void
+    {
+        $sample = strtoupper(substr(bin2hex((string) $input), 0, 1024));
+
+        $this->assertTrue(
+            preg_match("/^0000000C6A5020200D0A870A/", $sample) === 1,
+            'Detected MIME type does not belong to the Jpeg 2000 format.'
+        );
+    }
+
     protected function assertTransparency(ColorInterface $color): void
     {
         $this->assertInstanceOf(RgbColor::class, $color);
