@@ -278,4 +278,34 @@ class Core implements CoreInterface, IteratorAggregate
     {
         return new ArrayIterator($this); // @phpstan-ignore-line
     }
+
+    /**
+     * Show debug info for the current image
+     *
+     * @throws Exception
+     * @return array<string, mixed>
+     */
+    public function __debugInfo(): array
+    {
+        $debug = [];
+
+        foreach ($this->vipsImage->getFields() as $name) {
+            $value = $this->vipsImage->get($name);
+
+            if (str_ends_with($name, "-data")) {
+                $len = strlen($value);
+                $value = "<$len bytes of binary data>";
+            }
+
+            if (is_array($value)) {
+                $value = implode(", ", $value);
+            } else {
+                $value = (string) $value;
+            }
+
+            $debug[$name] = $value;
+        }
+
+        return $debug;
+    }
 }
