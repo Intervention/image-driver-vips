@@ -23,6 +23,17 @@ final class Jpeg200EncoderTest extends BaseTestCase
         $this->assertTrue($this->isJpeg2000($result), 'Encoding result is not in Jpeg 2000 format.');
     }
 
+    public function testEncodeAnimated(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $encoder = new Jpeg2000Encoder(75);
+        $encoder->setDriver(new Driver());
+        $result = $encoder->encode($image);
+        $encoded = $this->readFilePointer($result->toFilePointer());
+        $this->assertSame($image->width(), $encoded->width());
+        $this->assertSame($image->height(), $encoded->height());
+    }
+
     private function isJpeg2000(string|EncodedImage $input): bool
     {
         return 1 === preg_match(

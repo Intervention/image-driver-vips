@@ -21,4 +21,15 @@ final class WebpEncoderTest extends BaseTestCase
         $this->assertMediaType('image/webp', $result);
         $this->assertEquals('image/webp', $result->mimetype());
     }
+
+    public function testEncodeAnimated(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $encoder = new WebpEncoder(75);
+        $encoder->setDriver(new Driver());
+        $result = $encoder->encode($image);
+        $encoded = $this->readFilePointer($result->toFilePointer());
+        $this->assertSame($image->width(), $encoded->width());
+        $this->assertSame($image->height(), $encoded->height());
+    }
 }

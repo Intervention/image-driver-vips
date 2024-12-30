@@ -20,6 +20,7 @@ class HeicEncoder extends GenericHeicEncoder implements SpecializedInterface
     {
         $result = $image->core()->native()->writeToBuffer('.heic', [
             'Q' => $this->quality,
+            'strip' => true,
         ]);
 
         return new EncodedImage($result, 'image/heic');
