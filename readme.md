@@ -67,7 +67,7 @@ $encoded->save('images/example.jpg');
 | - | - |
 | ImageManager::read() | ✅ |
 | ImageManager::create() | ✅ |
-| ImageManager::animate() | ❌ |
+| ImageManager::animate() | ✅ |
 
 
 ## Contributing
