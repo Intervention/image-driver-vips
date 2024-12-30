@@ -61,6 +61,15 @@ $encoded = $image->toJpg();
 $encoded->save('images/example.jpg');
 ```
 
+## Feature Status
+
+| Feature | Status |
+| - | - |
+| ImageManager::read() | ✅ |
+| ImageManager::create() | ✅ |
+| ImageManager::animate() | ❌ |
+
+
 ## Contributing
 Check out the [documentation](https://github.com/Intervention/image/blob/develop/CONTRIBUTING.md)
 ```bash
