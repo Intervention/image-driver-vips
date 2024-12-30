@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests;
 
+use finfo;
 use Intervention\Image\Colors\Rgb\Channels\Alpha;
 use Intervention\Image\Colors\Rgb\Channels\Blue;
 use Intervention\Image\Colors\Rgb\Channels\Green;
@@ -127,12 +128,7 @@ abstract class BaseTestCase extends MockeryTestCase
 
     protected function assertMediaType(string|array $allowed, string|EncodedImage $input): void
     {
-        $pointer = fopen('php://temp', 'rw');
-        fputs($pointer, (string) $input);
-        rewind($pointer);
-        $detected = mime_content_type($pointer);
-        fclose($pointer);
-
+        $detected = (new finfo(FILEINFO_MIME_TYPE))->buffer((string) $input);
         $allowed = is_string($allowed) ? [$allowed] : $allowed;
         $this->assertTrue(
             in_array($detected, $allowed),
