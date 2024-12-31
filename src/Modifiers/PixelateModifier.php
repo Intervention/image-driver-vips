@@ -5,14 +5,22 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Core;
+use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\PixelateModifier as GenericPixelateModifier;
+use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Kernel;
 
 class PixelateModifier extends GenericPixelateModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see ModifierInterface::apply()
+     * @throws RuntimeException|VipsException
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
         if (!$image->isAnimated()) {
