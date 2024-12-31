@@ -108,11 +108,8 @@ class Core implements CoreInterface, Iterator
             return new Frame($this->vipsImage);
         }
 
-        if (in_array('delay', $this->vipsImage->getFields())) {
-            $delay = $this->vipsImage->get('delay')[$position] ?? 0;
-        } else {
-            $delay = null;
-        }
+        $delay = in_array('delay', $this->vipsImage->getFields()) ?
+            ($this->vipsImage->get('delay')[$position] ?? 0) : null;
 
         try {
             $height = $this->vipsImage->getType('page-height') === 0 ?
@@ -145,20 +142,14 @@ class Core implements CoreInterface, Iterator
      * @see CoreInterface::add()
      * @throws AnimationException|VipsException
      */
-    public function add(FrameInterface $frame): CoreInterface
+    public function add(FrameInterface $frame): self
     {
         $frames = $this->toArray();
-        $delay = $this->vipsImage->get('delay') ?? [];
+        $frames[] = new Frame($frame->native(), $frame->delay());
 
-        $frames[] = $frame->native();
-        $delay[] = (int) $frame->delay();
-
-        $this->vipsImage = VipsImage::arrayjoin($frames, ['across' => 1]);
-
-        $this->vipsImage->set('delay', $delay);
-        $this->vipsImage->set('loop', $this->loops());
-        $this->vipsImage->set('page-height', $frame->size()->height());
-        $this->vipsImage->set('n-pages', count($frames));
+        $this->setNative(
+            self::createFromFrames($frames)->native()
+        );
 
         return $this;
     }
@@ -272,7 +263,7 @@ class Core implements CoreInterface, Iterator
     }
 
     /**
-     * @return list<VipsImage>
+     * @return list<FrameInterface>
      *
      * @throws AnimationException|VipsException
      */
@@ -281,11 +272,7 @@ class Core implements CoreInterface, Iterator
         $frames = [];
 
         for ($i = 0; $i < $this->count(); $i++) {
-            $f = $this->frame($i)->native()
-                ->cast($this->vipsImage->format)
-                ->copy(['interpretation' => $this->vipsImage->interpretation]);
-
-            $frames[] = $f;
+            $frames[] = $this->frame($i);
         }
 
         return $frames;
@@ -300,17 +287,11 @@ class Core implements CoreInterface, Iterator
     public function slice(int $offset, ?int $length = 0): CollectionInterface
     {
         $frames = $this->toArray();
-        $delay = $this->vipsImage->get('delay') ?? [];
 
         $frames = array_slice($frames, $offset, $length);
-        $delay = array_slice($delay, $offset, $length);
-
-        $this->vipsImage = VipsImage::arrayjoin($frames, ['across' => 1]);
-
-        $this->vipsImage->set('delay', $delay);
-        $this->vipsImage->set('loop', $this->loops());
-        $this->vipsImage->set('page-height', $frames[0]->height);
-        $this->vipsImage->set('n-pages', count($frames));
+        $this->setNative(
+            self::createFromFrames($frames)->native()
+        );
 
         return $this;
     }

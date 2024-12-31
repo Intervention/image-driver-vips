@@ -37,7 +37,7 @@ final class PixelateModifierTest extends BaseTestCase
         $image->modify(new PixelateModifier(10));
         $this->assertEquals(2, count($image));
 
-        foreach ($image as $i => $frame) {
+        foreach ($image as $frame) {
             $this->assertColor(0, 174, 242, 255, $frame->toImage(new Driver())->pickColor(0, 0), 1);
             $this->assertColor(107, 171, 140, 255, $frame->toImage(new Driver())->pickColor(14, 14), 1);
         }
