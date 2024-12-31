@@ -11,9 +11,11 @@ use Intervention\Image\Colors\Rgb\Channels\Green;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 use Intervention\Image\Colors\Rgb\Color as RgbColor;
 use Intervention\Image\Colors\Rgb\Colorspace;
+use Intervention\Image\Drivers\Vips\Decoders\BinaryImageDecoder;
 use Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\EncodedImage;
+use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ColorInterface;
 use Jcupitt\Vips\BandFormat;
@@ -139,21 +141,25 @@ abstract class BaseTestCase extends MockeryTestCase
 
     protected function assertImageSize(string|EncodedImage $image, int $width, int $height): void
     {
-        $info = getimagesizefromstring((string) $image);
-
-        if (!is_array($info)) {
+        try {
+            $image = (new Driver())
+                ->specialize(new BinaryImageDecoder())
+                ->decode(
+                    (string) $image
+                );
+        } catch (RuntimeException) {
             $this->fail('Unable to read image size.');
-        } else {
-            $this->assertEquals(
-                (int) $info[0],
-                $width,
-                'Failed asserting that the detected image width (' . $info[0] . ') is ' . $width . ' pixels.',
-            );
-            $this->assertEquals(
-                (int) $info[1],
-                $height,
-                'Failed asserting that the detected image height (' . $info[1] . ') is ' . $height . ' pixels.',
-            );
         }
+
+        $this->assertEquals(
+            $image->width(),
+            $width,
+            'Failed asserting that the detected image width (' . $image->width() . ') is ' . $width . ' pixels.',
+        );
+        $this->assertEquals(
+            $image->height(),
+            $height,
+            'Failed asserting that the detected image height (' . $image->height() . ') is ' . $height . ' pixels.',
+        );
     }
 }
