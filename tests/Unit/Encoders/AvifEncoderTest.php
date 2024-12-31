@@ -28,8 +28,6 @@ final class AvifEncoderTest extends BaseTestCase
         $encoder = new AvifEncoder(75);
         $encoder->setDriver(new Driver());
         $result = $encoder->encode($image);
-        $encoded = $this->readFilePointer($result->toFilePointer());
-        $this->assertSame($image->width(), $encoded->width());
-        $this->assertSame($image->height(), $encoded->height());
+        $this->assertImageSize($result, $image->width(), $image->height());
     }
 }

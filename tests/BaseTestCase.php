@@ -12,7 +12,6 @@ use Intervention\Image\Colors\Rgb\Channels\Red;
 use Intervention\Image\Colors\Rgb\Color as RgbColor;
 use Intervention\Image\Colors\Rgb\Colorspace;
 use Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder;
-use Intervention\Image\Drivers\Vips\Decoders\FilePointerImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Image;
@@ -40,11 +39,6 @@ abstract class BaseTestCase extends MockeryTestCase
         return (new Driver())->specialize(new FilePathImageDecoder())->decode(
             static::getTestResourcePath($filename)
         );
-    }
-
-    public static function readFilePointer(mixed $fp): Image
-    {
-        return (new Driver())->specialize(new FilePointerImageDecoder())->decode($fp);
     }
 
     public function newImage(int $width, int $height, ?array $background = null): VipsImage
@@ -141,5 +135,12 @@ abstract class BaseTestCase extends MockeryTestCase
         $this->assertInstanceOf(RgbColor::class, $color);
         $channel = $color->channel(Alpha::class);
         $this->assertEquals(0, $channel->value());
+    }
+
+    protected function assertImageSize(string|EncodedImage $image, int $width, int $height): void
+    {
+        $info = getimagesizefromstring((string) $image);
+        $this->assertEquals($info[0], $width, 'Failed asserting that image has width of ' . $width . ' pixels.');
+        $this->assertEquals($info[1], $height, 'Failed asserting that image has height of ' . $height . ' pixels.');
     }
 }
