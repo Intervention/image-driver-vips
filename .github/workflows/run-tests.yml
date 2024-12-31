@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install vips
-        run: sudo apt install -y --no-install-recommends libvips libffi-dev libexif-dev libheif-dev
+        run: sudo apt install -y --no-install-recommends libvips libffi-dev libexif-dev libheif-dev libheif-plugin-aomenc libheif-plugin-x265
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
