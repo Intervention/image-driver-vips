@@ -23,12 +23,11 @@ jobs:
         run: apt update && apt install -y --no-install-recommends libvips42 libffi-dev libexif-dev zip unzip
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          ini-values: zend.max_allowed_stack_size=-1
-          tools: composer:v2
-          coverage: none
+        run: ( curl -sSLf https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o - || echo 'return 1' ) | sh -s \
+          @composer exif zip ffi
+
+      - name: PHP.ini config
+        run: cp docker/ff.ini /usr/local/etc/php/conf.d/ff.ini
 
       - name: Get composer cache directory
         id: composer-cache
