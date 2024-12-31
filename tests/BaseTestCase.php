@@ -11,13 +11,12 @@ use Intervention\Image\Colors\Rgb\Channels\Green;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 use Intervention\Image\Colors\Rgb\Color as RgbColor;
 use Intervention\Image\Colors\Rgb\Colorspace;
-use Intervention\Image\Drivers\Vips\Decoders\BinaryImageDecoder;
 use Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\EncodedImage;
-use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ColorInterface;
+use Jcupitt\Vips\Access;
 use Jcupitt\Vips\BandFormat;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
@@ -141,25 +140,21 @@ abstract class BaseTestCase extends MockeryTestCase
 
     protected function assertImageSize(string|EncodedImage $image, int $width, int $height): void
     {
-        try {
-            $image = (new Driver())
-                ->specialize(new BinaryImageDecoder())
-                ->decode(
-                    (string) $image
-                );
-        } catch (RuntimeException) {
-            $this->fail('Unable to read image size.');
-        }
+        $vipsImage = VipsImage::newFromBuffer((string) $image, 'n=-1', ['access' => Access::SEQUENTIAL,]);
+
+        $detectedWidth = $vipsImage->width;
+        $detectedHeight = $vipsImage->getType('page-height') === 0 ?
+            $vipsImage->height : $vipsImage->get('page-height');
 
         $this->assertEquals(
-            $image->width(),
+            $detectedWidth,
             $width,
-            'Failed asserting that the detected image width (' . $image->width() . ') is ' . $width . ' pixels.',
+            'Failed asserting that the detected image width (' . $detectedWidth . ') is ' . $width . ' pixels.',
         );
         $this->assertEquals(
-            $image->height(),
+            $detectedHeight,
             $height,
-            'Failed asserting that the detected image height (' . $image->height() . ') is ' . $height . ' pixels.',
+            'Failed asserting that the detected image height (' . $detectedHeight . ') is ' . $height . ' pixels.',
         );
     }
 }
