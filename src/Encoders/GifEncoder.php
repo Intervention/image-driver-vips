@@ -20,6 +20,8 @@ class GifEncoder extends GenericGifEncoder implements SpecializedInterface
     {
         $result = $image->core()->native()->writeToBuffer('.gif', [
             'interlace' => $this->interlaced,
+            'optimize-gif-frames' => true,
+            'optimize-gif-transparency' => true,
         ]);
 
         return new EncodedImage($result, 'image/gif');
