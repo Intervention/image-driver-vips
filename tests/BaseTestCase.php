@@ -159,4 +159,24 @@ abstract class BaseTestCase extends MockeryTestCase
             'Failed asserting that the detected image height (' . $detectedHeight . ') is ' . $height . ' pixels.',
         );
     }
+
+    protected function assertImageSize2(string|EncodedImage $image, int $width, int $height): void
+    {
+        $vipsImage = VipsImage::newFromBuffer((string) $image, 'n=-1');
+
+        $detectedWidth = $vipsImage->width;
+        $detectedHeight = $vipsImage->getType('page-height') === 0 ?
+            $vipsImage->height : $vipsImage->get('page-height');
+
+        $this->assertEquals(
+            $detectedWidth,
+            $width,
+            'Failed asserting that the detected image width (' . $detectedWidth . ') is ' . $width . ' pixels.',
+        );
+        $this->assertEquals(
+            $detectedHeight,
+            $height,
+            'Failed asserting that the detected image height (' . $detectedHeight . ') is ' . $height . ' pixels.',
+        );
+    }
 }
