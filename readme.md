@@ -105,7 +105,7 @@ the features that have already been implemented.
 | Image::pixelate() | 🪲 |
 | Image::reduceColors() | ❌ |
 | Image::text() | ❌ |
-| Image::fill() | 🚧 |
+| Image::fill() | ✅ |
 | Image::drawPixel() | ❌ |
 | Image::drawCircle() | ❌ |
 | Image::drawLine() | ❌ |
