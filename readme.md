@@ -77,7 +77,7 @@ the features that have already been implemented.
 | Image::height() | ✅ |
 | Image::size() | ✅ |
 | Image::resize() | ✅ |
-| Image::resizeDown() | ❌ |
+| Image::resizeDown() | ✅ |
 | Image::scale() | ✅ |
 | Image::scaleDown() | ✅ |
 | Image::cover() | ❌ |
