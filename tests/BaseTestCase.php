@@ -18,6 +18,7 @@ use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ColorInterface;
 use Jcupitt\Vips\Access;
 use Jcupitt\Vips\BandFormat;
+use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
 use Jcupitt\Vips\Interpretation;
@@ -162,7 +163,16 @@ abstract class BaseTestCase extends MockeryTestCase
 
     protected function assertImageSize2(string|EncodedImage $image, int $width, int $height): void
     {
-        $vipsImage = VipsImage::newFromBuffer((string) $image, 'n=-1');
+        try {
+            $tmp = tempnam(sys_get_temp_dir(), 'TMP_');
+            file_put_contents($tmp, (string) $image);
+
+            $vipsImage = VipsImage::newFromFile($tmp);
+            unlink($tmp);
+        } catch (VipsException $e) {
+            unlink($tmp);
+            throw $e;
+        }
 
         $detectedWidth = $vipsImage->width;
         $detectedHeight = $vipsImage->getType('page-height') === 0 ?
