@@ -37,4 +37,18 @@ final class PlaceModifierTest extends BaseTestCase
         $image->modify(new PlaceModifier($this->getTestResourcePath('exif.jpg'), opacity: 50));
         $this->assertColor(127, 83, 127, 255, $image->pickColor(10, 10), tolerance: 1);
     }
+
+    public function testColorChangeAnimated(): void
+    {
+        $image = (new Driver())->createAnimation(function ($animation) {
+            $animation->add($this->getTestResourcePath('test.jpg'), .25);
+            $animation->add($this->getTestResourcePath('test.jpg'), .25);
+        })->setLoops(5);
+
+        $image->modify(new PlaceModifier($this->getTestResourcePath('circle.png'), 'top-right', 0, 0));
+
+        foreach ($image as $frame) {
+            $this->assertEquals('32250d', $frame->toImage(new Driver())->pickColor(300, 25)->toHex());
+        }
+    }
 }

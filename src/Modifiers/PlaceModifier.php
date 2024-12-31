@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
+use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Geometry\Rectangle;
+use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\PointInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\PlaceModifier as GenericPlaceModifier;
 use Jcupitt\Vips\BlendMode;
+use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Extend;
 
 class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
@@ -19,6 +22,7 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
      * {@inheritdoc}
      *
      * @see ModifierInterface::apply()
+     * @throws VipsException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
@@ -39,7 +43,20 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
             ]);
         }
 
-        $this->placeWatermark($watermarkNative, $position, $image);
+        if (!$image->isAnimated()) {
+            $image->core()->setNative(
+                $this->placeWatermark($watermarkNative, $position, $image->core()->first())->native()
+            );
+        } else {
+            $frames = [];
+            foreach ($image as $frame) {
+                $frames[] = $this->placeWatermark($watermarkNative, $position, $frame);
+            }
+
+            $image->core()->setNative(
+                Core::createFromFrames($frames)->native()
+            );
+        }
 
         return $image;
     }
@@ -50,11 +67,11 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
     private function placeWatermark(
         mixed $watermarkNative,
         PointInterface $position,
-        ImageInterface $image
-    ): void {
+        FrameInterface $frame
+    ): FrameInterface {
         if ($watermarkNative->hasAlpha()) {
             /** @var Rectangle $size */
-            $size = $image->size();
+            $size = $frame->size();
             $imageSize = $size->align($this->position);
 
             $watermarkNative = $watermarkNative->embed(
@@ -68,20 +85,22 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
                 ]
             );
 
-            $image->core()->setNative(
-                $image->core()->native()->composite2(
+            $frame->setNative(
+                $frame->native()->composite2(
                     $watermarkNative,
                     BlendMode::OVER
                 )
             );
         } else {
-            $image->core()->setNative(
-                $image->core()->native()->insert(
+            $frame->setNative(
+                $frame->native()->insert(
                     $watermarkNative->bandjoin_const(255),
                     $position->x(),
                     $position->y()
                 )
             );
         }
+
+        return $frame;
     }
 }

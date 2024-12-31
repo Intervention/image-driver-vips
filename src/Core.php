@@ -10,16 +10,18 @@ use Intervention\Image\Exceptions\AnimationException;
 use Intervention\Image\Interfaces\CollectionInterface;
 use Intervention\Image\Interfaces\CoreInterface;
 use Intervention\Image\Interfaces\FrameInterface;
-use IteratorAggregate;
+use Iterator;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Image as VipsImage;
 use Traversable;
 
 /**
- * @implements IteratorAggregate<int, FrameInterface>
+ * @implements Iterator<int, FrameInterface>
  */
-class Core implements CoreInterface, IteratorAggregate
+class Core implements CoreInterface, Iterator
 {
+    protected int $iteratorIndex = 0;
+
     /**
      * Create new core instance
      *
@@ -64,6 +66,25 @@ class Core implements CoreInterface, IteratorAggregate
         return $this->vipsImage->getType('n-pages') === 0 ? 1 : $this->vipsImage->get('n-pages');
     }
 
+    public static function createFromFrames(array $frames): self
+    {
+        $natives = [];
+        $delay = [];
+
+        foreach ($frames as $frame) {
+            $delay[] = intval($frame->delay() * 1000);
+            $natives[] = $frame->native();
+        }
+
+        $image = VipsImage::arrayjoin($natives, ['across' => 1]);
+        $image->set('delay', $delay);
+        $image->set('loop', 0);
+        $image->set('page-height', $natives[0]->height);
+        $image->set('n-pages', count($frames));
+
+        return new self($image);
+    }
+
     /**
      * {@inheritdoc}
      *
@@ -72,8 +93,20 @@ class Core implements CoreInterface, IteratorAggregate
      */
     public function frame(int $position): FrameInterface
     {
-        if ($position > ($this->count() - 1)) {
+        $count = $this->count();
+
+        if ($position > ($count - 1)) {
             throw new AnimationException('Frame #' . $position . ' could not be found in the image.');
+        }
+
+        if ($count === 1) {
+            return new Frame($this->vipsImage);
+        }
+
+        if (in_array('delay', $this->vipsImage->getFields())) {
+            $delay = $this->vipsImage->get('delay')[$position] ?? 0;
+        } else {
+            $delay = null;
         }
 
         try {
@@ -89,11 +122,16 @@ class Core implements CoreInterface, IteratorAggregate
             );
 
             $vipsImage->set('n-pages', 1);
+            if (!is_null($delay)) {
+                $vipsImage->set('delay', $delay);
+
+                return new Frame($vipsImage, $delay / 1000);
+            }
+
+            return new Frame($vipsImage);
         } catch (VipsException) {
             throw new AnimationException('Frame #' . $position . ' could not be found in the image.');
         }
-
-        return new Frame($vipsImage);
     }
 
     /**
@@ -280,6 +318,31 @@ class Core implements CoreInterface, IteratorAggregate
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this); // @phpstan-ignore-line
+    }
+
+    public function valid(): bool
+    {
+        return $this->has($this->iteratorIndex);
+    }
+
+    public function current(): mixed
+    {
+        return $this->get($this->iteratorIndex);
+    }
+
+    public function next(): void
+    {
+        $this->iteratorIndex = $this->iteratorIndex + 1;
+    }
+
+    public function key(): mixed
+    {
+        return $this->iteratorIndex;
+    }
+
+    public function rewind(): void
+    {
+        $this->iteratorIndex = 0;
     }
 
     /**
