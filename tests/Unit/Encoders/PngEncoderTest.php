@@ -37,6 +37,15 @@ final class PngEncoderTest extends BaseTestCase
         $this->assertTrue($this->isInterlacedPng($result));
     }
 
+    public function testEncodeAnimated(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $encoder = new PngEncoder();
+        $encoder->setDriver(new Driver());
+        $result = $encoder->encode($image);
+        $this->assertImageSize($result, $image->width(), $image->height());
+    }
+
     #[DataProvider('indexedDataProvider')]
     public function testEncoderIndexed(ImageInterface $image, PngEncoder $encoder, string $result): void
     {

@@ -35,4 +35,13 @@ final class JpegEncoderTest extends BaseTestCase
         $this->assertEquals('image/jpeg', $result->mimetype());
         $this->assertTrue($this->isProgressiveJpeg($result));
     }
+
+    public function testEncodeAnimated(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $encoder = new JpegEncoder(75);
+        $encoder->setDriver(new Driver());
+        $result = $encoder->encode($image);
+        $this->assertImageSize($result, $image->width(), $image->height());
+    }
 }

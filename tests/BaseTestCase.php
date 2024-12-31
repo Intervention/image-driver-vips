@@ -16,6 +16,7 @@ use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ColorInterface;
+use Jcupitt\Vips\Access;
 use Jcupitt\Vips\BandFormat;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
@@ -135,5 +136,27 @@ abstract class BaseTestCase extends MockeryTestCase
         $this->assertInstanceOf(RgbColor::class, $color);
         $channel = $color->channel(Alpha::class);
         $this->assertEquals(0, $channel->value());
+    }
+
+    protected function assertImageSize(string|EncodedImage $image, int $width, int $height): void
+    {
+        $vipsImage = VipsImage::newFromBuffer((string) $image, 'n=-1', [
+            'access' => Access::SEQUENTIAL,
+        ]);
+
+        $detectedWidth = $vipsImage->width;
+        $detectedHeight = $vipsImage->getType('page-height') === 0 ?
+            $vipsImage->height : $vipsImage->get('page-height');
+
+        $this->assertEquals(
+            $detectedWidth,
+            $width,
+            'Failed asserting that the detected image width (' . $detectedWidth . ') is ' . $width . ' pixels.',
+        );
+        $this->assertEquals(
+            $detectedHeight,
+            $height,
+            'Failed asserting that the detected image height (' . $detectedHeight . ') is ' . $height . ' pixels.',
+        );
     }
 }

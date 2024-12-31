@@ -13,7 +13,7 @@ use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\ColorInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\MediaType;
-use Jcupitt\Vips\Exception;
+use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Image as VipsImage;
 
 class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInterface
@@ -76,7 +76,7 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
     {
         try {
             $loader = $vips->get('vips-loader');
-        } catch (Exception) {
+        } catch (VipsException) {
             return null;
         }
 

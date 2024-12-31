@@ -6,7 +6,9 @@ RUN apt update \
             libvips42 \
             libffi-dev \
             libexif-dev \
+            libheif-dev \
             git \
+            unzip \
             zip \
         && pecl install xdebug \
         && docker-php-ext-enable \

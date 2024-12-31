@@ -18,7 +18,13 @@ class Jpeg2000Encoder extends GenericJpeg2000Encoder implements SpecializedInter
      */
     public function encode(ImageInterface $image): EncodedImage
     {
-        $result = $image->core()->native()->writeToBuffer('.j2k', [
+        $vipsImage = $image->core()->native();
+
+        if ($image->isAnimated()) {
+            $vipsImage = $image->core()->frame(0)->native();
+        }
+
+        $result = $vipsImage->writeToBuffer('.j2k', [
             'Q' => $this->quality,
             'strip' => true,
             'lossless' => false,

@@ -21,4 +21,13 @@ final class BmpEncoderTest extends BaseTestCase
         $this->assertMediaType(['image/bmp', 'image/x-ms-bmp'], $result);
         $this->assertEquals('image/bmp', $result->mimetype());
     }
+
+    public function testEncodeAnimated(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $encoder = new BmpEncoder();
+        $encoder->setDriver(new Driver());
+        $result = $encoder->encode($image);
+        $this->assertImageSize($result, $image->width(), $image->height());
+    }
 }
