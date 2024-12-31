@@ -4,7 +4,7 @@ on: [ push, pull_request ]
 
 jobs:
   run:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install vips
-        run: sudo apt install -y --no-install-recommends libvips42 libffi-dev libexif-dev unzip zip
+        run: sudo apt install -y --no-install-recommends libvips42 libffi-dev libexif-dev
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
