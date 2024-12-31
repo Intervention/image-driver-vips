@@ -76,24 +76,24 @@ class Core implements CoreInterface, IteratorAggregate
             throw new AnimationException('Frame #' . $position . ' could not be found in the image.');
         }
 
-        $height = $this->vipsImage->getType('page-height') === 0 ?
-            $this->vipsImage->height : $this->vipsImage->get('page-height');
-
-        // extract only certain frame
-        $vipsImage = $this->vipsImage->extract_area(
-            0,
-            $height * $position,
-            $this->vipsImage->width,
-            $height
-        );
-
-        $vipsImage->set('n-pages', 1);
-
         try {
-            return new Frame($vipsImage);
-        } catch (Exception) {
+            $height = $this->vipsImage->getType('page-height') === 0 ?
+                $this->vipsImage->height : $this->vipsImage->get('page-height');
+
+            // extract only certain frame
+            $vipsImage = $this->vipsImage->extract_area(
+                0,
+                $height * $position,
+                $this->vipsImage->width,
+                $height
+            );
+
+            $vipsImage->set('n-pages', 1);
+        } catch (VipsException) {
             throw new AnimationException('Frame #' . $position . ' could not be found in the image.');
         }
+
+        return new Frame($vipsImage);
     }
 
     /**
