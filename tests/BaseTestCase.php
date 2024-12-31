@@ -140,7 +140,9 @@ abstract class BaseTestCase extends MockeryTestCase
 
     protected function assertImageSize(string|EncodedImage $image, int $width, int $height): void
     {
-        $vipsImage = VipsImage::newFromBuffer((string) $image, 'n=-1', ['access' => Access::SEQUENTIAL,]);
+        $vipsImage = VipsImage::newFromBuffer((string) $image, 'n=-1', [
+            'access' => Access::SEQUENTIAL,
+        ]);
 
         $detectedWidth = $vipsImage->width;
         $detectedHeight = $vipsImage->getType('page-height') === 0 ?
