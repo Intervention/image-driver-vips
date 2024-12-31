@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install vips
-        run: apt install -y --no-install-recommends libvips42 libffi-dev libexif-dev zip unzip
+        run: apt update && apt install -y --no-install-recommends libvips42 libffi-dev libexif-dev zip unzip
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
