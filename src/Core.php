@@ -145,7 +145,7 @@ class Core implements CoreInterface, Iterator
     public function add(FrameInterface $frame): self
     {
         $frames = $this->toArray();
-        $frames[] = new Frame($frame->native(), $frame->delay());
+        $frames[] = $frame;
 
         $this->setNative(
             self::createFromFrames($frames)->native()
