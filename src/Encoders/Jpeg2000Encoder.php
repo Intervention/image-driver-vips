@@ -21,7 +21,7 @@ class Jpeg2000Encoder extends GenericJpeg2000Encoder implements SpecializedInter
         $vipsImage = $image->core()->native();
 
         if ($image->isAnimated()) {
-            $vipsImage = $image->core()->frame(1)->native();
+            $vipsImage = $image->core()->frame(0)->native();
         }
 
         $result = $vipsImage->writeToBuffer('.j2k', [

@@ -21,7 +21,7 @@ class PngEncoder extends GenericPngEncoder implements SpecializedInterface
         $vipsImage = $image->core()->native();
 
         if ($image->isAnimated()) {
-            $vipsImage = $image->core()->frame(1)->native();
+            $vipsImage = $image->core()->frame(0)->native();
         }
 
         $result = $vipsImage->writeToBuffer('.png', [
