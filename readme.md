@@ -89,7 +89,7 @@ the features that have already been implemented.
 | Image::resizeCanvas() | ❌ |
 | Image::resizeCanvasRelative() | ❌ |
 | Image::trim() | 🪲 |
-| Image::place() | ✅ |
+| Image::place() | 🪲 |
 | Image::brightness() | ✅ |
 | Image::contrast() | ✅ |
 | Image::gamma() | ❌ |
