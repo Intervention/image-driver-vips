@@ -142,10 +142,18 @@ abstract class BaseTestCase extends MockeryTestCase
         $info = getimagesizefromstring((string) $image);
 
         if (!is_array($info)) {
-            $this->fail('Failed asserting that image has size of ' . $width . ' x ' . $height . ' pixels.');
+            $this->fail('Unable to read image size.');
         } else {
-            $this->assertEquals($info[0], $width, 'Failed asserting that image has width of ' . $width . ' pixels.');
-            $this->assertEquals($info[1], $height, 'Failed asserting that image has height of ' . $height . ' pixels.');
+            $this->assertEquals(
+                (int) $info[0],
+                $width,
+                'Failed asserting that the detected image width (' . $info[0] . ') is ' . $width . ' pixels.',
+            );
+            $this->assertEquals(
+                (int) $info[1],
+                $height,
+                'Failed asserting that the detected image height (' . $info[1] . ') is ' . $height . ' pixels.',
+            );
         }
     }
 }
