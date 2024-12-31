@@ -6,6 +6,7 @@ RUN apt update \
             libvips42 \
             libffi-dev \
             libexif-dev \
+            libheif-dev \
             git \
             unzip \
             zip \
