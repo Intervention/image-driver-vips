@@ -17,7 +17,13 @@ class BmpEncoder extends GenericBmpEncoder
      */
     public function encode(ImageInterface $image): EncodedImage
     {
-        $result = $image->core()->native()->writeToBuffer('.bmp', [
+        $vipsImage = $image->core()->native();
+
+        if ($image->isAnimated()) {
+            $vipsImage = $image->core()->frame(1)->native();
+        }
+
+        $result = $vipsImage->writeToBuffer('.bmp', [
             'strip' => true,
         ]);
 
