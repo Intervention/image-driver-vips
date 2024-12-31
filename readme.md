@@ -61,17 +61,98 @@ $encoded = $image->toJpg();
 $encoded->save('images/example.jpg');
 ```
 
-## Feature Status
+## Development Status
+
+The library is under development and not yet complete. Here is an overview of
+the features that have already been implemented.
+
+### Feature Status
 
 | Feature | Status |
 | - | - |
 | ImageManager::read() | ✅ |
 | ImageManager::create() | ✅ |
 | ImageManager::animate() | ✅ |
+| Image::width() | ✅ |
+| Image::height() | ✅ |
+| Image::size() | ✅ |
+| Image::resize() | ✅ |
+| Image::resizeDown() | ❌ |
+| Image::scale() | ✅ |
+| Image::scaleDown() | ✅ |
+| Image::cover() | ❌ |
+| Image::coverDown() | ❌ |
+| Image::resolution() | ❌ |
+| Image::pad() | ❌ |
+| Image::contain() | ❌ |
+| Image::crop() | ✅ |
+| Image::resizeCanvas() | ❌ |
+| Image::resizeCanvasRelative() | ❌ |
+| Image::trim() | 🪲 |
+| Image::place() | ✅ |
+| Image::brightness() | ✅ |
+| Image::contrast() | ✅ |
+| Image::gamma() | ❌ |
+| Image::colorize() | ❌ |
+| Image::greyscale() | ❌ |
+| Image::flip() | ❌ |
+| Image::flop() | ❌ |
+| Image::rotate() | 🪲 |
+| Image::orient() | ❌ |
+| Image::blur() | ✅ |
+| Image::sharpen() | ✅ |
+| Image::invert() | ❌ |
+| Image::pixelate() | 🪲 |
+| Image::reduceColors() | ❌ |
+| Image::text() | ❌ |
+| Image::fill() | 🚧 |
+| Image::drawPixel() | ❌ |
+| Image::drawCircle() | ❌ |
+| Image::drawLine() | ❌ |
+| Image::drawPolygon() | ❌ |
+| Image::drawBezier() | ❌ |
+| Image::setResolution() | ❌ |
+| Image::exif() | ✅ |
+| Image::pickColor() | ✅ |
+| Image::pickColors() | ✅ |
+| Image::colorspace() | ✅ |
+| Image::setColorspace() | ❌ |
+| Image::profile() | ❌ |
+| Image::setProfile() | ❌ |
+| Image::removeProfile() | ❌ |
+| Image::blendingColor() | ✅ |
+| Image::setBlendingColor() | ✅ |
+| Image::blendTransparency() | ❌ |
+| Image::isAnimated() | ✅ |
+| Image::count() | ✅ |
+| Image::sliceAnimation() | ❌ |
+| Image::loops() | ✅ |
+| Image::setLoops() | ✅ |
+| Image::removeAnimation() | ✅ |
+| Image::encode() | ✅ |
+| Image::encodeByMediaType() | ✅ |
+| Image::encodeByPath() | ✅ |
+| Image::encodeByExtension() | ✅ |
+| Image::save() | ✅ |
+| Image::toJpeg() | ✅ |
+| Image::toWebp() | ✅ |
+| Image::toPng() | ✅ |
+| Image::toGif() | ✅ |
+| Image::toBitmap() | ✅ |
+| Image::toAvif() | ✅ |
+| Image::toTiff() | ✅ |
+| Image::toJpeg2000() | ✅ |
+| Image::toHeic() | ✅ |
 
+✅ Integrated
+🪲 Integrated but has issues
+🚧 Partly integrated
+❌ Not (yet) integrated
 
 ## Contributing
+
 Check out the [documentation](https://github.com/Intervention/image/blob/develop/CONTRIBUTING.md)
+
 ```bash
 composer test
 ```
