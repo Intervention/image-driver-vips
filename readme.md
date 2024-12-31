@@ -80,8 +80,8 @@ the features that have already been implemented.
 | Image::resizeDown() | ✅ |
 | Image::scale() | ✅ |
 | Image::scaleDown() | ✅ |
-| Image::cover() | ❌ |
-| Image::coverDown() | ❌ |
+| Image::cover() | ✅ |
+| Image::coverDown() | ✅ |
 | Image::resolution() | ❌ |
 | Image::pad() | ❌ |
 | Image::contain() | ❌ |
