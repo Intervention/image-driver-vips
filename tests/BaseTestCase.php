@@ -18,7 +18,6 @@ use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ColorInterface;
 use Jcupitt\Vips\Access;
 use Jcupitt\Vips\BandFormat;
-use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
 use Jcupitt\Vips\Interpretation;
@@ -144,35 +143,6 @@ abstract class BaseTestCase extends MockeryTestCase
         $vipsImage = VipsImage::newFromBuffer((string) $image, 'n=-1', [
             'access' => Access::SEQUENTIAL,
         ]);
-
-        $detectedWidth = $vipsImage->width;
-        $detectedHeight = $vipsImage->getType('page-height') === 0 ?
-            $vipsImage->height : $vipsImage->get('page-height');
-
-        $this->assertEquals(
-            $detectedWidth,
-            $width,
-            'Failed asserting that the detected image width (' . $detectedWidth . ') is ' . $width . ' pixels.',
-        );
-        $this->assertEquals(
-            $detectedHeight,
-            $height,
-            'Failed asserting that the detected image height (' . $detectedHeight . ') is ' . $height . ' pixels.',
-        );
-    }
-
-    protected function assertImageSize2(string|EncodedImage $image, int $width, int $height): void
-    {
-        try {
-            $tmp = tempnam(sys_get_temp_dir(), 'TMP_');
-            file_put_contents($tmp, (string) $image);
-
-            $vipsImage = VipsImage::newFromFile($tmp);
-            unlink($tmp);
-        } catch (VipsException $e) {
-            unlink($tmp);
-            throw $e;
-        }
 
         $detectedWidth = $vipsImage->width;
         $detectedHeight = $vipsImage->getType('page-height') === 0 ?

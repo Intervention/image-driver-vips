@@ -28,7 +28,6 @@ final class HeicEncoderTest extends BaseTestCase
         $encoder = new HeicEncoder(75);
         $encoder->setDriver(new Driver());
         $result = $encoder->encode($image);
-        $this->assertImageSize2($result, $image->width(), $image->height());
-        //$this->assertImageSize($result, $image->width(), $image->height());
+        $this->assertImageSize($result, $image->width(), $image->height());
     }
 }
