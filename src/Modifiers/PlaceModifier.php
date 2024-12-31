@@ -22,7 +22,7 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
      * {@inheritdoc}
      *
      * @see ModifierInterface::apply()
-     * @throws VipsException
+     * @throws RuntimeException|VipsException
      */
     public function apply(ImageInterface $image): ImageInterface
     {

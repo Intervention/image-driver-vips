@@ -66,6 +66,11 @@ class Core implements CoreInterface, Iterator
         return $this->vipsImage->getType('n-pages') === 0 ? 1 : $this->vipsImage->get('n-pages');
     }
 
+    /**
+     * @param list<FrameInterface> $frames
+     *
+     * @throws VipsException
+     */
     public static function createFromFrames(array $frames): self
     {
         $natives = [];
