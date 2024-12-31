@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
+use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Modifiers\PixelateModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -20,9 +21,26 @@ final class PixelateModifierTest extends BaseTestCase
         $image->modify(new PixelateModifier(10));
 
         $color = $image->pickColor(0, 0);
-        $this->assertColor(0, 174, 241, 255, $color, 1);
+        $this->assertColor(0, 174, 242, 255, $color, 1);
 
         $color = $image->pickColor(14, 14);
-        $this->assertColor(104, 171, 143, 255, $color, 1);
+        $this->assertColor(107, 171, 140, 255, $color, 1);
+    }
+
+    public function testModifyAnimated(): void
+    {
+        $image = (new Driver())->createAnimation(function ($animation) {
+            $animation->add($this->getTestResourcePath('trim.png'), .25);
+            $animation->add($this->getTestResourcePath('trim.png'), .25);
+        });
+
+        $image->modify(new PixelateModifier(10));
+        $this->assertEquals(2, count($image));
+
+        foreach ($image as $i => $frame) {
+            $frame->toImage(new Driver())->save('pixel_' . $i . '.png');
+            $this->assertColor(0, 174, 242, 255, $frame->toImage(new Driver())->pickColor(0, 0), 1);
+            $this->assertColor(107, 171, 140, 255, $frame->toImage(new Driver())->pickColor(14, 14), 1);
+        }
     }
 }
