@@ -7,6 +7,7 @@ RUN apt update \
             libffi-dev \
             libexif-dev \
             git \
+            unzip \
             zip \
         && pecl install xdebug \
         && docker-php-ext-enable \
