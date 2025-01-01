@@ -95,8 +95,8 @@ the features that have already been implemented.
 | Image::gamma() | ❌ |
 | Image::colorize() | ❌ |
 | Image::greyscale() | ✅ |
-| Image::flip() | ❌ |
-| Image::flop() | ❌ |
+| Image::flip() | ✅ |
+| Image::flop() | ✅ |
 | Image::rotate() | 🪲 |
 | Image::orient() | ❌ |
 | Image::blur() | ✅ |
