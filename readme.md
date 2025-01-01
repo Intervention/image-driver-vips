@@ -125,7 +125,7 @@ the features that have already been implemented.
 | Image::blendTransparency() | ❌ |
 | Image::isAnimated() | ✅ |
 | Image::count() | ✅ |
-| Image::sliceAnimation() | ❌ |
+| Image::sliceAnimation() | ✅ |
 | Image::loops() | ✅ |
 | Image::setLoops() | ✅ |
 | Image::removeAnimation() | ✅ |
