@@ -20,13 +20,13 @@ class InvertModifier extends GenericInvertModifier implements SpecializedInterfa
         $vipsImage = $image->core()->native();
         $hasAlpha = $vipsImage->hasAlpha();
 
-        // don't invert alpha channel
+        // extract alpha channel to avoid inverting it
         if ($hasAlpha) {
             $alpha = $vipsImage->extract_band($vipsImage->bands - 1, ['n' => 1]);
             $vipsImage = $vipsImage->extract_band(0, ['n' => $vipsImage->bands - 1]);
         }
 
-        // invert colors
+        // invert channels
         $vipsImage = $vipsImage->invert();
 
         // re-apply alpha channel
