@@ -92,7 +92,7 @@ the features that have already been implemented.
 | Image::place() | 🪲 |
 | Image::brightness() | ✅ |
 | Image::contrast() | ✅ |
-| Image::gamma() | ❌ |
+| Image::gamma() | ✅ |
 | Image::colorize() | ❌ |
 | Image::greyscale() | ✅ |
 | Image::flip() | ✅ |
