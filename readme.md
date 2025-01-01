@@ -82,7 +82,7 @@ the features that have already been implemented.
 | Image::scaleDown() | ✅ |
 | Image::cover() | ✅ |
 | Image::coverDown() | ✅ |
-| Image::resolution() | ❌ |
+| Image::resolution() | ✅ |
 | Image::pad() | ❌ |
 | Image::contain() | ❌ |
 | Image::crop() | ✅ |

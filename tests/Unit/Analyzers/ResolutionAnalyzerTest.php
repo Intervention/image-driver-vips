@@ -15,12 +15,12 @@ final class ResolutionAnalyzerTest extends BaseTestCase
 {
     public function testAnalyze(): void
     {
-        $image = $this->readTestImage('tile.png');
+        $image = $this->readTestImage('300dpi.png');
         $analyzer = new ResolutionAnalyzer();
         $analyzer->setDriver(new Driver());
         $result = $analyzer->analyze($image);
         $this->assertInstanceOf(Resolution::class, $result);
-        $this->assertEquals(72.0, $result->x());
-        $this->assertEquals(72.0, $result->y());
+        $this->assertEquals(300, $result->perInch()->x());
+        $this->assertEquals(300, $result->perInch()->y());
     }
 }
