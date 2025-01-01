@@ -143,6 +143,7 @@ the features that have already been implemented.
 | Image::toTiff() | ✅ |
 | Image::toJpeg2000() | ✅ |
 | Image::toHeic() | ✅ |
+| Image::supports() | 🪲 |
 
 ✅ Integrated
 🪲 Integrated but has issues
