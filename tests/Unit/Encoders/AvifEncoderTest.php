@@ -21,4 +21,13 @@ final class AvifEncoderTest extends BaseTestCase
         $this->assertMediaType('image/avif', $result);
         $this->assertEquals('image/avif', $result->mimetype());
     }
+
+    public function testEncodeAnimated(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $encoder = new AvifEncoder(75);
+        $encoder->setDriver(new Driver());
+        $result = $encoder->encode($image);
+        $this->assertImageSize($result, $image->width(), $image->height());
+    }
 }

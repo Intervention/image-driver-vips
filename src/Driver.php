@@ -98,7 +98,7 @@ class Driver extends AbstractDriver
                 $delay = [];
 
                 foreach ($this->frames as $frame) {
-                    $delay = array_merge($delay, $frame->native()->get('delay'));
+                    $delay[] = intval($frame->delay() * 1000);
                     $frames[] = $frame->native();
                 }
 

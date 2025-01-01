@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips;
 
 use ArrayIterator;
+use Exception;
 use Intervention\Image\Exceptions\AnimationException;
 use Intervention\Image\Interfaces\CollectionInterface;
 use Intervention\Image\Interfaces\CoreInterface;
 use Intervention\Image\Interfaces\FrameInterface;
 use IteratorAggregate;
-use Jcupitt\Vips\Exception;
+use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Image as VipsImage;
 use Traversable;
 
@@ -27,6 +28,7 @@ class Core implements CoreInterface, IteratorAggregate
      */
     public function __construct(protected VipsImage $vipsImage)
     {
+        //
     }
 
     /**
@@ -55,7 +57,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CoreInterface::count()
-     * @throws Exception
+     * @throws VipsException
      */
     public function count(): int
     {
@@ -66,7 +68,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CoreInterface::frame()
-     * @throws AnimationException|Exception
+     * @throws AnimationException|VipsException
      */
     public function frame(int $position): FrameInterface
     {
@@ -74,28 +76,31 @@ class Core implements CoreInterface, IteratorAggregate
             throw new AnimationException('Frame #' . $position . ' could not be found in the image.');
         }
 
-        $height = $this->vipsImage->getType('page-height') === 0 ?
-            $this->vipsImage->height : $this->vipsImage->get('page-height');
-
         try {
-            return new Frame(
-                $this->vipsImage->extract_area(
-                    0,
-                    $height * $position,
-                    $this->vipsImage->width,
-                    $height
-                )
+            $height = $this->vipsImage->getType('page-height') === 0 ?
+                $this->vipsImage->height : $this->vipsImage->get('page-height');
+
+            // extract only certain frame
+            $vipsImage = $this->vipsImage->extract_area(
+                0,
+                $height * $position,
+                $this->vipsImage->width,
+                $height
             );
-        } catch (\Exception) {
+
+            $vipsImage->set('n-pages', 1);
+        } catch (VipsException) {
             throw new AnimationException('Frame #' . $position . ' could not be found in the image.');
         }
+
+        return new Frame($vipsImage);
     }
 
     /**
      * {@inheritdoc}
      *
      * @see CoreInterface::add()
-     * @throws AnimationException|Exception
+     * @throws AnimationException|VipsException
      */
     public function add(FrameInterface $frame): CoreInterface
     {
@@ -119,7 +124,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CoreInterface::loops()
-     * @throws Exception
+     * @throws VipsException
      */
     public function loops(): int
     {
@@ -130,7 +135,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CoreInterface::setLoops()
-     * @throws Exception
+     * @throws VipsException
      */
     public function setLoops(int $loops): CoreInterface
     {
@@ -143,7 +148,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CollectionInterface::first()
-     * @throws AnimationException|Exception
+     * @throws AnimationException|VipsException
      */
     public function first(): FrameInterface
     {
@@ -154,7 +159,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CollectableInterface::last()
-     * @throws AnimationException|Exception
+     * @throws AnimationException|VipsException
      */
     public function last(): FrameInterface
     {
@@ -165,13 +170,12 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CollectionInterface::has()
-     * @throws Exception
      */
     public function has(int|string $key): bool
     {
         try {
             return (bool) $this->frame($key);
-        } catch (AnimationException) {
+        } catch (VipsException | AnimationException) {
             return false;
         }
     }
@@ -180,7 +184,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CollectionInterface::push()
-     * @throws AnimationException|Exception
+     * @throws AnimationException|VipsException
      */
     public function push($item): CollectionInterface
     {
@@ -191,13 +195,12 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CollectionInterface::get()
-     * @throws Exception
      */
     public function get(int|string $key, $default = null): mixed
     {
         try {
             return $this->frame($key);
-        } catch (AnimationException) {
+        } catch (VipsException | AnimationException) {
             return $default;
         }
     }
@@ -228,7 +231,7 @@ class Core implements CoreInterface, IteratorAggregate
     /**
      * @return list<VipsImage>
      *
-     * @throws AnimationException|Exception
+     * @throws AnimationException|VipsException
      */
     public function toArray(): array
     {
@@ -249,7 +252,7 @@ class Core implements CoreInterface, IteratorAggregate
      * {@inheritdoc}
      *
      * @see CollectionInterface::slice()
-     * @throws AnimationException|Exception
+     * @throws AnimationException|VipsException
      */
     public function slice(int $offset, ?int $length = 0): CollectionInterface
     {
@@ -282,7 +285,7 @@ class Core implements CoreInterface, IteratorAggregate
     /**
      * Show debug info for the current image
      *
-     * @throws Exception
+     * @throws VipsException
      * @return array<string, mixed>
      */
     public function __debugInfo(): array

@@ -18,7 +18,13 @@ class PngEncoder extends GenericPngEncoder implements SpecializedInterface
      */
     public function encode(ImageInterface $image): EncodedImage
     {
-        $result = $image->core()->native()->writeToBuffer('.png', [
+        $vipsImage = $image->core()->native();
+
+        if ($image->isAnimated()) {
+            $vipsImage = $image->core()->frame(0)->native();
+        }
+
+        $result = $vipsImage->writeToBuffer('.png', [
             'interlace' => $this->interlaced,
             'palette' => $this->indexed,
             'strip' => true,

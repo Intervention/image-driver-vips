@@ -26,7 +26,13 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
         //     ->colorProcessor($image->colorspace())
         //     ->colorToNative($blendingColor);
 
-        $result = $image->core()->native()->writeToBuffer('.jpg', [
+        $vipsImage = $image->core()->native();
+
+        if ($image->isAnimated()) {
+            $vipsImage = $image->core()->frame(0)->native();
+        }
+
+        $result = $vipsImage->writeToBuffer('.jpg', [
             'Q' => $this->quality,
             'interlace' => $this->progressive,
             'strip' => true,

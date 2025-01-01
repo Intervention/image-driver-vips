@@ -6,6 +6,7 @@ namespace Intervention\Image\Drivers\Vips\Decoders;
 
 use Exception;
 use Intervention\Image\Exceptions\DecoderException;
+use Intervention\Image\Format;
 use Intervention\Image\Interfaces\ColorInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Jcupitt\Vips;
@@ -33,6 +34,11 @@ class FilePathImageDecoder extends NativeObjectDecoder
 
         // set file path on origin
         $image->origin()->setFilePath($input);
+
+        // extract exif data for the appropriate formats
+        if (in_array($this->vipsMediaType($vipsImage)?->format(), [Format::JPEG, Format::TIFF])) {
+            $image->setExif($this->extractExifData($input));
+        }
 
         return $image;
     }

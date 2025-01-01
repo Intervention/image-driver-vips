@@ -4,7 +4,7 @@ on: [ push, pull_request ]
 
 jobs:
   run:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -17,16 +17,17 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v4
 
+      - name: Install vips
+        run: sudo apt install -y --no-install-recommends libvips libffi-dev libexif-dev libheif-dev libheif-plugin-aomenc libheif-plugin-x265
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          ini-values: zend.max_allowed_stack_size=-1
+          ini-values: zend.max_allowed_stack_size=-1,ffi.enable=true
+          extensions: ffi, exif
           tools: composer:v2
           coverage: none
-
-      - name: Install vips
-        run: sudo apt install -y libvips --no-install-recommends
 
       - name: Get composer cache directory
         id: composer-cache

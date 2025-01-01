@@ -21,4 +21,13 @@ final class TiffEncoderTest extends BaseTestCase
         $this->assertMediaType('image/tiff', $result);
         $this->assertEquals('image/tiff', $result->mimetype());
     }
+
+    public function testEncodeAnimated(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $encoder = new TiffEncoder(75);
+        $encoder->setDriver(new Driver());
+        $result = $encoder->encode($image);
+        $this->assertImageSize($result, $image->width(), $image->height());
+    }
 }

@@ -21,4 +21,13 @@ final class HeicEncoderTest extends BaseTestCase
         $this->assertMediaType('image/heic', $result);
         $this->assertEquals('image/heic', $result->mimetype());
     }
+
+    public function testEncodeAnimated(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $encoder = new HeicEncoder(75);
+        $encoder->setDriver(new Driver());
+        $result = $encoder->encode($image);
+        $this->assertImageSize($result, $image->width(), $image->height());
+    }
 }
