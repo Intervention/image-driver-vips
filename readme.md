@@ -101,7 +101,7 @@ the features that have already been implemented.
 | Image::orient() | ❌ |
 | Image::blur() | ✅ |
 | Image::sharpen() | ✅ |
-| Image::invert() | 🪲 |
+| Image::invert() | ✅ |
 | Image::pixelate() | 🪲 |
 | Image::reduceColors() | ❌ |
 | Image::text() | ❌ |
