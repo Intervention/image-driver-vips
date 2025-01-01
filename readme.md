@@ -98,7 +98,7 @@ the features that have already been implemented.
 | Image::flip() | ✅ |
 | Image::flop() | ✅ |
 | Image::rotate() | 🪲 |
-| Image::orient() | ❌ |
+| Image::orient() | ✅ |
 | Image::blur() | ✅ |
 | Image::sharpen() | ✅ |
 | Image::invert() | ✅ |
