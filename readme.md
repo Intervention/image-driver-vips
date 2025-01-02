@@ -116,7 +116,7 @@ the features that have already been implemented.
 | Image::pickColor() | ✅ |
 | Image::pickColors() | ✅ |
 | Image::colorspace() | ✅ |
-| Image::setColorspace() | ❌ |
+| Image::setColorspace() | ✅ |
 | Image::profile() | ❌ |
 | Image::setProfile() | ❌ |
 | Image::removeProfile() | ❌ |
