@@ -73,7 +73,7 @@ class Core implements CoreInterface, Iterator
      */
     public static function replaceFrames(VipsImage $vipsImage, array $frames): VipsImage
     {
-        $loops = (int) $vipsImage->get('loop');
+        $loops = in_array('loop', $vipsImage->getFields()) ? $vipsImage->get('loop') : 0;
 
         return self::createFromFrames($frames, $loops)->native();
     }
