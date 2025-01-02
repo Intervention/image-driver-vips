@@ -94,23 +94,9 @@ class Driver extends AbstractDriver
              */
             public function __invoke(): ImageInterface
             {
-                $frames = [];
-                $delay = [];
-
-                foreach ($this->frames as $frame) {
-                    $delay[] = intval($frame->delay() * 1000);
-                    $frames[] = $frame->native();
-                }
-
-                $image = VipsImage::arrayjoin($frames, ['across' => 1]);
-                $image->set('delay', $delay);
-                $image->set('loop', 0);
-                $image->set('page-height', $frames[0]->height);
-                $image->set('n-pages', count($this->frames));
-
                 return new Image(
                     $this->driver,
-                    new Core($image)
+                    Core::createFromFrames($this->frames)
                 );
             }
         };

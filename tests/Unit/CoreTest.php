@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Tests\Unit;
 
 use Intervention\Image\Drivers\Vips\Core;
+use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Frame;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Exceptions\AnimationException;
+use Intervention\Image\Interfaces\FrameInterface;
 use Jcupitt\Vips\Image as VipsImage;
 use PHPUnit\Framework\Attributes\CoversClass;
 
@@ -107,10 +109,22 @@ class CoreTest extends BaseTestCase
 
     public function testSlice(): void
     {
-        $this->assertEquals(3, $this->core->count());
-        $result = $this->core->slice(1, 2);
-        $this->assertEquals(2, $this->core->count());
+        $image = (new Driver())->createAnimation(function ($animation) {
+            $animation->add($this->getTestResourcePath('red.gif'), 0);
+            $animation->add($this->getTestResourcePath('green.gif'), .25);
+            $animation->add($this->getTestResourcePath('blue.gif'), .50);
+        });
+
+        $this->assertEquals(3, $image->core()->count());
+        $result = $image->core()->slice(1, 2);
+        $this->assertEquals(2, $image->core()->count());
         $this->assertEquals(2, $result->count());
+
+        // check delay of sliced frames
+        foreach ($image as $i => $frame) {
+            $this->assertInstanceOf(FrameInterface::class, $frame);
+            $this->assertEquals(($i + 1) * .25, $frame->delay());
+        }
     }
 
     public function testIteratorAggregate(): void

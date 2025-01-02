@@ -9,7 +9,7 @@ use Intervention\Image\Drivers\Vips\Analyzers\PixelColorsAnalyzer;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Interfaces\ColorInterface;
-use PHPUnit\Metadata\CoversClass;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(PixelColorsAnalyzer::class)]
 class PixelColorsAnalyzerTest extends BaseTestCase

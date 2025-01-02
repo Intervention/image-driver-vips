@@ -10,16 +10,18 @@ use Intervention\Image\Exceptions\AnimationException;
 use Intervention\Image\Interfaces\CollectionInterface;
 use Intervention\Image\Interfaces\CoreInterface;
 use Intervention\Image\Interfaces\FrameInterface;
-use IteratorAggregate;
+use Iterator;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Image as VipsImage;
 use Traversable;
 
 /**
- * @implements IteratorAggregate<int, FrameInterface>
+ * @implements Iterator<int, FrameInterface>
  */
-class Core implements CoreInterface, IteratorAggregate
+class Core implements CoreInterface, Iterator
 {
+    protected int $iteratorIndex = 0;
+
     /**
      * Create new core instance
      *
@@ -65,6 +67,42 @@ class Core implements CoreInterface, IteratorAggregate
     }
 
     /**
+     * @param list<FrameInterface> $frames
+     *
+     * @throws VipsException|AnimationException
+     */
+    public static function replaceFrames(VipsImage $vipsImage, array $frames): VipsImage
+    {
+        $loops = (int) $vipsImage->get('loop');
+
+        return self::createFromFrames($frames, $loops)->native();
+    }
+
+    /**
+     * @param list<FrameInterface> $frames
+     *
+     * @throws VipsException
+     */
+    public static function createFromFrames(array $frames, int $loops = 0): self
+    {
+        $natives = [];
+        $delay = [];
+
+        foreach ($frames as $frame) {
+            $delay[] = intval($frame->delay() * 1000);
+            $natives[] = $frame->native();
+        }
+
+        $image = VipsImage::arrayjoin($natives, ['across' => 1]);
+        $image->set('delay', $delay);
+        $image->set('loop', $loops);
+        $image->set('page-height', $natives[0]->height);
+        $image->set('n-pages', count($frames));
+
+        return new self($image);
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @see CoreInterface::frame()
@@ -72,9 +110,18 @@ class Core implements CoreInterface, IteratorAggregate
      */
     public function frame(int $position): FrameInterface
     {
-        if ($position > ($this->count() - 1)) {
+        $count = $this->count();
+
+        if ($position > ($count - 1)) {
             throw new AnimationException('Frame #' . $position . ' could not be found in the image.');
         }
+
+        if ($count === 1) {
+            return new Frame($this->vipsImage);
+        }
+
+        $delay = in_array('delay', $this->vipsImage->getFields()) ?
+            ($this->vipsImage->get('delay')[$position] ?? 0) : null;
 
         try {
             $height = $this->vipsImage->getType('page-height') === 0 ?
@@ -89,11 +136,16 @@ class Core implements CoreInterface, IteratorAggregate
             );
 
             $vipsImage->set('n-pages', 1);
+            if (!is_null($delay)) {
+                $vipsImage->set('delay', $delay);
+
+                return new Frame($vipsImage, $delay / 1000);
+            }
+
+            return new Frame($vipsImage);
         } catch (VipsException) {
             throw new AnimationException('Frame #' . $position . ' could not be found in the image.');
         }
-
-        return new Frame($vipsImage);
     }
 
     /**
@@ -102,20 +154,12 @@ class Core implements CoreInterface, IteratorAggregate
      * @see CoreInterface::add()
      * @throws AnimationException|VipsException
      */
-    public function add(FrameInterface $frame): CoreInterface
+    public function add(FrameInterface $frame): self
     {
         $frames = $this->toArray();
-        $delay = $this->vipsImage->get('delay') ?? [];
+        $frames[] = $frame;
 
-        $frames[] = $frame->native();
-        $delay[] = (int) $frame->delay();
-
-        $this->vipsImage = VipsImage::arrayjoin($frames, ['across' => 1]);
-
-        $this->vipsImage->set('delay', $delay);
-        $this->vipsImage->set('loop', $this->loops());
-        $this->vipsImage->set('page-height', $frame->size()->height());
-        $this->vipsImage->set('n-pages', count($frames));
+        $this->setNative(self::replaceFrames($this->vipsImage, $frames));
 
         return $this;
     }
@@ -229,7 +273,7 @@ class Core implements CoreInterface, IteratorAggregate
     }
 
     /**
-     * @return list<VipsImage>
+     * @return list<FrameInterface>
      *
      * @throws AnimationException|VipsException
      */
@@ -238,11 +282,7 @@ class Core implements CoreInterface, IteratorAggregate
         $frames = [];
 
         for ($i = 0; $i < $this->count(); $i++) {
-            $f = $this->frame($i)->native()
-                ->cast($this->vipsImage->format)
-                ->copy(['interpretation' => $this->vipsImage->interpretation]);
-
-            $frames[] = $f;
+            $frames[] = $this->frame($i);
         }
 
         return $frames;
@@ -257,17 +297,9 @@ class Core implements CoreInterface, IteratorAggregate
     public function slice(int $offset, ?int $length = 0): CollectionInterface
     {
         $frames = $this->toArray();
-        $delay = $this->vipsImage->get('delay') ?? [];
 
         $frames = array_slice($frames, $offset, $length);
-        $delay = array_slice($delay, $offset, $length);
-
-        $this->vipsImage = VipsImage::arrayjoin($frames, ['across' => 1]);
-
-        $this->vipsImage->set('delay', $delay);
-        $this->vipsImage->set('loop', $this->loops());
-        $this->vipsImage->set('page-height', $frames[0]->height);
-        $this->vipsImage->set('n-pages', count($frames));
+        $this->setNative(self::replaceFrames($this->vipsImage, $frames));
 
         return $this;
     }
@@ -280,6 +312,31 @@ class Core implements CoreInterface, IteratorAggregate
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this); // @phpstan-ignore-line
+    }
+
+    public function valid(): bool
+    {
+        return $this->has($this->iteratorIndex);
+    }
+
+    public function current(): mixed
+    {
+        return $this->get($this->iteratorIndex);
+    }
+
+    public function next(): void
+    {
+        $this->iteratorIndex = $this->iteratorIndex + 1;
+    }
+
+    public function key(): mixed
+    {
+        return $this->iteratorIndex;
+    }
+
+    public function rewind(): void
+    {
+        $this->iteratorIndex = 0;
     }
 
     /**

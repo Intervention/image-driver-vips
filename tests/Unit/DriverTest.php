@@ -12,6 +12,7 @@ use Intervention\Image\FileExtension;
 use Intervention\Image\Format;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ColorProcessorInterface;
+use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\MediaType;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -43,7 +44,7 @@ class DriverTest extends BaseTestCase
     public function testCreateAnimation(): void
     {
         $image = $this->driver->createAnimation(function ($animation) {
-            $animation->add($this->getTestResourcePath('red.gif'), .25);
+            $animation->add($this->getTestResourcePath('red.gif'), 0);
             $animation->add($this->getTestResourcePath('green.gif'), .25);
         })->setLoops(5);
         $this->assertInstanceOf(ImageInterface::class, $image);
@@ -52,6 +53,11 @@ class DriverTest extends BaseTestCase
         $this->assertEquals(16, $image->height());
         $this->assertEquals(5, $image->loops());
         $this->assertEquals(2, $image->count());
+
+        foreach ($image as $i => $frame) {
+            $this->assertInstanceOf(FrameInterface::class, $frame);
+            $this->assertEquals($i * .25, $frame->delay());
+        }
     }
 
     public function testColorProcessor(): void
