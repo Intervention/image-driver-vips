@@ -56,6 +56,7 @@ class ColorProcessor implements ColorProcessorInterface
      * Transform vips interpretation into colorspace object
      *
      * @param string $interpretation
+     * @throws ColorException
      * @return ColorspaceInterface
      */
     public static function interpretationToColorspace(string $interpretation): ColorspaceInterface
@@ -80,6 +81,9 @@ class ColorProcessor implements ColorProcessorInterface
             Interpretation::RGB16 => new RgbColorspace(),
             Interpretation::GREY16 => new RgbColorspace(),
             Interpretation::MATRIX => new RgbColorspace(),
+            default => throw new ColorException(
+                'Unable to transform interpretation "' . $interpretation . '" to colorspace.',
+            ),
         };
     }
 
