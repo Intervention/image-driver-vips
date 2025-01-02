@@ -106,7 +106,8 @@ the features that have already been implemented.
 | Image::text() | ❌ |
 | Image::fill() | ✅ |
 | Image::drawPixel() | ❌ |
-| Image::drawCircle() | ❌ |
+| Image::drawEllipse() | ✅ |
+| Image::drawCircle() | ✅ |
 | Image::drawLine() | ❌ |
 | Image::drawPolygon() | ❌ |
 | Image::drawBezier() | ❌ |

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips;
 
+use Intervention\Image\Decoders\BinaryImageDecoder;
 use Intervention\Image\Drivers\AbstractDriver;
 use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\NotSupportedException;
@@ -11,6 +12,7 @@ use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\FileExtension;
 use Intervention\Image\Format;
 use Intervention\Image\Image;
+use Intervention\Image\InputHandler;
 use Intervention\Image\Interfaces\DriverInterface;
 use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
@@ -104,6 +106,35 @@ class Driver extends AbstractDriver
         $init($animation);
 
         return call_user_func($animation);
+    }
+
+    /**
+     * @param array<string, string|int> $attributes
+     *
+     * @throws RuntimeException
+     */
+    public static function createShape(string $shape, array $attributes, int $width, int $height): ImageInterface
+    {
+        $xmlAttributes = implode(
+            ' ',
+            array_map(
+                fn ($key, $value) => sprintf('%s="%s"', $key, htmlspecialchars((string) $value)),
+                array_keys($attributes),
+                $attributes
+            )
+        );
+
+        $svg = <<<EOL
+<svg viewBox="0 0 {$width} {$height}" xmlns="http://www.w3.org/2000/svg">
+    <{$shape} {$xmlAttributes} />
+</svg>
+EOL;
+
+        try {
+            return InputHandler::withDecoders([new BinaryImageDecoder()], new self())->handle($svg);
+        } catch (\Exception $e) {
+            throw new RuntimeException('Could not create shape: ' . $e->getMessage(), previous: $e);
+        }
     }
 
     /**
