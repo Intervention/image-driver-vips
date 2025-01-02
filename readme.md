@@ -82,7 +82,6 @@ the features that have already been implemented.
 | Image::scaleDown() | ✅ |
 | Image::cover() | ✅ |
 | Image::coverDown() | ✅ |
-| Image::resolution() | ✅ |
 | Image::pad() | ❌ |
 | Image::contain() | ❌ |
 | Image::crop() | ✅ |
@@ -111,7 +110,8 @@ the features that have already been implemented.
 | Image::drawLine() | ❌ |
 | Image::drawPolygon() | ❌ |
 | Image::drawBezier() | ❌ |
-| Image::setResolution() | ❌ |
+| Image::resolution() | ✅ |
+| Image::setResolution() | ✅ |
 | Image::exif() | ✅ |
 | Image::pickColor() | ✅ |
 | Image::pickColors() | ✅ |
