@@ -69,9 +69,21 @@ class Core implements CoreInterface, Iterator
     /**
      * @param list<FrameInterface> $frames
      *
+     * @throws VipsException|AnimationException
+     */
+    public static function replaceFrames(VipsImage $vipsImage, array $frames): VipsImage
+    {
+        $loops = (int) $vipsImage->get('loop');
+
+        return self::createFromFrames($frames, $loops)->native();
+    }
+
+    /**
+     * @param list<FrameInterface> $frames
+     *
      * @throws VipsException
      */
-    public static function createFromFrames(array $frames): self
+    public static function createFromFrames(array $frames, int $loops = 0): self
     {
         $natives = [];
         $delay = [];
@@ -83,7 +95,7 @@ class Core implements CoreInterface, Iterator
 
         $image = VipsImage::arrayjoin($natives, ['across' => 1]);
         $image->set('delay', $delay);
-        $image->set('loop', 0);
+        $image->set('loop', $loops);
         $image->set('page-height', $natives[0]->height);
         $image->set('n-pages', count($frames));
 
@@ -147,9 +159,7 @@ class Core implements CoreInterface, Iterator
         $frames = $this->toArray();
         $frames[] = $frame;
 
-        $this->setNative(
-            self::createFromFrames($frames)->native()
-        );
+        $this->setNative(self::replaceFrames($this->vipsImage, $frames));
 
         return $this;
     }
@@ -289,9 +299,7 @@ class Core implements CoreInterface, Iterator
         $frames = $this->toArray();
 
         $frames = array_slice($frames, $offset, $length);
-        $this->setNative(
-            self::createFromFrames($frames)->native()
-        );
+        $this->setNative(self::replaceFrames($this->vipsImage, $frames));
 
         return $this;
     }

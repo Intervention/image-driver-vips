@@ -24,25 +24,17 @@ class PixelateModifier extends GenericPixelateModifier implements SpecializedInt
     public function apply(ImageInterface $image): ImageInterface
     {
         if (!$image->isAnimated()) {
-            $image->core()->setNative(
-                $this->pixelate($image->core()->first())->native()
-            );
+            $pixelated = $this->pixelate($image->core()->first())->native();
         } else {
             $frames = [];
             foreach ($image as $frame) {
                 $frames[] = $this->pixelate($frame);
             }
 
-            $image->core()->setNative(
-                Core::createFromFrames($frames)->native()
-            );
+            $pixelated = Core::replaceFrames($image->core()->native(), $frames);
         }
-        $image->core()->setNative(
-            $image->core()->native()
-                ->resize(1 / $this->size)
-                ->resize($this->size, ['kernel' => Kernel::NEAREST])
-                ->crop(0, 0, $image->width(), $image->height())
-        );
+
+        $image->core()->setNative($pixelated);
 
         return $image;
     }

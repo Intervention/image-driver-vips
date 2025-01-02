@@ -20,23 +20,23 @@ final class PixelateModifierTest extends BaseTestCase
         $this->assertEquals('00aef0', $image->pickColor(0, 0)->toHex());
         $this->assertEquals('00aef0', $image->pickColor(14, 14)->toHex());
         $image->modify(new PixelateModifier(10));
-
         $color = $image->pickColor(0, 0);
         $this->assertColor(0, 174, 242, 255, $color, 1);
 
         $color = $image->pickColor(14, 14);
-        $this->assertColor(107, 171, 140, 255, $color, 1);
+        $this->assertColor(104, 171, 143, 255, $color, 1);
     }
 
     public function testModifyAnimated(): void
     {
         $image = (new Driver())->createAnimation(function ($animation) {
             $animation->add($this->getTestResourcePath('trim.png'), .25);
-            $animation->add($this->getTestResourcePath('trim.png'), .25);
-        });
+            $animation->add($this->getTestResourcePath('radial.png'), .25);
+        })->setLoops(5);
 
         $image->modify(new PixelateModifier(10));
         $this->assertEquals(2, count($image));
+        $this->assertEquals(5, $image->loops());
 
         // encode to gif and read again to verify animation frame count
         $this->assertEquals(2, ImageManager::withDriver(Driver::class)->read($image->toGif())->count());

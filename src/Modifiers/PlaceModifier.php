@@ -44,19 +44,17 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
         }
 
         if (!$image->isAnimated()) {
-            $image->core()->setNative(
-                $this->placeWatermark($watermarkNative, $position, $image->core()->first())->native()
-            );
+            $watermarked = $this->placeWatermark($watermarkNative, $position, $image->core()->first())->native();
         } else {
             $frames = [];
             foreach ($image as $frame) {
                 $frames[] = $this->placeWatermark($watermarkNative, $position, $frame);
             }
 
-            $image->core()->setNative(
-                Core::createFromFrames($frames)->native()
-            );
+            $watermarked = Core::replaceFrames($image->core()->native(), $frames);
         }
+
+        $image->core()->setNative($watermarked);
 
         return $image;
     }
