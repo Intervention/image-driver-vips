@@ -35,6 +35,16 @@ final class CropModifierTest extends BaseTestCase
         $this->assertTransparency($image->pickColor(460, 16));
     }
 
+    public function testModifyCropExtendWithAlpha(): void
+    {
+        $image = $this->readTestImage('blocks.png');
+        $image = $image->modify(new CropModifier(800, 379, background: 'transparent'));
+        $this->assertEquals(800, $image->width());
+        $this->assertEquals(379, $image->height());
+
+        $this->assertTransparency($image->pickColor(799, 378));
+    }
+
     public function testModifyCropSmart(): void
     {
         $image = $this->readTestImage('cats.gif');
