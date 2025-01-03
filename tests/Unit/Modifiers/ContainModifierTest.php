@@ -37,4 +37,16 @@ final class ContainModifierTest extends BaseTestCase
         $this->assertColor(0, 0, 0, 0, $image->pickColor(600, 10));
         $this->assertColor(255, 0, 0, 255, $image->pickColor(900, 10));
     }
+
+    public function testModifyContainWithAlpha(): void
+    {
+        $image = $this->readTestImage('test.jpg');
+        $this->assertEquals(320, $image->width());
+        $this->assertEquals(240, $image->height());
+        $image->modify(new ContainModifier(800, 200, 'transparent', 'right'));
+        $this->assertEquals(800, $image->width());
+        $this->assertEquals(200, $image->height());
+        $this->assertColor(255, 255, 255, 0, $image->pickColor(0, 0));
+        $this->assertColor(254, 168, 0, 255, $image->pickColor(799, 190));
+    }
 }
