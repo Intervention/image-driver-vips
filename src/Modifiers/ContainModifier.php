@@ -8,9 +8,14 @@ use Intervention\Image\Colors\Rgb\Channels\Alpha;
 use Intervention\Image\Colors\Rgb\Channels\Blue;
 use Intervention\Image\Colors\Rgb\Channels\Green;
 use Intervention\Image\Colors\Rgb\Channels\Red;
+use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Traits\PositionToGravity;
+use Intervention\Image\Exceptions\ColorException;
 use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Interfaces\ColorInterface;
+use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
+use Intervention\Image\Interfaces\SizeInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\ContainModifier as GenericContainModifier;
 use Jcupitt\Vips\Exception as VipsException;
@@ -31,7 +36,28 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
         $resize = $this->getResizeSize($image);
         $bgColor = $this->driver()->handleInput($this->background);
 
-        $resized = $image->core()->native()->thumbnail_image($resize->width(), [
+        if (!$image->isAnimated()) {
+            $contained = $this->contain($image->core()->first(), $resize, $bgColor)->native();
+        } else {
+            $frames = [];
+            foreach ($image as $frame) {
+                $frames[] = $this->contain($frame, $resize, $bgColor);
+            }
+
+            $contained = Core::replaceFrames($image->core()->native(), $frames);
+        }
+
+        $image->core()->setNative($contained);
+
+        return $image;
+    }
+
+    /**
+     * @throws ColorException
+     */
+    private function contain(FrameInterface $frame, SizeInterface $resize, ColorInterface $bgColor): FrameInterface
+    {
+        $resized = $frame->native()->thumbnail_image($resize->width(), [
             'height' => $resize->height(),
             'no_rotate' => true,
         ]);
@@ -40,7 +66,7 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
             $resized = $resized->bandjoin_const(255);
         }
 
-        $image->core()->setNative(
+        $frame->setNative(
             $resized->gravity(
                 $this->positionToGravity($this->position),
                 $resize->width(),
@@ -57,6 +83,6 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
             )
         );
 
-        return $image;
+        return $frame;
     }
 }
