@@ -123,7 +123,7 @@ the features that have already been implemented.
 | Image::removeProfile() | ✅ |
 | Image::blendingColor() | ✅ |
 | Image::setBlendingColor() | ✅ |
-| Image::blendTransparency() | ❌ |
+| Image::blendTransparency() | ✅ |
 | Image::isAnimated() | ✅ |
 | Image::count() | ✅ |
 | Image::sliceAnimation() | ✅ |
