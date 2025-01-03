@@ -65,7 +65,7 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
             );
 
             if ($crop->width() > $originalSize->width() || $cropped->height < $crop->height()) {
-                $cropped = $background->insert($cropped, $offset_x * -1, $offset_y * -1);
+                $cropped = $background->insert($cropped, max($offset_x * -1, 0), max($offset_y * -1, 0));
             }
 
             $image->core()->setNative($cropped);
