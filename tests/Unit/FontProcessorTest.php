@@ -42,7 +42,6 @@ class FontProcessorTest extends BaseTestCase
         $this->assertInstanceOf(TextBlock::class, $result);
     }
 
-
     public function testTypographicalSize(): void
     {
         $processor = new FontProcessor();
