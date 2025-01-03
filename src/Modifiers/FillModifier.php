@@ -13,11 +13,9 @@ use Intervention\Image\Interfaces\ColorInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\FillModifier as GenericFillModifier;
-use Jcupitt\Vips\BandFormat;
 use Jcupitt\Vips\BlendMode;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
-use Jcupitt\Vips\Interpretation;
 
 class FillModifier extends GenericFillModifier implements SpecializedInterface
 {
@@ -33,14 +31,21 @@ class FillModifier extends GenericFillModifier implements SpecializedInterface
 
         $overlay = VipsImage::black(1, 1)
             ->add($color->channel(Red::class)->value())
-            ->cast(BandFormat::UCHAR)
+            ->cast($image->core()->native()->format)
             ->embed(0, 0, $image->core()->native()->width, $image->core()->native()->height, ['extend' => Extend::COPY])
-            ->copy(['interpretation' => Interpretation::SRGB])
+            ->copy(['interpretation' => $image->core()->native()->interpretation])
             ->bandjoin([
                 $color->channel(Green::class)->value(),
                 $color->channel(Blue::class)->value(),
                 $color->channel(Alpha::class)->value(),
             ]);
+
+        // original image and overlay must have the same number of bands
+        if (!$image->core()->native()->hasAlpha()) {
+            $image->core()->setNative(
+                $image->core()->native()->bandjoin([255])
+            );
+        }
 
         if ($this->hasPosition()) {
             $mask = VipsImage::black($image->core()->native()->width, $image->core()->native()->height);

@@ -13,11 +13,9 @@ use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SizeInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\CropModifier as GenericCropModifier;
-use Jcupitt\Vips\BandFormat;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
 use Jcupitt\Vips\Interesting;
-use Jcupitt\Vips\Interpretation;
 
 class CropModifier extends GenericCropModifier implements SpecializedInterface
 {
@@ -33,7 +31,7 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
     {
         $originalSize = $image->size();
         $crop = $this->crop($image);
-        $background = $this->background($crop);
+        $background = $this->background($crop, $image);
 
         if (
             in_array($this->position, $this->getInterestingPositions()) &&
@@ -79,20 +77,26 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
     /**
      * @throws RuntimeException|\Jcupitt\Vips\Exception
      */
-    private function background(SizeInterface $resizeTo): VipsImage
+    private function background(SizeInterface $resizeTo, ImageInterface $image): VipsImage
     {
         $bgColor = $this->driver()->handleInput($this->background);
 
+        $bands = [
+            $bgColor->channel(Green::class)->value(),
+            $bgColor->channel(Blue::class)->value(),
+        ];
+
+        // original image and background must have the same number of bands
+        if ($image->core()->native()->hasAlpha()) {
+            $bands[] = $bgColor->channel(Alpha::class)->value();
+        }
+
         return VipsImage::black(1, 1)
             ->add($bgColor->channel(Red::class)->value())
-            ->cast(BandFormat::UCHAR)
+            ->cast($image->core()->native()->format)
             ->embed(0, 0, $resizeTo->width(), $resizeTo->height(), ['extend' => Extend::COPY])
-            ->copy(['interpretation' => Interpretation::SRGB])
-            ->bandjoin([
-                $bgColor->channel(Green::class)->value(),
-                $bgColor->channel(Blue::class)->value(),
-                $bgColor->channel(Alpha::class)->value(),
-            ]);
+            ->copy(['interpretation' => $image->core()->native()->interpretation])
+            ->bandjoin($bands);
     }
 
     /**

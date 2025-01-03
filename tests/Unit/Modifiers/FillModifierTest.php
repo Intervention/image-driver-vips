@@ -33,4 +33,12 @@ final class FillModifierTest extends BaseTestCase
         $this->assertEquals('cccccc', $image->pickColor(420, 270)->toHex());
         $this->assertEquals('cccccc', $image->pickColor(540, 400)->toHex());
     }
+
+    public function testFillWithAlpha(): void
+    {
+        $image = $this->readTestImage('blocks.png');
+        $this->assertColor(0, 0, 0, 0, $image->pickColor(460, 40));
+        $image->modify(new FillModifier(new Color(204, 204, 204, 100)));
+        $this->assertColor(204, 204, 204, 100, $image->pickColor(460, 40));
+    }
 }
