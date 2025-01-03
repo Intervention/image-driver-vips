@@ -23,9 +23,17 @@ class FontProcessor extends AbstractFontProcessor
      */
     public function boxSize(string $text, FontInterface $font): SizeInterface
     {
-        $text = $this->vipsText($text, $font);
+        // no text - no box size
+        if (mb_strlen($text) === 0) {
+            return new Rectangle(0, 0);
+        }
 
-        return new Rectangle($text->width, $text->height);
+        $text = $this->textToVipsImage($text, $font);
+
+        return new Rectangle(
+            $text->width,
+            $text->height,
+        );
     }
 
     /**
@@ -38,7 +46,7 @@ class FontProcessor extends AbstractFontProcessor
      * @throws FontException
      * @return VipsImage
      */
-    public function vipsText(string $text, FontInterface $font, ?ColorInterface $color = null): VipsImage
+    public function textToVipsImage(string $text, FontInterface $font, ?ColorInterface $color = null): VipsImage
     {
         if (!is_null($color)) {
             $text = '<span foreground="' . $color->toHex('#') . '">' . $text . '</span>';
@@ -46,7 +54,7 @@ class FontProcessor extends AbstractFontProcessor
 
         return VipsImage::text($text, [
             'fontfile' => $font->filename(),
-            'font' => TrueTypeFont::fromPath($font->filename())->familyName() . ' ' . intval($font->size()),
+            'font' => TrueTypeFont::fromPath($font->filename())->familyName() . ' ' . $font->size(),
             'dpi' => 72,
             'rgba' => true,
         ]);

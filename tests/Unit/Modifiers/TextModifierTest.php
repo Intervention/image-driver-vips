@@ -17,6 +17,9 @@ class TextModifierTest extends BaseTestCase
         $font = new Font($this->getTestResourcePath('test.ttf'));
         $font->setColor('b53517');
         $font->setSize(32);
-        $image->modify(new TextModifier('brown fox', new Point(70, 150), $font));
+        $font->setWrapWidth(300);
+        $font->setAlignment('center');
+        $font->setLineHeight(2);
+        $image->modify(new TextModifier('ABC', new Point(150, 150), $font));
     }
 }

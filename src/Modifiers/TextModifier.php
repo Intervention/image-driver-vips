@@ -23,7 +23,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
         $lines = $fontProcessor->textBlock($this->text, $this->font, $this->position);
 
         foreach ($lines as $line) {
-            $text = $fontProcessor->vipsText((string) $line, $this->font, $color);
+            $text = $fontProcessor->textToVipsImage((string) $line, $this->font, $color);
             $image->core()->setNative(
                 $image->core()->native()->composite($text, 'over', [
                     'x' => $line->position()->x(),

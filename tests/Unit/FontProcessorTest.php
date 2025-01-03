@@ -6,8 +6,10 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit;
 
 use Intervention\Image\Drivers\Vips\FontProcessor;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
+use Intervention\Image\Geometry\Point;
 use Intervention\Image\Interfaces\SizeInterface;
 use Intervention\Image\Typography\Font;
+use Intervention\Image\Typography\TextBlock;
 
 class FontProcessorTest extends BaseTestCase
 {
@@ -20,8 +22,46 @@ class FontProcessorTest extends BaseTestCase
         );
 
         $this->assertInstanceOf(SizeInterface::class, $size);
-        // $this->assertEquals(163, $size->width());
-        // $this->assertEquals(72, $size->height());
+        $this->assertEquals(155, $size->width());
+        $this->assertEquals(43, $size->height());
+    }
+
+    public function testNativeFontSize(): void
+    {
+        $processor = new FontProcessor();
+        $font = new Font();
+        $font->setSize(14.2);
+        $size = $processor->nativeFontSize($font);
+        $this->assertEquals(14.2, $size);
+    }
+
+    public function testTextBlock(): void
+    {
+        $processor = new FontProcessor();
+        $result = $processor->textBlock('test', $this->testFont(), new Point(0, 0));
+        $this->assertInstanceOf(TextBlock::class, $result);
+    }
+
+
+    public function testTypographicalSize(): void
+    {
+        $processor = new FontProcessor();
+        $result = $processor->typographicalSize($this->testFont());
+        $this->assertEquals(12, $result);
+    }
+
+    public function testCapHeight(): void
+    {
+        $processor = new FontProcessor();
+        $result = $processor->capHeight($this->testFont());
+        $this->assertEquals(9, $result);
+    }
+
+    public function testLeading(): void
+    {
+        $processor = new FontProcessor();
+        $result = $processor->leading($this->testFont());
+        $this->assertEquals(15, $result);
     }
 
     private function testFont(): Font
