@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
+use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Modifiers\CropModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -33,6 +34,17 @@ final class CropModifierTest extends BaseTestCase
         $this->assertColor(0, 0, 255, 255, $image->pickColor(16, 16));
         $this->assertColor(0, 0, 255, 255, $image->pickColor(445, 16));
         $this->assertTransparency($image->pickColor(460, 16));
+    }
+
+    public function testModifyCropExtendWithPosition(): void
+    {
+        $image = (new Driver())->createImage(50, 50)
+            ->fill('ff0000')
+            ->crop(100, 25, background: '00f', position: 'center');
+
+        $this->assertEquals(100, $image->width());
+        $this->assertEquals(25, $image->height());
+        $this->assertEquals('ff0000', $image->pickColor(50, 24)->toHex());
     }
 
     public function testModifyCropExtendWithAlpha(): void
