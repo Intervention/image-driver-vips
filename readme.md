@@ -83,7 +83,7 @@ the features that have already been implemented.
 | Image::cover() | ✅ |
 | Image::coverDown() | ✅ |
 | Image::pad() | ❌ |
-| Image::contain() | ❌ |
+| Image::contain() | ✅ |
 | Image::crop() | ✅ |
 | Image::resizeCanvas() | ❌ |
 | Image::resizeCanvasRelative() | ❌ |

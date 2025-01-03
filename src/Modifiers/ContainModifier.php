@@ -36,10 +36,8 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
             'no_rotate' => true,
         ]);
 
-        if (!$image->core()->native()->hasAlpha()) {
-            $image->core()->setNative(
-                $image->core()->native()->bandjoin_const(255)
-            );
+        if (!$resized->hasAlpha()) {
+            $resized = $resized->bandjoin_const(255);
         }
 
         $image->core()->setNative(
