@@ -66,7 +66,6 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
             ->bandjoin([
                 $color->green()->value(),
                 $color->blue()->value(),
-                $color->alpha()->value(),
             ]);
 
         return new Image($this->driver(), new Core($vipsImage));
