@@ -74,12 +74,14 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
     /**
      * Decode current blending color of modifier
      *
+     * TODO: Remove this method and use parent class implementation
+     *
      * @throws RuntimeException
      * @throws DecoderException
      * @throws VipsException
      * @return ColorInterface
      */
-    private function blendingColor(): ColorInterface
+    protected function blendingColor(): ColorInterface
     {
         // decode blending color
         $color = $this->driver()->handleInput(
