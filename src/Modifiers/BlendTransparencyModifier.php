@@ -62,7 +62,7 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
             ->add($color->red()->value())
             ->cast(BandFormat::UCHAR)
             ->embed(0, 0, $image->width(), $image->height(), ['extend' => Extend::COPY])
-            ->copy(['interpretation' => ColorProcessor::colorspaceToInterpretation($image->colorspace())])
+            ->copy(['interpretation' => $image->core()->native()->interpretation])
             ->bandjoin([
                 $color->green()->value(),
                 $color->blue()->value(),
