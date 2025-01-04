@@ -6,7 +6,6 @@ namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Colors\Rgb\Color as RgbColor;
 use Intervention\Image\Colors\Rgb\Colorspace as RgbColorspace;
-use Intervention\Image\Drivers\Vips\ColorProcessor;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Exceptions\ColorException;
 use Intervention\Image\Exceptions\DecoderException;
@@ -16,7 +15,6 @@ use Intervention\Image\Interfaces\ColorInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\BlendTransparencyModifier as GenericBlendTransparencyModifier;
-use Jcupitt\Vips\BandFormat;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
