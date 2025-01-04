@@ -38,7 +38,9 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
         $canvas = $this->canvas($image, $color);
 
         // place original image
-        $canvas->modify(new PlaceModifier($image));
+        $canvas->core()->setNative(
+            $canvas->core()->native()->composite2($image->core()->native(), 'over')
+        );
 
         return $canvas;
     }
