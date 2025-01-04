@@ -7,6 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Modifiers;
 use Intervention\Image\Colors\Rgb\Color as RgbColor;
 use Intervention\Image\Colors\Rgb\Colorspace as RgbColorspace;
 use Intervention\Image\Drivers\Vips\Core;
+use Intervention\Image\Drivers\Vips\Frame;
 use Intervention\Image\Exceptions\ColorException;
 use Intervention\Image\Exceptions\DecoderException;
 use Intervention\Image\Exceptions\RuntimeException;
@@ -38,7 +39,22 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
         // create new canvas with blending color as background
         $canvas = $this->canvas($image, $color);
 
-        // place original image
+        if ($image->isAnimated()) {
+            $frames = [];
+            foreach ($image as $frame) {
+                $frames[] = new Frame(
+                    $canvas->core()->native()->composite2($frame->native(), 'over'),
+                    $frame->delay()
+                );
+            }
+
+            $image->core()->setNative(
+                Core::replaceFrames($image->core()->native(), $frames)
+            );
+
+            return $image;
+        }
+
         $canvas->core()->setNative(
             $canvas->core()->native()->composite2($image->core()->native(), 'over')
         );
@@ -76,6 +92,7 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
      * Decode current blending color of modifier
      *
      * TODO: Remove this method and use parent class implementation
+     * (requires unreleased 'intervention/image' version)
      *
      * @param DriverInterface $driver
      * @throws RuntimeException
