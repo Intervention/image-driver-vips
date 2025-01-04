@@ -6,6 +6,8 @@ namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Exceptions\AnimationException;
+use Intervention\Image\Exceptions\ColorException;
+use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\DrawPixelModifier as GenericDrawPixelModifier;
@@ -18,19 +20,24 @@ class DrawPixelModifier extends GenericDrawPixelModifier implements SpecializedI
     /**
      * {@inheritdoc}
      *
-     * @throws VipsException|AnimationException
+     * @throws VipsException|AnimationException|ColorException|RuntimeException
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      */
     public function apply(ImageInterface $image): ImageInterface
     {
+        // decode pixel color
+        $color = $this->driver()->colorProcessor($image->colorspace())->colorToNative(
+            $this->driver()->handleInput($this->color)
+        );
+
         $pixel = VipsImage::black(1, 1)
-            ->add(255) // red
+            ->add($color[0]) // red
             ->cast($image->core()->native()->format)
             ->copy(['interpretation' => $image->core()->native()->interpretation])
             ->bandjoin([
-                255, // green
-                255, // blue
-                255, // alpha
+                $color[1], // green
+                $color[2], // blue
+                $color[3], // alpha
             ]);
 
         $frames = [];
