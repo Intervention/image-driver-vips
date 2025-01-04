@@ -108,7 +108,7 @@ the features that have already been implemented.
 | Image::drawPixel() | ✅ |
 | Image::drawEllipse() | ✅ |
 | Image::drawCircle() | ✅ |
-| Image::drawLine() | ❌ |
+| Image::drawLine() | ✅ |
 | Image::drawPolygon() | ❌ |
 | Image::drawBezier() | ❌ |
 | Image::resolution() | ✅ |
