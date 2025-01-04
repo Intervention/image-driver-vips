@@ -88,7 +88,7 @@ the features that have already been implemented.
 | Image::resizeCanvas() | ❌ |
 | Image::resizeCanvasRelative() | ❌ |
 | Image::trim() | 🪲 |
-| Image::place() | 🪲 |
+| Image::place() | ✅ |
 | Image::brightness() | ✅ |
 | Image::contrast() | ✅ |
 | Image::gamma() | ✅ |
@@ -101,7 +101,7 @@ the features that have already been implemented.
 | Image::blur() | ✅ |
 | Image::sharpen() | ✅ |
 | Image::invert() | ✅ |
-| Image::pixelate() | 🪲 |
+| Image::pixelate() | ✅ |
 | Image::reduceColors() | ❌ |
 | Image::text() | ❌ |
 | Image::fill() | ✅ |
