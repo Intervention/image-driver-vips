@@ -26,16 +26,16 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
      */
     public function apply(ImageInterface $image): ImageInterface
     {
-        $watermark = $this->driver()->handleInput($this->element);
-        $watermarkNative = $watermark->core()->native();
-        $position = $this->getPosition($image, $watermark);
+        $element = $this->driver()->handleInput($this->element);
+        $elementNative = $element->core()->native();
+        $position = $this->getPosition($image, $element);
 
         if ($this->opacity < 100) {
-            if (!$watermarkNative->hasAlpha()) {
-                $watermarkNative = $watermarkNative->bandjoin_const(255);
+            if (!$elementNative->hasAlpha()) {
+                $elementNative = $elementNative->bandjoin_const(255);
             }
 
-            $watermarkNative = $watermarkNative->multiply([
+            $elementNative = $elementNative->multiply([
                 1.0,
                 1.0,
                 1.0,
@@ -44,11 +44,11 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
         }
 
         if (!$image->isAnimated()) {
-            $watermarked = $this->placeWatermark($watermarkNative, $position, $image->core()->first())->native();
+            $watermarked = $this->placeElement($elementNative, $position, $image->core()->first())->native();
         } else {
             $frames = [];
             foreach ($image as $frame) {
-                $frames[] = $this->placeWatermark($watermarkNative, $position, $frame);
+                $frames[] = $this->placeElement($elementNative, $position, $frame);
             }
 
             $watermarked = Core::replaceFrames($image->core()->native(), $frames);
@@ -62,17 +62,17 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
     /**
      * @throws RuntimeException
      */
-    private function placeWatermark(
-        mixed $watermarkNative,
+    private function placeElement(
+        mixed $elementNative,
         PointInterface $position,
         FrameInterface $frame
     ): FrameInterface {
-        if ($watermarkNative->hasAlpha()) {
+        if ($elementNative->hasAlpha()) {
             /** @var Rectangle $size */
             $size = $frame->size();
             $imageSize = $size->align($this->position);
 
-            $watermarkNative = $watermarkNative->embed(
+            $elementNative = $elementNative->embed(
                 $position->x(),
                 $position->y(),
                 $imageSize->width(),
@@ -85,14 +85,14 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
 
             $frame->setNative(
                 $frame->native()->composite2(
-                    $watermarkNative,
+                    $elementNative,
                     BlendMode::OVER
                 )
             );
         } else {
             $frame->setNative(
                 $frame->native()->insert(
-                    $watermarkNative->bandjoin_const(255),
+                    $elementNative->bandjoin_const(255),
                     $position->x(),
                     $position->y()
                 )
