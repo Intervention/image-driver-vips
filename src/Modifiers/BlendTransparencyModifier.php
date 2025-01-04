@@ -84,7 +84,7 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
     {
         // decode blending color
         $color = $this->driver()->handleInput(
-            $this->color ? $this->color : $this->driver()->config()->blendingColor
+            $this->color ?: $this->driver()->config()->blendingColor
         );
 
         if (!($color instanceof ColorInterface)) {
