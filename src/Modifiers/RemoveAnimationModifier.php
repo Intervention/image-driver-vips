@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Exceptions\AnimationException;
-use Intervention\Image\Exceptions\InputException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\RemoveAnimationModifier as GenericRemoveAnimationModifier;
@@ -24,7 +23,7 @@ class RemoveAnimationModifier extends GenericRemoveAnimationModifier implements 
             return $image;
         }
 
-        $position = $this->normalizedPosition($image);
+        $position = parent::normalizePosition($image);
         $page_height = $image->core()->native()->get('page-height');
 
         try {
@@ -42,37 +41,5 @@ class RemoveAnimationModifier extends GenericRemoveAnimationModifier implements 
         $image->core()->setNative($modified);
 
         return $image;
-    }
-
-    /**
-     * Normalize modifier's position to integer
-     *
-     * TODO: Remove this method and use the version from parent class in newer
-     * version of dependency "Intervention Image".
-     *
-     * @param ImageInterface $image
-     * @throws InputException
-     * @return int
-     */
-    private function normalizedPosition(ImageInterface $image): int
-    {
-        if (is_int($this->position)) {
-            return $this->position;
-        }
-
-        if (is_numeric($this->position)) {
-            return (int) $this->position;
-        }
-
-        if (preg_match("/^(?P<percent>[0-9]{1,3})%$/", $this->position, $matches) != 1) {
-            throw new InputException(
-                'Position must be either integer or a percent value as string.'
-            );
-        }
-
-        $total = count($image);
-        $position = intval(round($total / 100 * intval($matches['percent'])));
-
-        return $position == $total ? $position - 1 : $position;
     }
 }

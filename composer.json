@@ -20,7 +20,7 @@
     ],
     "require": {
         "php": "^8.1",
-        "intervention/image": "^3.8",
+        "intervention/image": "^3.10.2",
         "jcupitt/vips": "^2.4"
     },
     "require-dev": {
