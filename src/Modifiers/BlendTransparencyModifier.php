@@ -60,7 +60,7 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
         /** @var RgbColor $color */
         $vipsImage = VipsImage::black(1, 1)
             ->add($color->red()->value())
-            ->cast(BandFormat::UCHAR)
+            ->cast($image->core()->native()->format)
             ->embed(0, 0, $image->width(), $image->height(), ['extend' => Extend::COPY])
             ->copy(['interpretation' => $image->core()->native()->interpretation])
             ->bandjoin([
