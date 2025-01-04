@@ -12,6 +12,7 @@ use Intervention\Image\Exceptions\DecoderException;
 use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ColorInterface;
+use Intervention\Image\Interfaces\DriverInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\BlendTransparencyModifier as GenericBlendTransparencyModifier;
@@ -32,7 +33,7 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
     public function apply(ImageInterface $image): ImageInterface
     {
         // decode blending color
-        $color = $this->blendingColor();
+        $color = $this->blendingColor($this->driver());
 
         // create new canvas with blending color as background
         $canvas = $this->canvas($image, $color);
@@ -76,16 +77,17 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
      *
      * TODO: Remove this method and use parent class implementation
      *
+     * @param DriverInterface $driver
      * @throws RuntimeException
      * @throws DecoderException
      * @throws VipsException
      * @return ColorInterface
      */
-    protected function blendingColor(): ColorInterface
+    protected function blendingColor(DriverInterface $driver): ColorInterface
     {
         // decode blending color
-        $color = $this->driver()->handleInput(
-            $this->color ?: $this->driver()->config()->blendingColor
+        $color = $driver->handleInput(
+            $this->color ?: $driver->config()->blendingColor
         );
 
         if (!($color instanceof ColorInterface)) {
