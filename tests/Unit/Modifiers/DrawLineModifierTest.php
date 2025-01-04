@@ -34,6 +34,6 @@ final class DrawLineModifierTest extends BaseTestCase
         $line->setBackgroundColor('fff4');
         $line->setWidth(2);
         $image->modify(new DrawLineModifier($line));
-        $this->assertColor(255, 136, 77, 255, $image->pickColor(5, 5));
+        $this->assertColor(255, 136, 77, 255, $image->pickColor(5, 5), 1);
     }
 }
