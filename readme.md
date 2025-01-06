@@ -110,7 +110,7 @@ the features that have already been implemented.
 | Image::drawCircle() | ✅ |
 | Image::drawLine() | ✅ |
 | Image::drawPolygon() | ✅ |
-| Image::drawBezier() | ❌ |
+| Image::drawBezier() | ✅ |
 | Image::resolution() | ✅ |
 | Image::setResolution() | ✅ |
 | Image::exif() | ✅ |
