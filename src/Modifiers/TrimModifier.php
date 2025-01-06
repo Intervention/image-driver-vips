@@ -12,6 +12,11 @@ use Jcupitt\Vips\BandFormat;
 
 class TrimModifier extends GenericTrimModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
         if ($image->isAnimated()) {
@@ -19,11 +24,6 @@ class TrimModifier extends GenericTrimModifier implements SpecializedInterface
         }
 
         $core = $image->core()->native();
-
-        if ($image->core()->native()->hasAlpha()) {
-            // extract alpha channel
-            $core = $image->core()->native()->extract_band($image->core()->native()->bands - 1, ['n' => 1]);
-        }
 
         // get the color of the 4 corners
         $points = [
@@ -34,23 +34,20 @@ class TrimModifier extends GenericTrimModifier implements SpecializedInterface
         ];
 
         $maxThreshold = match ($image->core()->native()->format) {
-            BandFormat::UCHAR => 255,
             BandFormat::USHORT => 65535,
             BandFormat::FLOAT => 1,
             default => 255,
         };
 
         foreach ($points as $point) {
-            unset($point[3]); // remove alpha
-
             $trim = $core->find_trim([
-                'threshold' => min($this->tolerance, $maxThreshold),
+                'threshold' => min(empty($this->tolerance) ? 40 : $this->tolerance + 10, $maxThreshold),
                 'background' => $point,
             ]);
 
             $core = $core->crop(
-                min($trim['top'], $image->height() - 1),
                 min($trim['left'], $image->width() - 1),
+                min($trim['top'], $image->height() - 1),
                 max($trim['width'], 1),
                 max($trim['height'], 1)
             );

@@ -23,6 +23,14 @@ final class TrimModifierTest extends BaseTestCase
         $this->assertEquals(28, $image->height());
     }
 
+    public function testTrimApple(): void
+    {
+        $image = $this->readTestImage('apple.jpg');
+        $image->modify(new TrimModifier());
+        $this->assertEquals(81, $image->width());
+        $this->assertEquals(92, $image->height());
+    }
+
     public function testTrimGradient(): void
     {
         $image = $this->readTestImage('radial.png');
