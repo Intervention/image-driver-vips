@@ -87,7 +87,7 @@ the features that have already been implemented.
 | Image::crop() | ✅ |
 | Image::resizeCanvas() | ❌ |
 | Image::resizeCanvasRelative() | ❌ |
-| Image::trim() | 🪲 |
+| Image::trim() | ✅ |
 | Image::place() | ✅ |
 | Image::brightness() | ✅ |
 | Image::contrast() | ✅ |
@@ -96,7 +96,7 @@ the features that have already been implemented.
 | Image::greyscale() | ✅ |
 | Image::flip() | ✅ |
 | Image::flop() | ✅ |
-| Image::rotate() | 🪲 |
+| Image::rotate() | ✅ |
 | Image::orient() | ✅ |
 | Image::blur() | ✅ |
 | Image::sharpen() | ✅ |
