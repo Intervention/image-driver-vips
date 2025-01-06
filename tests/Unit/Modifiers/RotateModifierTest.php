@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
+use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Modifiers\RotateModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -26,5 +27,26 @@ final class RotateModifierTest extends BaseTestCase
         $this->assertEquals(397, $image->width());
         $this->assertEquals(368, $image->height());
         $this->assertEquals('ffffff', $image->pickColor(10, 10)->toHex());
+    }
+
+    public function testRotateAnimated(): void
+    {
+        $image = (new Driver())->createAnimation(function ($animation) {
+            $animation->add($this->getTestResourcePath('test.jpg'), .25);
+            $animation->add($this->getTestResourcePath('test.jpg'), .25);
+        })->setLoops(5);
+
+        $image->modify(new RotateModifier(90, 'fff'));
+        $this->assertEquals(240, $image->width());
+        $this->assertEquals(320, $image->height());
+
+        $image->modify(new RotateModifier(120, 'fff'));
+        $this->assertEquals(2, $image->count());
+
+        foreach ($image as $frame) {
+            $this->assertEquals(397, $frame->size()->width());
+            $this->assertEquals(368, $image->size()->height());
+            $this->assertEquals('ffffff', $frame->toImage(new Driver())->pickColor(10, 10)->toHex());
+        }
     }
 }
