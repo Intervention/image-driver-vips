@@ -4,7 +4,8 @@
     "homepage": "https://image.intervention.io/",
     "keywords": [
         "image",
-        "vips"
+        "vips",
+        "libvips"
     ],
     "license": "MIT",
     "authors": [
