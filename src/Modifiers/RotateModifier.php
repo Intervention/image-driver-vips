@@ -59,11 +59,11 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
             $color->channel(Red::class)->value(),
             $color->channel(Green::class)->value(),
             $color->channel(Blue::class)->value(),
+            $color->channel(Alpha::class)->value()
         ];
 
-        if ($color->isTransparent() && !$vipsImage->hasAlpha()) {
+        if (!$vipsImage->hasAlpha()) {
             $vipsImage = $vipsImage->bandjoin_const(255);
-            $background[] = $color->channel(Alpha::class)->value();
         }
 
         return $vipsImage->similarity([

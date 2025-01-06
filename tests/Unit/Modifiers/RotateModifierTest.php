@@ -55,15 +55,16 @@ final class RotateModifierTest extends BaseTestCase
     {
         $image = $this->readTestImage('animation.gif');
         $image->modify(new RotateModifier(45, 'f00'));
-        $this->assertEquals(26, $image->width());
-        $this->assertEquals(27, $image->height());
+        $this->assertEquals(25, $image->width());
+        $this->assertEquals(25, $image->height());
+
         $this->assertEquals(
             array_map(fn(Color $color): string => $color->toHex(), $image->pickColors(1, 1)->toArray()),
             ['ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000']
         );
         $this->assertEquals(
             array_map(fn(Color $color): string => $color->toHex(), $image->pickColors(12, 12)->toArray()),
-            ['394b63', '394b63', '394b63', 'ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63']
+            ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63']
         );
     }
 }
