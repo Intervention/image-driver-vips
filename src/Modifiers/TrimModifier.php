@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
+use Intervention\Image\Drivers\SpecializableModifier;
 use Intervention\Image\Exceptions\NotSupportedException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
-use Intervention\Image\Modifiers\TrimModifier as GenericTrimModifier;
 use Jcupitt\Vips\BandFormat;
 
-class TrimModifier extends GenericTrimModifier implements SpecializedInterface
+class TrimModifier extends SpecializableModifier implements SpecializedInterface
 {
+    public function __construct(public int $tolerance = 40)
+    {
+        //
+    }
+
     /**
      * {@inheritdoc}
      *
@@ -41,7 +46,7 @@ class TrimModifier extends GenericTrimModifier implements SpecializedInterface
 
         foreach ($points as $point) {
             $trim = $core->find_trim([
-                'threshold' => min(empty($this->tolerance) ? 40 : $this->tolerance + 10, $maxThreshold),
+                'threshold' => min($this->tolerance + 10, $maxThreshold),
                 'background' => $point,
             ]);
 
