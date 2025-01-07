@@ -11,13 +11,16 @@ use Intervention\Image\Colors\Rgb\Channels\Green;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 use Intervention\Image\Colors\Rgb\Color as RgbColor;
 use Intervention\Image\Colors\Rgb\Colorspace;
+use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\EncodedImage;
+use Intervention\Image\Exceptions\ColorException;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ColorInterface;
 use Jcupitt\Vips\Access;
 use Jcupitt\Vips\BandFormat;
+use Jcupitt\Vips\Exception;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
 use Jcupitt\Vips\Interpretation;
@@ -42,7 +45,24 @@ abstract class BaseTestCase extends MockeryTestCase
         );
     }
 
-    public function newImage(int $width, int $height, ?array $background = null): VipsImage
+    /**
+     * Create new test image with red (ff0000) background
+     *
+     * @param int $width
+     * @param int $height
+     * @return Image
+     * @throws ColorException
+     * @throws Exception
+     */
+    public static function createTestImage(int $width, int $height): Image
+    {
+        return new Image(
+            new Driver(),
+            new Core(self::vipsImage($width, $height, [255, 0, 0, 255]))
+        );
+    }
+
+    protected static function vipsImage(int $width, int $height, ?array $background = null): VipsImage
     {
         $driver = new Driver();
         $background = $driver->colorProcessor(new Colorspace())->nativeToColor($background ?? [255, 255, 255, 0]);

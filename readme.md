@@ -85,8 +85,8 @@ the features that have already been implemented.
 | Image::pad() | ❌ |
 | Image::contain() | ✅ |
 | Image::crop() | ✅ |
-| Image::resizeCanvas() | ❌ |
-| Image::resizeCanvasRelative() | ❌ |
+| Image::resizeCanvas() | ✅ |
+| Image::resizeCanvasRelative() | ✅ |
 | Image::trim() | ✅ |
 | Image::place() | ✅ |
 | Image::brightness() | ✅ |
