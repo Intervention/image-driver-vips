@@ -43,17 +43,15 @@ abstract class BaseTestCase extends MockeryTestCase
         );
     }
 
-    public function createTestImage(int $width, int $height): Image
+    public static function createTestImage(int $width, int $height): Image
     {
         return new Image(
             new Driver(),
-            new Core(
-                $this->vipsImage($width, $height, [255, 0, 0, 255])
-            )
+            new Core(self::vipsImage($width, $height, [255, 0, 0, 255]))
         );
     }
 
-    public function vipsImage(int $width, int $height, ?array $background = null): VipsImage
+    protected static function vipsImage(int $width, int $height, ?array $background = null): VipsImage
     {
         $driver = new Driver();
         $background = $driver->colorProcessor(new Colorspace())->nativeToColor($background ?? [255, 255, 255, 0]);
