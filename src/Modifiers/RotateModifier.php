@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
-use Intervention\Image\Colors\Rgb\Channels\Alpha;
-use Intervention\Image\Colors\Rgb\Channels\Blue;
-use Intervention\Image\Colors\Rgb\Channels\Green;
-use Intervention\Image\Colors\Rgb\Channels\Red;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Exceptions\AnimationException;
 use Intervention\Image\Exceptions\RuntimeException;
@@ -53,21 +49,14 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
      */
     public function rotate(VipsImage $vipsImage): VipsImage
     {
-        $color = $this->driver()->handleInput($this->background);
-
-        $background = [
-            $color->channel(Red::class)->value(),
-            $color->channel(Green::class)->value(),
-            $color->channel(Blue::class)->value(),
-            $color->channel(Alpha::class)->value()
-        ];
+        $background = $this->driver()->handleInput($this->background);
 
         if (!$vipsImage->hasAlpha()) {
             $vipsImage = $vipsImage->bandjoin_const(255);
         }
 
         return $vipsImage->similarity([
-            'background' => $background,
+            'background' => $background->toArray(),
             'angle' => $this->rotationAngle(),
         ]);
     }

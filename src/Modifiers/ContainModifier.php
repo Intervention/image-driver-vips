@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
-use Intervention\Image\Colors\Rgb\Channels\Alpha;
-use Intervention\Image\Colors\Rgb\Channels\Blue;
-use Intervention\Image\Colors\Rgb\Channels\Green;
-use Intervention\Image\Colors\Rgb\Channels\Red;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Traits\PositionToGravity;
 use Intervention\Image\Exceptions\ColorException;
@@ -73,12 +69,7 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
                 $resize->height(),
                 [
                     'extend' => Extend::BACKGROUND,
-                    'background' => [
-                        $bgColor->channel(Red::class)->value(),
-                        $bgColor->channel(Green::class)->value(),
-                        $bgColor->channel(Blue::class)->value(),
-                        $bgColor->channel(Alpha::class)->value(),
-                    ],
+                    'background' => $bgColor->toArray(),
                 ]
             )
         );
