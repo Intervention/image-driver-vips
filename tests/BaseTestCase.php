@@ -11,6 +11,7 @@ use Intervention\Image\Colors\Rgb\Channels\Green;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 use Intervention\Image\Colors\Rgb\Color as RgbColor;
 use Intervention\Image\Colors\Rgb\Colorspace;
+use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\EncodedImage;
@@ -39,6 +40,16 @@ abstract class BaseTestCase extends MockeryTestCase
     {
         return (new Driver())->specialize(new FilePathImageDecoder())->decode(
             static::getTestResourcePath($filename)
+        );
+    }
+
+    public function createTestImage(int $width, int $height): Image
+    {
+        return new Image(
+            new Driver(),
+            new Core(
+                $this->newImage($width, $height, [255, 0, 0, 255])
+            )
         );
     }
 
