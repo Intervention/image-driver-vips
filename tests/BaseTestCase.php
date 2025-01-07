@@ -15,10 +15,12 @@ use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\EncodedImage;
+use Intervention\Image\Exceptions\ColorException;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ColorInterface;
 use Jcupitt\Vips\Access;
 use Jcupitt\Vips\BandFormat;
+use Jcupitt\Vips\Exception;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
 use Jcupitt\Vips\Interpretation;
@@ -43,6 +45,15 @@ abstract class BaseTestCase extends MockeryTestCase
         );
     }
 
+    /**
+     * Create new test image with red (ff0000) background
+     *
+     * @param int $width
+     * @param int $height
+     * @return Image
+     * @throws ColorException
+     * @throws Exception
+     */
     public static function createTestImage(int $width, int $height): Image
     {
         return new Image(
