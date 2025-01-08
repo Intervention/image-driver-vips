@@ -8,7 +8,9 @@ use Intervention\Image\Colors\Rgb\Channels\Alpha;
 use Intervention\Image\Colors\Rgb\Channels\Blue;
 use Intervention\Image\Colors\Rgb\Channels\Green;
 use Intervention\Image\Colors\Rgb\Channels\Red;
+use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SizeInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
@@ -48,27 +50,14 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
                 )
             );
         } else {
-            $offset_x = $crop->pivot()->x() + $this->offset_x;
-            $offset_y = $crop->pivot()->y() + $this->offset_y;
-
-            $targetWidth = min($crop->width(), $originalSize->width());
-            $targetHeight = min($crop->height(), $originalSize->height());
-
-            $targetWidth = $targetWidth > $originalSize->width() ? $targetWidth + $offset_x : $targetWidth;
-            $targetHeight = $targetHeight > $originalSize->height() ? $targetHeight + $offset_y : $targetHeight;
-
-            $cropped = $image->core()->native()->crop(
-                max($offset_x, 0),
-                max($offset_y, 0),
-                $targetWidth,
-                $targetHeight
-            );
-
-            if ($crop->width() > $originalSize->width() || $cropped->height < $crop->height()) {
-                $cropped = $background->insert($cropped, max($offset_x * -1, 0), max($offset_y * -1, 0));
+            $frames = [];
+            foreach ($image as $frame) {
+                $frames[] = $frame->setNative($this->cropFrame($frame, $crop, $originalSize, $background));
             }
 
-            $image->core()->setNative($cropped);
+            $image->core()->setNative(
+                Core::replaceFrames($image->core()->native(), $frames)
+            );
         }
 
         return $image;
@@ -115,5 +104,38 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
             Interesting::HIGH,
             Interesting::ALL,
         ]);
+    }
+
+    private function cropFrame(
+        FrameInterface $frame,
+        SizeInterface $crop,
+        SizeInterface $originalSize,
+        VipsImage $background
+    ): VipsImage {
+        $offset_x = $crop->pivot()->x() + $this->offset_x;
+        $offset_y = $crop->pivot()->y() + $this->offset_y;
+
+        $targetWidth = min($crop->width(), $originalSize->width());
+        $targetHeight = min($crop->height(), $originalSize->height());
+
+        $targetWidth = $targetWidth > $originalSize->width() ? $targetWidth + $offset_x : $targetWidth;
+        $targetHeight = $targetHeight > $originalSize->height() ? $targetHeight + $offset_y : $targetHeight;
+
+        $cropped = $frame->native()->crop(
+            max($offset_x, 0),
+            max($offset_y, 0),
+            $targetWidth,
+            $targetHeight
+        );
+
+        if ($crop->width() > $originalSize->width() || $cropped->height < $crop->height()) {
+            $cropped = $background->insert(
+                $cropped,
+                max($offset_x * -1, 0),
+                max($offset_y * -1, 0)
+            );
+        }
+
+        return $cropped;
     }
 }
