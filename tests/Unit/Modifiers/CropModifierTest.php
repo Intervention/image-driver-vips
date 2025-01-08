@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
+use Intervention\Image\Colors\Rgb\Color;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Modifiers\CropModifier;
@@ -64,5 +65,27 @@ final class CropModifierTest extends BaseTestCase
         $this->assertEquals(50, $image->width());
         $this->assertEquals(50, $image->height());
         $this->assertColor(255, 219, 154, 255, $image->pickColor(25, 25));
+    }
+
+    public function testModifyCropAnimated(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $image = $image->modify(new CropModifier(15, 15, 0, 0, position: 'center'));
+        $this->assertEquals(15, $image->width());
+        $this->assertEquals(15, $image->height());
+
+        $this->assertEquals(
+            array_map(fn(Color $color): string => $color->toHex(), $image->pickColors(8, 8)->toArray()),
+            ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63']
+        );
+    }
+
+    public function testModifyCropAnimatedSmart(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $image = $image->modify(new CropModifier(15, 15, 0, 0, 'ff0000', 'interesting-attention'));
+        $this->assertEquals(15, $image->width());
+        $this->assertEquals(15, $image->height());
+        $this->assertColor(255, 166, 1, 255, $image->pickColor(8, 8));
     }
 }
