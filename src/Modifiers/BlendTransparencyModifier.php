@@ -17,6 +17,7 @@ use Intervention\Image\Interfaces\DriverInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\BlendTransparencyModifier as GenericBlendTransparencyModifier;
+use Jcupitt\Vips\BlendMode;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
@@ -43,7 +44,7 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
             $frames = [];
             foreach ($image as $frame) {
                 $frames[] = new Frame(
-                    $canvas->core()->native()->composite2($frame->native(), 'over'),
+                    $canvas->core()->native()->composite2($frame->native(), BlendMode::OVER),
                     $frame->delay()
                 );
             }
@@ -56,7 +57,7 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
         }
 
         $canvas->core()->setNative(
-            $canvas->core()->native()->composite2($image->core()->native(), 'over')
+            $canvas->core()->native()->composite2($image->core()->native(), BlendMode::OVER)
         );
 
         return $canvas;

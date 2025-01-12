@@ -13,6 +13,7 @@ use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SizeInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\ContainModifier as GenericContainModifier;
+use Jcupitt\Vips\CompassDirection;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Extend;
 
@@ -83,31 +84,31 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
             'top', 'top-center',
             'top-middle',
             'center-top',
-            'middle-top' => 'north',
+            'middle-top' => CompassDirection::NORTH,
             'top-right',
-            'right-top' => 'north-east',
+            'right-top' => CompassDirection::NORTH_EAST,
             'left',
             'left-center',
             'left-middle',
             'center-left',
-            'middle-left' => 'west',
+            'middle-left' => CompassDirection::WEST,
             'right',
             'right-center',
             'right-middle',
             'center-right',
-            'middle-right' => 'east',
+            'middle-right' => CompassDirection::EAST,
             'bottom-left',
-            'left-bottom' => 'south-west',
+            'left-bottom' => CompassDirection::SOUTH_WEST,
             'bottom',
             'bottom-center',
             'bottom-middle',
             'center-bottom',
-            'middle-bottom' => 'south',
+            'middle-bottom' => CompassDirection::SOUTH,
             'bottom-right',
-            'right-bottom' => 'south-east',
+            'right-bottom' => CompassDirection::SOUTH_EAST,
             'top-left',
-            'left-top' => 'north-west',
-            default => 'centre'
+            'left-top' => CompassDirection::NORTH_WEST,
+            default => CompassDirection::CENTRE
         };
     }
 }
