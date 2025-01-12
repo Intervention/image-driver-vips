@@ -73,8 +73,6 @@ $encoded->save('images/example.jpg');
 
 This library was developed by [Oliver Vogel](https://intervention.io) and Thomas Picquet.
 
-Thanks to the community of [contributors](https://github.com/Intervention/image/graphs/contributors) who have helped to improve this project.
-
 ## License
 
 Intervention Image Driver Vips is licensed under the [MIT License](LICENSE).
