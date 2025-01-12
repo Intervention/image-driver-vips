@@ -103,7 +103,7 @@ the features that have already been implemented.
 | Image::invert() | ✅ |
 | Image::pixelate() | ✅ |
 | Image::reduceColors() | ❌ |
-| Image::text() | ❌ |
+| Image::text() | ✅ |
 | Image::fill() | ✅ |
 | Image::drawPixel() | ✅ |
 | Image::drawEllipse() | ✅ |
