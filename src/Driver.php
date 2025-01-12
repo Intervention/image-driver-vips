@@ -21,6 +21,7 @@ use Intervention\Image\Interfaces\ColorProcessorInterface;
 use Intervention\Image\Interfaces\FontProcessorInterface;
 use Intervention\Image\MediaType;
 use Jcupitt\Vips\BandFormat;
+use Jcupitt\Vips\Config as VipsConfig;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
@@ -194,5 +195,15 @@ EOL;
         if (version_compare(PHP_VERSION, '8.3', '>=') && ini_get('zend.max_allowed_stack_size') != '-1') {
             throw new DriverException("zend.max_allowed_stack_size not set to '-1'");
         }
+    }
+
+    /**
+     * Return version of libvips library
+     *
+     * @return string
+     */
+    public static function version(): string
+    {
+        return VipsConfig::version();
     }
 }
