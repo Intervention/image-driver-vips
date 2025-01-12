@@ -21,7 +21,7 @@ use Intervention\Image\Interfaces\ColorProcessorInterface;
 use Intervention\Image\Interfaces\FontProcessorInterface;
 use Intervention\Image\MediaType;
 use Jcupitt\Vips\BandFormat;
-use Jcupitt\Vips\Config as VipsConfig
+use Jcupitt\Vips\Config as VipsConfig;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
