@@ -64,7 +64,7 @@ $encoded->save('images/example.jpg');
 ## Caveats
 
 - Due to the technical characteristics of libvips, it is currently not possible
-  to implement colour quantization via `ImageInterface::reduceColors()` as
+  to implement color quantization via `ImageInterface::reduceColors()` as
   intended. However, there is a [pull request in
   libvips](https://github.com/libvips/php-vips/issues/256#issuecomment-2575872401)
   that enables this feature and may be integrated here in the future.
