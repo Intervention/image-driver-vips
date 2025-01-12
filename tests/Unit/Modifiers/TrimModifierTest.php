@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
+use Intervention\Image\Drivers\Vips\Modifiers\TrimModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Exceptions\NotSupportedException;
-use Intervention\Image\Modifiers\TrimModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(\Intervention\Image\Modifiers\TrimModifier::class)]
-#[CoversClass(\Intervention\Image\Drivers\Vips\Modifiers\TrimModifier::class)]
+#[CoversClass(TrimModifier::class)]
 final class TrimModifierTest extends BaseTestCase
 {
     public function testTrim(): void
@@ -21,6 +20,14 @@ final class TrimModifierTest extends BaseTestCase
         $image->modify(new TrimModifier());
         $this->assertEquals(28, $image->width());
         $this->assertEquals(28, $image->height());
+    }
+
+    public function testTrimApple(): void
+    {
+        $image = $this->readTestImage('apple.jpg');
+        $image->modify(new TrimModifier());
+        $this->assertEquals(81, $image->width());
+        $this->assertEquals(91, $image->height());
     }
 
     public function testTrimGradient(): void

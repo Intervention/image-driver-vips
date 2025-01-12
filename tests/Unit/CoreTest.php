@@ -20,9 +20,9 @@ class CoreTest extends BaseTestCase
 
     protected function setUp(): void
     {
-        $red = $this->newImage(10, 10, [255, 0, 0]);
-        $green = $this->newImage(10, 10, [0, 255, 0]);
-        $blue = $this->newImage(10, 10, [0, 0, 255]);
+        $red = $this->vipsImage(10, 10, [255, 0, 0]);
+        $green = $this->vipsImage(10, 10, [0, 255, 0]);
+        $blue = $this->vipsImage(10, 10, [0, 0, 255]);
 
         $frames = [$red, $green, $blue];
         $animation = VipsImage::arrayjoin($frames, ['across' => 1]);
@@ -44,9 +44,9 @@ class CoreTest extends BaseTestCase
 
     public function testSetNative(): void
     {
-        $image1 = $this->newImage(10, 10, [255, 0, 0]);
+        $image1 = $this->vipsImage(10, 10, [255, 0, 0]);
         $core = new Core($image1);
-        $image2 = $this->newImage(10, 10, [0, 255, 0]);
+        $image2 = $this->vipsImage(10, 10, [0, 255, 0]);
         $core->setNative($image2);
         $this->assertEquals($image2, $core->native());
     }
@@ -75,7 +75,7 @@ class CoreTest extends BaseTestCase
 
     public function testAdd(): void
     {
-        $image = $this->newImage(10, 10, [255, 0, 0]);
+        $image = $this->vipsImage(10, 10, [255, 0, 0]);
         $this->assertEquals(3, $this->core->count());
         $result = $this->core->add(new Frame($image, 300));
         $this->assertEquals(4, $this->core->count());

@@ -5,27 +5,19 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Core;
-use Intervention\Image\Drivers\Vips\Traits\PositionToGravity;
 use Intervention\Image\Exceptions\ColorException;
-use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Interfaces\ColorInterface;
 use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SizeInterface;
-use Intervention\Image\Interfaces\SpecializedInterface;
-use Intervention\Image\Modifiers\ContainModifier as GenericContainModifier;
-use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Extend;
 
-class ContainModifier extends GenericContainModifier implements SpecializedInterface
+class PadModifier extends ContainModifier
 {
-    use PositionToGravity;
-
     /**
      * {@inheritdoc}
      *
-     * @throws RuntimeException|VipsException
-     * @see ModifierInterface::apply()
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      */
     public function apply(ImageInterface $image): ImageInterface
     {
@@ -33,11 +25,11 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
         $bgColor = $this->driver()->handleInput($this->background);
 
         if (!$image->isAnimated()) {
-            $contained = $this->contain($image->core()->first(), $resize, $bgColor)->native();
+            $contained = $this->pad($image->core()->first(), $resize, $bgColor)->native();
         } else {
             $frames = [];
             foreach ($image as $frame) {
-                $frames[] = $this->contain($frame, $resize, $bgColor);
+                $frames[] = $this->pad($frame, $resize, $bgColor);
             }
 
             $contained = Core::replaceFrames($image->core()->native(), $frames);
@@ -49,12 +41,21 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
     }
 
     /**
+     * Apply padded image resizing
+     *
+     * @param FrameInterface $frame
+     * @param SizeInterface $resize
+     * @param ColorInterface $bgColor
+     * @return FrameInterface
      * @throws ColorException
      */
-    private function contain(FrameInterface $frame, SizeInterface $resize, ColorInterface $bgColor): FrameInterface
+    private function pad(FrameInterface $frame, SizeInterface $resize, ColorInterface $bgColor): FrameInterface
     {
-        $resized = $frame->native()->thumbnail_image($resize->width(), [
-            'height' => $resize->height(),
+        $cropWidth = min($frame->native()->width, $resize->width());
+        $cropHeight = min($frame->native()->height, $resize->height());
+
+        $resized = $frame->native()->thumbnail_image($cropWidth, [
+            'height' => $cropHeight,
             'no_rotate' => true,
         ]);
 
