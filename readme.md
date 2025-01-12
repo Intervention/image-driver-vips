@@ -7,10 +7,8 @@
 
 ## WARNING: UNSTABLE
 
-**The code is in a very early and experimental stage of development. Many
-features are not yet implemented and tested. There may still be significant
-changes. Therefore, it is not recommended to use the driver in production
-environments.**
+**The code is in beta stage and is currently finalised. Therefore, it is not
+recommended to use the driver in production environments.**
 
 Driver to use [Intervention Image](https://github.com/Intervention/image) with
 [libvips](https://github.com/libvips/libvips) which is a fast image processing
