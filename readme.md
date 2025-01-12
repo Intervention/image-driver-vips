@@ -61,101 +61,20 @@ $encoded = $image->toJpg();
 $encoded->save('images/example.jpg');
 ```
 
-## Development Status
+## Caveats
 
-The library is under development and not yet complete. Here is an overview of
-the features that have already been implemented.
+- Due to the technical characteristics of libvips, it is currently not possible
+  to implement colour quantization via `ImageInterface::reduceColors()` as
+  intended. However, there is a [pull request in
+  libvips](https://github.com/libvips/php-vips/issues/256#issuecomment-2575872401)
+  that enables this feature and may be integrated here in the future.
 
-### Feature Status
+## Authors
 
-| Feature | Status |
-| - | - |
-| ImageManager::read() | ✅ |
-| ImageManager::create() | ✅ |
-| ImageManager::animate() | ✅ |
-| Image::width() | ✅ |
-| Image::height() | ✅ |
-| Image::size() | ✅ |
-| Image::resize() | ✅ |
-| Image::resizeDown() | ✅ |
-| Image::scale() | ✅ |
-| Image::scaleDown() | ✅ |
-| Image::cover() | ✅ |
-| Image::coverDown() | ✅ |
-| Image::pad() | ✅ |
-| Image::contain() | ✅ |
-| Image::crop() | ✅ |
-| Image::resizeCanvas() | ✅ |
-| Image::resizeCanvasRelative() | ✅ |
-| Image::trim() | ✅ |
-| Image::place() | ✅ |
-| Image::brightness() | ✅ |
-| Image::contrast() | ✅ |
-| Image::gamma() | ✅ |
-| Image::colorize() | ❌ |
-| Image::greyscale() | ✅ |
-| Image::flip() | ✅ |
-| Image::flop() | ✅ |
-| Image::rotate() | ✅ |
-| Image::orient() | ✅ |
-| Image::blur() | ✅ |
-| Image::sharpen() | ✅ |
-| Image::invert() | ✅ |
-| Image::pixelate() | ✅ |
-| Image::reduceColors() | ❌ |
-| Image::text() | ✅ |
-| Image::fill() | ✅ |
-| Image::drawPixel() | ✅ |
-| Image::drawEllipse() | ✅ |
-| Image::drawCircle() | ✅ |
-| Image::drawLine() | ✅ |
-| Image::drawRectangle() | ✅ |
-| Image::drawPolygon() | ✅ |
-| Image::drawBezier() | ✅ |
-| Image::resolution() | ✅ |
-| Image::setResolution() | ✅ |
-| Image::exif() | ✅ |
-| Image::pickColor() | ✅ |
-| Image::pickColors() | ✅ |
-| Image::colorspace() | ✅ |
-| Image::setColorspace() | ✅ |
-| Image::profile() | ✅ |
-| Image::setProfile() | ✅ |
-| Image::removeProfile() | ✅ |
-| Image::blendingColor() | ✅ |
-| Image::setBlendingColor() | ✅ |
-| Image::blendTransparency() | ✅ |
-| Image::isAnimated() | ✅ |
-| Image::count() | ✅ |
-| Image::sliceAnimation() | ✅ |
-| Image::loops() | ✅ |
-| Image::setLoops() | ✅ |
-| Image::removeAnimation() | ✅ |
-| Image::encode() | ✅ |
-| Image::encodeByMediaType() | ✅ |
-| Image::encodeByPath() | ✅ |
-| Image::encodeByExtension() | ✅ |
-| Image::save() | ✅ |
-| Image::toJpeg() | ✅ |
-| Image::toWebp() | ✅ |
-| Image::toPng() | ✅ |
-| Image::toGif() | ✅ |
-| Image::toBitmap() | ✅ |
-| Image::toAvif() | ✅ |
-| Image::toTiff() | ✅ |
-| Image::toJpeg2000() | ✅ |
-| Image::toHeic() | ✅ |
-| Image::supports() | 🪲 |
+This library was developed by [Oliver Vogel](https://intervention.io) and Thomas Picquet.
 
-✅ Integrated
-🪲 Integrated but has issues
-🚧 Partly integrated
-❌ Not (yet) integrated
+Thanks to the community of [contributors](https://github.com/Intervention/image/graphs/contributors) who have helped to improve this project.
 
-## Contributing
+## License
 
-Check out the [documentation](https://github.com/Intervention/image/blob/develop/CONTRIBUTING.md)
-
-```bash
-composer test
-```
+Intervention Image Driver Vips is licensed under the [MIT License](LICENSE).
