@@ -14,8 +14,8 @@ environments.**
 
 Driver to use [Intervention Image](https://github.com/Intervention/image) with
 [libvips](https://github.com/libvips/libvips) which is a fast image processing
-library with low memory needs. This driver combines the easy-to-use API of
-Intervention Image with the performance of libvips.
+library with low memory needs. This package combines the easy-to-use API of
+Intervention Image with the high performance of libvips.
 
 ## Requirements
 
