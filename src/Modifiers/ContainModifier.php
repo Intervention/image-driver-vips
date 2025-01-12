@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Core;
-use Intervention\Image\Drivers\Vips\Traits\PositionToGravity;
 use Intervention\Image\Exceptions\ColorException;
 use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Interfaces\ColorInterface;
@@ -19,8 +18,6 @@ use Jcupitt\Vips\Extend;
 
 class ContainModifier extends GenericContainModifier implements SpecializedInterface
 {
-    use PositionToGravity;
-
     /**
      * {@inheritdoc}
      *
@@ -75,5 +72,42 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
         );
 
         return $frame;
+    }
+
+    /**
+     * Convert position string to libvips gravity string.
+     */
+    public function positionToGravity(string $position): string
+    {
+        return match (strtolower($position)) {
+            'top', 'top-center',
+            'top-middle',
+            'center-top',
+            'middle-top' => 'north',
+            'top-right',
+            'right-top' => 'north-east',
+            'left',
+            'left-center',
+            'left-middle',
+            'center-left',
+            'middle-left' => 'west',
+            'right',
+            'right-center',
+            'right-middle',
+            'center-right',
+            'middle-right' => 'east',
+            'bottom-left',
+            'left-bottom' => 'south-west',
+            'bottom',
+            'bottom-center',
+            'bottom-middle',
+            'center-bottom',
+            'middle-bottom' => 'south',
+            'bottom-right',
+            'right-bottom' => 'south-east',
+            'top-left',
+            'left-top' => 'north-west',
+            default => 'centre'
+        };
     }
 }
