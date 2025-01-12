@@ -198,7 +198,7 @@ EOL;
     }
 
     /**
-     * Return version of GD library
+     * Return version of liblibs library
      *
      * @return string
      */
