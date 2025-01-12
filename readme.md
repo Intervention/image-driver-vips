@@ -34,7 +34,7 @@ composer require intervention/image-driver-vips
 
 The public [API](https://image.intervention.io/v3) of Intervention Image can be
 used unchanged. The only [configuration](https://image.intervention.io/v3/basics/image-manager) that needs to be done is to ensure that
-the `libvips` driver is used by `Intervention\Image\ImageManager`.
+`Intervention\Image\Drivers\Vips\Driver` by this library is used by `Intervention\Image\ImageManager`.
 
 ## Code Examples
 
