@@ -67,6 +67,10 @@ $encoded->save('images/example.jpg');
   libvips](https://github.com/libvips/php-vips/issues/256#issuecomment-2575872401)
   that enables this feature and it may be integrated here the future as well.
 
+- With PHP on macOS, font files are not recognized in the
+  `ImageInterface::text()` call because Quartz as a rendering engine does not
+  allow font files to be loaded at runtime via the fontconfig API.
+
 ## Authors
 
 This library was developed by [Oliver Vogel](https://intervention.io) and Thomas Picquet.
