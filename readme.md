@@ -12,9 +12,10 @@ features are not yet implemented and tested. There may still be significant
 changes. Therefore, it is not recommended to use the driver in production
 environments.**
 
-Driver to use [libvips](https://github.com/libvips/libvips) with [Intervention
-Image](https://github.com/Intervention/image). Combines the easy-to-use API of
-Intervention Image with the technical performance of libvips.
+Driver to use [Intervention Image](https://github.com/Intervention/image) with
+[libvips](https://github.com/libvips/libvips) which is a fast image processing
+library with low memory needs. This driver combines the easy-to-use API of
+Intervention Image with the performance of libvips.
 
 ## Requirements
 
