@@ -10,10 +10,13 @@
 **The code is in beta stage and is currently finalised. Therefore, it is not
 recommended to use the driver in production environments.**
 
-Driver to use [Intervention Image](https://github.com/Intervention/image) with
-[libvips](https://github.com/libvips/libvips) which is a fast image processing
-library with low memory needs. This package combines the easy-to-use API of
-Intervention Image with the high performance of libvips.
+Intervention Image's official driver to use [Intervention
+Image](https://github.com/Intervention/image) with
+[libvips](https://github.com/libvips/libvips). libvips is a fast, low-memory
+image processing library that outperforms the standard PHP image extensions GD
+and Imagick. This package makes it easy to utilize the power of libvips in your
+project while taking advantage of Intervention Image's user-friendly and
+easy-to-use API.
 
 ## Requirements
 
