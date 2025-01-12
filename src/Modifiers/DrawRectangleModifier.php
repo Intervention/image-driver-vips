@@ -41,7 +41,7 @@ class DrawRectangleModifier extends GenericDrawRectangleModifier implements Spec
         $frames = [];
         foreach ($image as $frame) {
             $frames[] = $frame->setNative(
-                $frame->native()->composite($rectangle->core()->native(), [BlendMode::OVER])
+                $frame->native()->composite($rectangle, [BlendMode::OVER])
             );
         }
 

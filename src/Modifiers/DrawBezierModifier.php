@@ -32,7 +32,7 @@ class DrawBezierModifier extends GenericDrawBezierModifier implements Specialize
             };
         }, $chunks, array_keys($chunks)));
 
-        $polygon = Driver::createShape(
+        $bezier = Driver::createShape(
             'path',
             [
                 'd' => $points,
@@ -47,7 +47,7 @@ class DrawBezierModifier extends GenericDrawBezierModifier implements Specialize
         $frames = [];
         foreach ($image as $frame) {
             $frames[] = $frame->setNative(
-                $frame->native()->composite($polygon->core()->native(), [BlendMode::OVER])
+                $frame->native()->composite($bezier, [BlendMode::OVER])
             );
         }
 

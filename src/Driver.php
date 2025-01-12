@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips;
 
-use Intervention\Image\Decoders\BinaryImageDecoder;
 use Intervention\Image\Drivers\AbstractDriver;
 use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\NotSupportedException;
@@ -12,7 +11,6 @@ use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\FileExtension;
 use Intervention\Image\Format;
 use Intervention\Image\Image;
-use Intervention\Image\InputHandler;
 use Intervention\Image\Interfaces\DriverInterface;
 use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
@@ -110,30 +108,31 @@ class Driver extends AbstractDriver
     }
 
     /**
+     * @param string $shape
      * @param array<string, string|int> $attributes
-     *
+     * @param int $width
+     * @param int $height
      * @throws RuntimeException
+     * @return VipsImage
      */
-    public static function createShape(string $shape, array $attributes, int $width, int $height): ImageInterface
+    public static function createShape(string $shape, array $attributes, int $width, int $height): VipsImage
     {
         $xmlAttributes = implode(
             ' ',
             array_map(
-                fn ($key, $value) => sprintf('%s="%s"', $key, htmlspecialchars((string) $value)),
+                fn($key, $value) => sprintf('%s="%s"', $key, htmlspecialchars((string) $value)),
                 array_keys($attributes),
                 $attributes
             )
         );
 
-        $svg = <<<EOL
-<svg viewBox="0 0 {$width} {$height}" xmlns="http://www.w3.org/2000/svg">
-    <{$shape} {$xmlAttributes} />
-</svg>
-EOL;
+        $svg = '<svg viewBox="0 0 ' . $width . ' ' . $height . '" xmlns="http://www.w3.org/2000/svg">' .
+            '<' . $shape . ' ' . $xmlAttributes . ' />' .
+            '</svg>';
 
         try {
-            return InputHandler::withDecoders([new BinaryImageDecoder()], new self())->handle($svg);
-        } catch (\Exception $e) {
+            return VipsImage::svgload_buffer($svg);
+        } catch (VipsException $e) {
             throw new RuntimeException('Could not create shape: ' . $e->getMessage(), previous: $e);
         }
     }

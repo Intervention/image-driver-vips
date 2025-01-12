@@ -23,7 +23,7 @@ class DrawLineModifier extends GenericDrawLineModifier implements SpecializedInt
      */
     public function apply(ImageInterface $image): ImageInterface
     {
-        $ellipse = Driver::createShape(
+        $line = Driver::createShape(
             'line',
             [
                 'x1' => $this->drawable->start()->x(),
@@ -40,7 +40,7 @@ class DrawLineModifier extends GenericDrawLineModifier implements SpecializedInt
         $frames = [];
         foreach ($image as $frame) {
             $frames[] = $frame->setNative(
-                $frame->native()->composite($ellipse->core()->native(), [BlendMode::OVER])
+                $frame->native()->composite($line, [BlendMode::OVER])
             );
         }
 

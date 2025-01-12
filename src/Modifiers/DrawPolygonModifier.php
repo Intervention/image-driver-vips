@@ -41,7 +41,7 @@ class DrawPolygonModifier extends GenericDrawPolygonModifier implements Speciali
         $frames = [];
         foreach ($image as $frame) {
             $frames[] = $frame->setNative(
-                $frame->native()->composite($polygon->core()->native(), [BlendMode::OVER])
+                $frame->native()->composite($polygon, [BlendMode::OVER])
             );
         }
 
