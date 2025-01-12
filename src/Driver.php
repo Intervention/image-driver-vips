@@ -198,7 +198,7 @@ EOL;
     }
 
     /**
-     * Return version of liblibs library
+     * Return version of libvips library
      *
      * @return string
      */
