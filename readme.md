@@ -24,7 +24,7 @@ Intervention Image with the performance of libvips.
 ## Installation
 
 You can easily install this library using [Composer](https://getcomposer.org).
-Just request the package with the following command:
+Simply request the package with the following command:
     
 ```bash
 composer require intervention/image-driver-vips
