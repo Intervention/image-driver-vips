@@ -28,8 +28,7 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
     public function apply(ImageInterface $image): ImageInterface
     {
         $element = $this->driver()->handleInput($this->element);
-        $elementCore = Core::ensureInMemory($element->core());
-        $elementNative = $elementCore->native();
+        $elementNative = $element->core()->native();
 
         $position = $this->getPosition($image, $element);
 
