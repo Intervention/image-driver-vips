@@ -14,7 +14,6 @@ use Intervention\Image\Interfaces\ColorspaceInterface;
 use Intervention\Image\Interfaces\CoreInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
-use Jcupitt\Vips\Image as VipsImage;
 
 class PixelColorAnalyzer extends GenericPixelColorAnalyzer implements SpecializedInterface
 {
