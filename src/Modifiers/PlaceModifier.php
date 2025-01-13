@@ -15,6 +15,7 @@ use Intervention\Image\Modifiers\PlaceModifier as GenericPlaceModifier;
 use Jcupitt\Vips\BlendMode;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Extend;
+use Jcupitt\Vips\Image as VipsImage;
 
 class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
 {
@@ -27,7 +28,9 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
     public function apply(ImageInterface $image): ImageInterface
     {
         $element = $this->driver()->handleInput($this->element);
-        $elementNative = $element->core()->native();
+        $elementCore = Core::ensureInMemory($element->core());
+        $elementNative = $elementCore->native();
+
         $position = $this->getPosition($image, $element);
 
         if ($this->opacity < 100) {
@@ -63,7 +66,7 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
      * @throws RuntimeException
      */
     private function placeElement(
-        mixed $elementNative,
+        VipsImage $elementNative,
         PointInterface $position,
         FrameInterface $frame
     ): FrameInterface {

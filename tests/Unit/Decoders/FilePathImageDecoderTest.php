@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Decoders;
 
+use Intervention\Image\Drivers\Vips\Analyzers\HeightAnalyzer;
+use Intervention\Image\Drivers\Vips\Modifiers\ResizeModifier;
+use Intervention\Image\Modifiers\BlurModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
@@ -32,9 +35,30 @@ final class FilePathImageDecoderTest extends BaseTestCase
 
         $result = $this->decoder->decode($path);
 
-        if ($result === true) {
+        if ($result) {
             $this->assertInstanceOf(Image::class, $result);
         }
+    }
+
+    public function testDecodeWithSequentialAccess(): void
+    {
+        $image = $this->decoder->decode(self::getTestResourcePath('trim.png'));
+
+        // run more than 1 operation to test sequential mode
+        $image->pickColor(14, 14)->toHex();
+        $image->modify(new BlurModifier(30));
+        $image->modify(new ResizeModifier(10, 10));
+        $image->pickColor(7, 7)->toHex();
+        $this->assertInstanceOf(Image::class, $image);
+
+        $image = $this->decoder->decode(self::getTestResourcePath('trim.png'));
+        $image->modify(new BlurModifier(30));
+        $image->modify(new ResizeModifier(10, 10));
+
+        $analyzer = new HeightAnalyzer();
+        $analyzer->setDriver(new Driver());
+        $analyzer->analyze($image);
+        $this->assertInstanceOf(Image::class, $image);
     }
 
     public static function filePathsProvider(): array
