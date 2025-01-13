@@ -29,7 +29,6 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
     {
         $element = $this->driver()->handleInput($this->element);
         $elementNative = $element->core()->native();
-
         $position = $this->getPosition($image, $element);
 
         if ($this->opacity < 100) {
