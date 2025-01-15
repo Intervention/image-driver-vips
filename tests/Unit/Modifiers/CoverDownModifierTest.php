@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
+use Intervention\Image\Colors\Rgb\Color;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -33,5 +34,18 @@ final class CoverDownModifierTest extends BaseTestCase
         $image->modify(new CoverDownModifier(240, 90, 'center'));
         $this->assertEquals(240, $image->width());
         $this->assertEquals(90, $image->height());
+    }
+
+    public function testModifyAnimated(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $image = $image->modify(new CoverDownModifier(15, 15, position: 'center'));
+        $this->assertEquals(15, $image->width());
+        $this->assertEquals(15, $image->height());
+
+        $this->assertEquals(
+            array_map(fn(Color $color): string => $color->toHex(), $image->pickColors(8, 8)->toArray()),
+            ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63']
+        );
     }
 }
