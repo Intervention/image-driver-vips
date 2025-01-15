@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Drivers\SpecializableModifier;
+use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Exceptions\NotSupportedException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
@@ -28,14 +29,15 @@ class TrimModifier extends SpecializableModifier implements SpecializedInterface
             throw new NotSupportedException('Trim modifier cannot be applied to animated images.');
         }
 
-        $core = $image->core()->native();
+        $core = Core::ensureInMemory($image->core());
+        $native = $core->native();
 
         // get the color of the 4 corners
         $points = [
-            $core->getpoint(0, 0),
-            $core->getpoint($image->width() - 1, 0),
-            $core->getpoint(0, $image->height() - 1),
-            $core->getpoint($image->width() - 1, $image->height() - 1),
+            $native->getpoint(0, 0),
+            $native->getpoint($image->width() - 1, 0),
+            $native->getpoint(0, $image->height() - 1),
+            $native->getpoint($image->width() - 1, $image->height() - 1),
         ];
 
         $maxThreshold = match ($image->core()->native()->format) {
@@ -45,12 +47,12 @@ class TrimModifier extends SpecializableModifier implements SpecializedInterface
         };
 
         foreach ($points as $point) {
-            $trim = $core->find_trim([
+            $trim = $native->find_trim([
                 'threshold' => min($this->tolerance + 10, $maxThreshold),
                 'background' => $point,
             ]);
 
-            $core = $core->crop(
+            $native = $native->crop(
                 min($trim['left'], $image->width() - 1),
                 min($trim['top'], $image->height() - 1),
                 max($trim['width'], 1),
@@ -62,7 +64,7 @@ class TrimModifier extends SpecializableModifier implements SpecializedInterface
             }
         }
 
-        $image->core()->setNative($core);
+        $image->core()->setNative($native);
 
         return $image;
     }

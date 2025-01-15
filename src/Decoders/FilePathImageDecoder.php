@@ -25,7 +25,9 @@ class FilePathImageDecoder extends NativeObjectDecoder
         }
 
         try {
-            $vipsImage = Vips\Image::newFromFile($input . '[' . $this->stringOptions() . ']');
+            $vipsImage = Vips\Image::newFromFile($input . '[' . $this->stringOptions() . ']', [
+                'access' => Vips\Access::SEQUENTIAL,
+            ]);
         } catch (Exception) {
             throw new DecoderException('Unable to decode input');
         }

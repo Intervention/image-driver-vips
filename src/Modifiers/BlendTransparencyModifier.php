@@ -86,7 +86,9 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
                 $color->blue()->value(),
             ]);
 
-        return new Image($this->driver(), new Core($vipsImage));
+        $core = Core::ensureInMemory(new Core($vipsImage));
+
+        return new Image($this->driver(), $core);
     }
 
     /**

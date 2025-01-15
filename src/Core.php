@@ -55,6 +55,22 @@ class Core implements CoreInterface, Iterator
         return $this;
     }
 
+    public static function ensureInMemory(CoreInterface $core): CoreInterface
+    {
+        try {
+            $sequential = in_array('vips-sequential', $core->native()->getFields()) &&
+                (bool) $core->native()->get('vips-sequential');
+
+            if ($sequential) {
+                $core->setNative($core->native()->copyMemory());
+            }
+        } catch (AnimationException) {
+            //
+        }
+
+        return $core;
+    }
+
     /**
      * {@inheritdoc}
      *
@@ -114,6 +130,13 @@ class Core implements CoreInterface, Iterator
 
         if ($position > ($count - 1)) {
             throw new AnimationException('Frame #' . $position . ' could not be found in the image.');
+        }
+
+        $sequential = in_array('vips-sequential', $this->vipsImage->getFields()) ?
+            $this->vipsImage->get('vips-sequential') : null;
+
+        if ($sequential) {
+            $this->vipsImage = $this->vipsImage->copyMemory();
         }
 
         if ($count === 1) {
