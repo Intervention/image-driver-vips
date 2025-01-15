@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
+use Intervention\Image\Drivers\Vips\Core;
+use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
+use Intervention\Image\Interfaces\SizeInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\CoverModifier as GenericCoverModifier;
+use Jcupitt\Vips\Image as VipsImage;
 
 class CoverModifier extends GenericCoverModifier implements SpecializedInterface
 {
@@ -15,21 +19,32 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
         $crop = $this->getCropSize($image);
         $resize = $this->getResizeSize($crop);
 
+        $frames = [];
+        foreach ($image as $frame) {
+            $frames[] = $frame->setNative($this->cropResizeFrame($frame, $crop, $resize));
+        }
+
         $image->core()->setNative(
-            $image->core()->native()
-                ->crop(
-                    $crop->pivot()->x(),
-                    $crop->pivot()->y(),
-                    $crop->width(),
-                    $crop->height()
-                )
-                ->thumbnail_image($resize->width(), [
-                    'height' => $resize->height(),
-                    'size' => 'force',
-                    'no_rotate' => true,
-                ])
+            Core::replaceFrames($image->core()->native(), $frames)
         );
 
         return $image;
+    }
+
+    private function cropResizeFrame(
+        FrameInterface $frame,
+        SizeInterface $cropSize,
+        SizeInterface $resizeSize
+    ): VipsImage {
+        return $frame->native()->crop(
+            $cropSize->pivot()->x(),
+            $cropSize->pivot()->y(),
+            $cropSize->width(),
+            $cropSize->height()
+        )->thumbnail_image($resizeSize->width(), [
+            'height' => $resizeSize->height(),
+            'size' => 'force',
+            'no_rotate' => true,
+        ]) ;
     }
 }
