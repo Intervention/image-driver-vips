@@ -21,7 +21,7 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
     /**
      * {@inheritdoc}
      *
-     * @see ModifierInterface::apply()
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      * @throws RuntimeException|VipsException
      */
     public function apply(ImageInterface $image): ImageInterface

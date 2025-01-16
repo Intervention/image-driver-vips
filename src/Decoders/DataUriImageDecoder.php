@@ -10,6 +10,11 @@ use Intervention\Image\Interfaces\ImageInterface;
 
 class DataUriImageDecoder extends BinaryImageDecoder
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see Intervention\Image\Interfaces\DecoderInterface::decode()
+     */
     public function decode(mixed $input): ImageInterface|ColorInterface
     {
         if (!is_string($input)) {

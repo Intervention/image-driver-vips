@@ -27,7 +27,7 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
      * {@inheritdoc}
      *
      * @throws RuntimeException|\Jcupitt\Vips\Exception
-     * @see ModifierInterface::apply()
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      */
     public function apply(ImageInterface $image): ImageInterface
     {

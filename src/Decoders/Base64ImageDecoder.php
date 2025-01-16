@@ -10,6 +10,11 @@ use Intervention\Image\Interfaces\ImageInterface;
 
 class Base64ImageDecoder extends BinaryImageDecoder
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see Intervention\Image\Interfaces\DecoderInterface::decode()
+     */
     public function decode(mixed $input): ImageInterface|ColorInterface
     {
         if (!$this->isValidBase64($input)) {

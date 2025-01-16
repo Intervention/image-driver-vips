@@ -20,7 +20,7 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
      * {@inheritdoc}
      *
      * @throws RuntimeException|VipsException
-     * @see ModifierInterface::apply()
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      */
     public function apply(ImageInterface $image): ImageInterface
     {

@@ -16,7 +16,7 @@ class ResizeModifier extends GenericResizeModifier implements SpecializedInterfa
     /**
      * {@inheritdoc}
      *
-     * @see ModifierInterface::apply()
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      */
     public function apply(ImageInterface $image): ImageInterface
     {

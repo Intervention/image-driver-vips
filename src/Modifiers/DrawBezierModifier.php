@@ -18,7 +18,7 @@ class DrawBezierModifier extends GenericDrawBezierModifier implements Specialize
     /**
      * {@inheritdoc}
      *
-     * @see ModifierInterface::apply()
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      * @throws VipsException|RuntimeException|\RuntimeException
      */
     public function apply(ImageInterface $image): ImageInterface

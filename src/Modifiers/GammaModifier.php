@@ -10,6 +10,11 @@ use Intervention\Image\Modifiers\GammaModifier as GenericGammaModifier;
 
 class GammaModifier extends GenericGammaModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
         $image->core()->setNative(

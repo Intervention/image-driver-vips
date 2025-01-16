@@ -14,7 +14,7 @@ class HeicEncoder extends GenericHeicEncoder implements SpecializedInterface
     /**
      * {@inheritdoc}
      *
-     * @see EncoderInterface::function()
+     * @see Intervention\Image\Interfaces\EncoderInterface::encode()
      */
     public function encode(ImageInterface $image): EncodedImage
     {

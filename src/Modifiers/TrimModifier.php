@@ -20,7 +20,7 @@ class TrimModifier extends SpecializableModifier implements SpecializedInterface
     /**
      * {@inheritdoc}
      *
-     * @see ModifierInterface::apply()
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      */
     public function apply(ImageInterface $image): ImageInterface
     {

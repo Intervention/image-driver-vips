@@ -10,7 +10,10 @@ use Intervention\Image\Interfaces\SizeInterface;
 class CoverDownModifier extends CoverModifier
 {
     /**
+     * {@inheritdoc}
+     *
      * @throws GeometryException
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      */
     public function getResizeSize(SizeInterface $size): SizeInterface
     {

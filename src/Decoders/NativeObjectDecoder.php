@@ -19,7 +19,10 @@ use Jcupitt\Vips\Image as VipsImage;
 class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInterface
 {
     /**
+     * {@inheritdoc}
+     *
      * @throws DecoderException|RuntimeException
+     * @see Intervention\Image\Interfaces\DecoderInterface::decode()
      */
     public function decode(mixed $input): ImageInterface|ColorInterface
     {
