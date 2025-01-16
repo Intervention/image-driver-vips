@@ -167,15 +167,11 @@ class Driver extends AbstractDriver
     {
         try {
             $format = Format::create($identifier);
-            $this->createImage(1, 1)
-                ->core()
-                ->native()
-                ->writeToBuffer('.' . $format->fileExtension()->value);
-        } catch (NotSupportedException | VipsException) {
+        } catch (NotSupportedException) {
             return false;
         }
 
-        return true;
+        return in_array($format, LoaderDetector::create()->formats());
     }
 
     /**
