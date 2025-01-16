@@ -13,6 +13,11 @@ use Jcupitt\Vips\Exception as VipsException;
 
 class ProfileAnalyzer extends GenericProfileAnalyzer implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see Intervention\Image\Interfaces\AnalyzerInterface::analyze()
+     */
     public function analyze(ImageInterface $image): mixed
     {
         try {
