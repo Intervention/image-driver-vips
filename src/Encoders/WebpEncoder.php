@@ -19,7 +19,7 @@ class WebpEncoder extends GenericWebpEncoder implements SpecializedInterface
     public function encode(ImageInterface $image): EncodedImage
     {
         $result = $image->core()->native()->writeToBuffer('.webp', [
-            'lossless' => false,
+            'lossless' => $this->quality === 100,
             'Q' => $this->quality,
         ]);
 
