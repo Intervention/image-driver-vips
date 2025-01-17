@@ -58,12 +58,15 @@ class Core implements CoreInterface, Iterator
     public static function ensureInMemory(CoreInterface $core): CoreInterface
     {
         try {
-            $sequential = in_array('vips-sequential', $core->native()->getFields()) &&
-                (bool) $core->native()->get('vips-sequential');
-
-            if ($sequential) {
-                $core->setNative($core->native()->copyMemory());
+            if (!in_array('vips-sequential', $core->native()->getFields())) {
+                return $core;
             }
+
+            if (false === (bool) $core->native()->get('vips-sequential')) {
+                return $core;
+            }
+
+            $core->setNative($core->native()->copyMemory());
         } catch (AnimationException) {
             //
         }
