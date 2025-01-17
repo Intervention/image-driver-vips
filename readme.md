@@ -3,6 +3,7 @@
 [![Latest Version](https://img.shields.io/packagist/v/intervention/image-driver-vips.svg)](https://packagist.org/packages/intervention/image-driver-vips)
 [![Build Status](https://github.com/Intervention/image-driver-vips/actions/workflows/run-tests.yml/badge.svg)](https://github.com/Intervention/image-driver-vips/actions)
 [![Monthly Downloads](https://img.shields.io/packagist/dm/intervention/image-driver-vips.svg)](https://packagist.org/packages/intervention/image-driver-vips/stats)
+[![Support me on Ko-fi](https://raw.githubusercontent.com/Intervention/image-driver-vips/develop/.github/images/support.svg)](https://ko-fi.com/interventionphp)
 
 ## WARNING: UNSTABLE
 
