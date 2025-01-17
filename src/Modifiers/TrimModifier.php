@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
-use Intervention\Image\Drivers\SpecializableModifier;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Exceptions\NotSupportedException;
 use Intervention\Image\Interfaces\ImageInterface;
