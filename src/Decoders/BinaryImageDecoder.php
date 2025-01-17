@@ -16,7 +16,7 @@ class BinaryImageDecoder extends NativeObjectDecoder
     /**
      * {@inheritdoc}
      *
-     * @see DecoderInterface::decode()
+     * @see Intervention\Image\Interfaces\DecoderInterface::decode()
      */
     public function decode(mixed $input): ImageInterface|ColorInterface
     {

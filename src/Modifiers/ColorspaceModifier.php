@@ -11,6 +11,11 @@ use Intervention\Image\Modifiers\ColorspaceModifier as GenericColorspaceModifier
 
 class ColorspaceModifier extends GenericColorspaceModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
         $image->core()->setNative(

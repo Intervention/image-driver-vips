@@ -19,7 +19,7 @@ RUN apt update \
         && apt-get clean
 
 # ffi config
-COPY --link docker/ffi.ini /usr/local/etc/php/conf.d/10-ffi.ini
+RUN echo "zend.max_allowed_stack_size=-1\nffi.enable=true" > /usr/local/etc/php/conf.d/10-ffi.ini
 
 # install composer
 COPY --from=composer /usr/bin/composer /usr/bin/composer

@@ -10,6 +10,11 @@ use Intervention\Image\Modifiers\ContrastModifier as GenericContrastModifier;
 
 class ContrastModifier extends GenericContrastModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
         // calculate a and b for linear

@@ -10,6 +10,11 @@ use Intervention\Image\Modifiers\ColorizeModifier as GenericColorizeModifier;
 
 class ColorizeModifier extends GenericColorizeModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
         $bands = $image->core()->native()->bands;

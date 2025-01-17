@@ -18,7 +18,7 @@ class PixelateModifier extends GenericPixelateModifier implements SpecializedInt
     /**
      * {@inheritdoc}
      *
-     * @see ModifierInterface::apply()
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      * @throws RuntimeException|VipsException
      */
     public function apply(ImageInterface $image): ImageInterface

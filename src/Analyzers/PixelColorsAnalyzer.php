@@ -13,7 +13,10 @@ use Intervention\Image\Interfaces\SpecializedInterface;
 class PixelColorsAnalyzer extends PixelColorAnalyzer implements SpecializedInterface
 {
     /**
+     * {@inheritdoc}
+     *
      * @throws ColorException|RuntimeException
+     * @see Intervention\Image\Interfaces\AnalyzerInterface::analyze()
      */
     public function analyze(ImageInterface $image): mixed
     {

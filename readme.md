@@ -1,5 +1,4 @@
-# image-driver-vips
-## libvips driver for Intervention Image 3
+# libvips driver for Intervention Image 3
 
 [![Latest Version](https://img.shields.io/packagist/v/intervention/image-driver-vips.svg)](https://packagist.org/packages/intervention/image-driver-vips)
 [![Build Status](https://github.com/Intervention/image-driver-vips/actions/workflows/run-tests.yml/badge.svg)](https://github.com/Intervention/image-driver-vips/actions)

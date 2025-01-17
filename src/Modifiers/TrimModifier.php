@@ -9,9 +9,10 @@ use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Exceptions\NotSupportedException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
+use Intervention\Image\Modifiers\TrimModifier as GenericTrimModifier;
 use Jcupitt\Vips\BandFormat;
 
-class TrimModifier extends SpecializableModifier implements SpecializedInterface
+class TrimModifier extends GenericTrimModifier implements SpecializedInterface
 {
     public function __construct(public int $tolerance = 40)
     {
@@ -21,7 +22,7 @@ class TrimModifier extends SpecializableModifier implements SpecializedInterface
     /**
      * {@inheritdoc}
      *
-     * @see ModifierInterface::apply()
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      */
     public function apply(ImageInterface $image): ImageInterface
     {

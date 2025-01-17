@@ -14,7 +14,7 @@ class WebpEncoder extends GenericWebpEncoder implements SpecializedInterface
     /**
      * {@inheritdoc}
      *
-     * @see EncoderInterface::function()
+     * @see Intervention\Image\Interfaces\EncoderInterface::encode()
      */
     public function encode(ImageInterface $image): EncodedImage
     {

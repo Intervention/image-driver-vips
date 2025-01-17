@@ -6,7 +6,6 @@ namespace Intervention\Image\Drivers\Vips\Analyzers;
 
 use Intervention\Image\Analyzers\PixelColorAnalyzer as GenericPixelColorAnalyzer;
 use Intervention\Image\Drivers\Vips\Core;
-use Intervention\Image\Exceptions\AnimationException;
 use Intervention\Image\Exceptions\ColorException;
 use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Interfaces\ColorInterface;
@@ -18,7 +17,10 @@ use Intervention\Image\Interfaces\SpecializedInterface;
 class PixelColorAnalyzer extends GenericPixelColorAnalyzer implements SpecializedInterface
 {
     /**
+     * {@inheritdoc}
+     *
      * @throws ColorException|RuntimeException
+     * @see Intervention\Image\Interfaces\AnalyzerInterface::analyze()
      */
     public function analyze(ImageInterface $image): mixed
     {
@@ -31,9 +33,9 @@ class PixelColorAnalyzer extends GenericPixelColorAnalyzer implements Specialize
     }
 
     /**
-     * @param CoreInterface<Core> $core
+     * Detects color at given position and returns it as ColorInterface
      *
-     * @throws ColorException|AnimationException
+     * @throws ColorException
      */
     protected function colorAt(ColorspaceInterface $colorspace, CoreInterface $core, int $x, int $y): ColorInterface
     {

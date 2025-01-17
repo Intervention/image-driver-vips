@@ -10,6 +10,11 @@ use Intervention\Image\Modifiers\ResolutionModifier as GenericResolutionModifier
 
 class ResolutionModifier extends GenericResolutionModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
         $image->core()->setNative(

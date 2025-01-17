@@ -10,6 +10,11 @@ use Intervention\Image\Interfaces\SpecializedInterface;
 
 class HeightAnalyzer extends GenericWidthAnalyzer implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see Intervention\Image\Interfaces\AnalyzerInterface::analyze()
+     */
     public function analyze(ImageInterface $image): mixed
     {
         $vipsImage = $image->core()->native();

@@ -14,7 +14,7 @@ class Jpeg2000Encoder extends GenericJpeg2000Encoder implements SpecializedInter
     /**
      * {@inheritdoc}
      *
-     * @see EncoderInterface::function()
+     * @see Intervention\Image\Interfaces\EncoderInterface::encode()
      */
     public function encode(ImageInterface $image): EncodedImage
     {

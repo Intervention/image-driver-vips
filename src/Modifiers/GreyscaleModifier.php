@@ -13,7 +13,7 @@ class GreyscaleModifier extends GenericGreyscaleModifier implements SpecializedI
     /**
      * {@inheritdoc}
      *
-     * @see ModifierInterface::apply()
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      */
     public function apply(ImageInterface $image): ImageInterface
     {

@@ -10,6 +10,11 @@ use Intervention\Image\Modifiers\BlurModifier as GenericBlurModifier;
 
 class BlurModifier extends GenericBlurModifier implements SpecializedInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     */
     public function apply(ImageInterface $image): ImageInterface
     {
         $image->core()->setNative(
