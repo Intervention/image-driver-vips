@@ -71,8 +71,10 @@ $encoded->save('images/example.jpg');
   that enables this feature and it may be integrated here the future as well.
 
 - With PHP on macOS, font files are not recognized in the
-  `ImageInterface::text()` call because Quartz as a rendering engine does not
-  allow font files to be loaded at runtime via the fontconfig API.
+  `ImageInterface::text()` call by default because Quartz as a rendering engine
+  does not allow font files to be loaded at runtime via the fontconfig API.
+  However, setting the environment variable `PANGOCAIRO_BACKEND` to
+  `fontconfig` helps here.
 
 ## Authors
 
