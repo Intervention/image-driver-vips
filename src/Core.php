@@ -347,26 +347,51 @@ class Core implements CoreInterface, Iterator
         return new ArrayIterator($this); // @phpstan-ignore-line
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see Iterator::valid()
+     */
     public function valid(): bool
     {
         return $this->has($this->iteratorIndex);
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see Iterator::current()
+     */
     public function current(): mixed
     {
         return $this->get($this->iteratorIndex);
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see Iterator::next()
+     */
     public function next(): void
     {
         $this->iteratorIndex = $this->iteratorIndex + 1;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see Iterator::key()
+     */
     public function key(): mixed
     {
         return $this->iteratorIndex;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see Iterator::rewind()
+     */
     public function rewind(): void
     {
         $this->iteratorIndex = 0;
