@@ -22,13 +22,13 @@ class BrightnessModifier extends GenericBrightnessModifier implements Specialize
             $mask = $image->core()->native()->extract_band($image->core()->native()->bands - 1, ['n' => 1]);
 
             $brightened = $flatten
-                ->linear([1, 1, 1], [$this->level, $this->level, $this->level])
+                ->linear(1, $this->level)
                 ->bandjoin($mask)
                 ->cast($image->core()->native()->format)
             ;
         } else {
             $brightened = $image->core()->native()
-                ->linear([1, 1, 1], [$this->level, $this->level, $this->level])
+                ->linear(1, $this->level)
                 ->cast($image->core()->native()->format)
             ;
         }

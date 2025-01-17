@@ -34,7 +34,7 @@ final class PixelColorAnalyzerTest extends BaseTestCase
 
             $image->core()->setNative(
                 $image->core()->native()
-                    ->linear([1, 1, 1], [30, 30, 30])
+                    ->linear(1, 30)
                     ->cast($format)
             );
 
