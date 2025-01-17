@@ -17,10 +17,6 @@ and Imagick. This package makes it easy to utilize the power of libvips in your
 project while taking advantage of Intervention Image's user-friendly and
 easy-to-use API.
 
-## Requirements
-
-- PHP >= 8.1
-
 ## Installation
 
 You can easily install this library using [Composer](https://getcomposer.org).
@@ -60,6 +56,10 @@ $encoded = $image->toJpg();
 // save encoded image
 $encoded->save('images/example.jpg');
 ```
+
+## Requirements
+
+- PHP >= 8.1
 
 ## Caveats
 
