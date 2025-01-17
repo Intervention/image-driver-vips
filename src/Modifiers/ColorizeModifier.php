@@ -21,7 +21,7 @@ class ColorizeModifier extends GenericColorizeModifier implements SpecializedInt
 
         $image->core()->setNative(
             $image->core()->native()->linear(
-                array_fill(0, $bands, 1),
+                1,
                 array_pad(array_map(fn(int $value): int => $value * 3, [
                     $this->red,
                     $this->green,

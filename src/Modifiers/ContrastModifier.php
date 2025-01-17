@@ -26,13 +26,13 @@ class ContrastModifier extends GenericContrastModifier implements SpecializedInt
             $mask = $image->core()->native()->extract_band($image->core()->native()->bands - 1, ['n' => 1]);
 
             $brightened = $flatten
-                ->linear([$a, $a, $a], [$b, $b, $b])
+                ->linear($a, $b)
                 ->bandjoin($mask)
                 ->cast($image->core()->native()->format)
             ;
         } else {
             $brightened = $image->core()->native()
-                ->linear([$a, $a, $a], [$b, $b, $b])
+                ->linear($a, $b)
                 ->cast($image->core()->native()->format)
             ;
         }
