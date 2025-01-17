@@ -55,6 +55,13 @@ class Core implements CoreInterface, Iterator
         return $this;
     }
 
+    /**
+     * Renders vips image of given core into memory and serves any downstream
+     * requests from the memory area
+     *
+     * @param CoreInterface $core
+     * @return CoreInterface
+     */
     public static function ensureInMemory(CoreInterface $core): CoreInterface
     {
         try {
