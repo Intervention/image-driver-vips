@@ -27,7 +27,7 @@ class PixelColorsAnalyzer extends PixelColorAnalyzer implements SpecializedInter
             $colors->push(
                 $this->colorAt(
                     $image->colorspace(),
-                    $image->core()->native(),
+                    $image->core(),
                     $this->x,
                     $this->y + $i * $height
                 )
