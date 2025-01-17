@@ -23,9 +23,7 @@ class BmpEncoder extends GenericBmpEncoder
             $vipsImage = $image->core()->frame(0)->native();
         }
 
-        $result = $vipsImage->writeToBuffer('.bmp', [
-            'strip' => true,
-        ]);
+        $result = $vipsImage->writeToBuffer('.bmp');
 
         return new EncodedImage($result, 'image/bmp');
     }

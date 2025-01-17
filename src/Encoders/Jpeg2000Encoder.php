@@ -26,7 +26,6 @@ class Jpeg2000Encoder extends GenericJpeg2000Encoder implements SpecializedInter
 
         $result = $vipsImage->writeToBuffer('.j2k', [
             'Q' => $this->quality,
-            'strip' => true,
             'lossless' => false,
         ]);
 

@@ -19,7 +19,6 @@ class TiffEncoder extends GenericTiffEncoder implements SpecializedInterface
     public function encode(ImageInterface $image): EncodedImage
     {
         $result = $image->core()->native()->writeToBuffer('.tiff', [
-            'strip' => true,
             'lossless' => false,
             'Q' => $this->quality,
         ]);

@@ -20,7 +20,6 @@ class AvifEncoder extends GenericAvifEncoder implements SpecializedInterface
     {
         $result = $image->core()->native()->writeToBuffer('.avif', [
             'Q' => $this->quality,
-            'strip' => true,
             // 'speed' => 6, // Speed (faster encoding)/*
             // 'effort' => 4, // Compression effort*/
         ]);

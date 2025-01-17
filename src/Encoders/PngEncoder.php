@@ -27,7 +27,6 @@ class PngEncoder extends GenericPngEncoder implements SpecializedInterface
         $result = $vipsImage->writeToBuffer('.png', [
             'interlace' => $this->interlaced,
             'palette' => $this->indexed,
-            'strip' => true,
         ]);
 
         return new EncodedImage($result, 'image/png');
