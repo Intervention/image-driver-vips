@@ -56,4 +56,15 @@ final class JpegEncoderTest extends BaseTestCase
         $image = ImageManager::withDriver(Driver::class)->read($result);
         $this->assertEquals('Oliver Vogel', $image->exif('IFD0.Artist'));
     }
+
+    public function testEncoderStripExifData(): void
+    {
+        $image = $this->readTestImage('exif.jpg');
+        $this->assertEquals('Oliver Vogel', $image->exif('IFD0.Artist'));
+        $encoder = new JpegEncoder(strip: true);
+        $encoder->setDriver(new Driver());
+        $result = $encoder->encode($image);
+        $image = ImageManager::withDriver(Driver::class)->read($result);
+        $this->assertNull($image->exif('IFD0.Artist'));
+    }
 }
