@@ -54,7 +54,7 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
         if (VipsConfig::atLeast(8, 15)) {
             $options['keep'] = $strip ? ForeignKeep::ICC : ForeignKeep::ALL;
         } else {
-            $options['strip'] = true;
+            $options['strip'] = $strip;
         }
 
         return $options;

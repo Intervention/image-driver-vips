@@ -46,7 +46,7 @@ class Jpeg2000Encoder extends GenericJpeg2000Encoder implements SpecializedInter
         if (VipsConfig::atLeast(8, 15)) {
             $options['keep'] = $strip ? ForeignKeep::ICC : ForeignKeep::ALL;
         } else {
-            $options['strip'] = true;
+            $options['strip'] = $strip;
         }
 
         return $options;
