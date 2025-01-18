@@ -9,6 +9,7 @@ use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\JpegEncoder as GenericJpegEncoder;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
+use Jcupitt\Vips\Config as VipsConfig;
 use Jcupitt\Vips\ForeignKeep;
 
 class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
@@ -20,27 +21,36 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
      */
     public function encode(ImageInterface $image): EncodedImage
     {
-        $blendingColor = $this->driver()->handleInput(
-            $this->driver()->config()->blendingColor
-        );
-
         $vipsImage = $image->core()->native();
 
         if ($image->isAnimated()) {
             $vipsImage = $image->core()->frame(0)->native();
         }
 
-        $keep = $this->strip || (is_null($this->strip) &&
-            $this->driver()->config()->strip) ? ForeignKeep::ICC : ForeignKeep::ALL;
-
-        $result = $vipsImage->writeToBuffer('.jpg', [
-            'Q' => $this->quality,
-            'interlace' => $this->progressive,
-            'keep' => $keep,
-            'optimize_coding' => true,
-            'background' => array_slice($blendingColor->convertTo(Rgb::class)->toArray(), 0, 3),
-        ]);
+        $result = $vipsImage->writeToBuffer('.jpg', $this->getOptions());
 
         return new EncodedImage($result, 'image/jpeg');
+    }
+
+    protected function getOptions(): array
+    {
+        $options = [
+            'Q' => $this->quality,
+            'interlace' => $this->progressive,
+            'optimize_coding' => true,
+            'background' => array_slice($this->driver()->handleInput(
+                $this->driver()->config()->blendingColor
+            )->convertTo(Rgb::class)->toArray(), 0, 3),
+        ];
+
+        $strip = $this->strip || $this->driver()->config()->strip;
+
+        if (VipsConfig::atLeast(8, 15)) {
+            $options['keep'] = $strip ? ForeignKeep::ICC : ForeignKeep::ALL;
+        } else {
+            $options['strip'] = true;
+        }
+
+        return $options;
     }
 }
