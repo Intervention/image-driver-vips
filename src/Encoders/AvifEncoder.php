@@ -8,6 +8,7 @@ use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\AvifEncoder as GenericAvifEncoder;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
+use Jcupitt\Vips\ForeignKeep;
 
 class AvifEncoder extends GenericAvifEncoder implements SpecializedInterface
 {
@@ -18,8 +19,12 @@ class AvifEncoder extends GenericAvifEncoder implements SpecializedInterface
      */
     public function encode(ImageInterface $image): EncodedImage
     {
+        $keep = $this->strip || (is_null($this->strip) &&
+            $this->driver()->config()->strip) ? ForeignKeep::ICC : ForeignKeep::ALL;
+
         $result = $image->core()->native()->writeToBuffer('.avif', [
             'Q' => $this->quality,
+            'keep' => $keep,
             // 'speed' => 6, // Speed (faster encoding)/*
             // 'effort' => 4, // Compression effort*/
         ]);
