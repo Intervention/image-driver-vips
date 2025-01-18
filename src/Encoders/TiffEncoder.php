@@ -8,6 +8,7 @@ use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\TiffEncoder as GenericTiffEncoder;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
+use Jcupitt\Vips\ForeignKeep;
 
 class TiffEncoder extends GenericTiffEncoder implements SpecializedInterface
 {
@@ -18,9 +19,13 @@ class TiffEncoder extends GenericTiffEncoder implements SpecializedInterface
      */
     public function encode(ImageInterface $image): EncodedImage
     {
+        $keep = $this->strip || (is_null($this->strip) &&
+            $this->driver()->config()->strip) ? ForeignKeep::ICC : ForeignKeep::ALL;
+
         $result = $image->core()->native()->writeToBuffer('.tiff', [
-            'lossless' => false,
+            'lossless' => $this->quality === 100,
             'Q' => $this->quality,
+            'keep' => $keep,
         ]);
 
         return new EncodedImage($result, 'image/tiff');

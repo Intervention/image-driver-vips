@@ -8,6 +8,7 @@ use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\WebpEncoder as GenericWebpEncoder;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
+use Jcupitt\Vips\ForeignKeep;
 
 class WebpEncoder extends GenericWebpEncoder implements SpecializedInterface
 {
@@ -18,9 +19,13 @@ class WebpEncoder extends GenericWebpEncoder implements SpecializedInterface
      */
     public function encode(ImageInterface $image): EncodedImage
     {
+        $keep = $this->strip || (is_null($this->strip) &&
+            $this->driver()->config()->strip) ? ForeignKeep::ICC : ForeignKeep::ALL;
+
         $result = $image->core()->native()->writeToBuffer('.webp', [
             'lossless' => $this->quality === 100,
             'Q' => $this->quality,
+            'keep' => $keep,
         ]);
 
         return new EncodedImage($result, 'image/webp');

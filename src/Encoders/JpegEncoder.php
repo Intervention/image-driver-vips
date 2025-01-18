@@ -9,6 +9,7 @@ use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\JpegEncoder as GenericJpegEncoder;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
+use Jcupitt\Vips\ForeignKeep;
 
 class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
 {
@@ -29,10 +30,13 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
             $vipsImage = $image->core()->frame(0)->native();
         }
 
+        $keep = $this->strip || (is_null($this->strip) &&
+            $this->driver()->config()->strip) ? ForeignKeep::ICC : ForeignKeep::ALL;
+
         $result = $vipsImage->writeToBuffer('.jpg', [
             'Q' => $this->quality,
             'interlace' => $this->progressive,
-            'strip' => $this->strip || (is_null($this->strip) && $this->driver()->config()->strip),
+            'keep' => $keep,
             'optimize_coding' => true,
             'background' => array_slice($blendingColor->convertTo(Rgb::class)->toArray(), 0, 3),
         ]);
