@@ -8,6 +8,8 @@ use Intervention\Image\Collection;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\ModifierInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
+use Jcupitt\Vips\ForeignKeep;
+use Jcupitt\Vips\Image as VipsImage;
 
 class StripMetaModifier implements ModifierInterface, SpecializedInterface
 {
@@ -18,16 +20,14 @@ class StripMetaModifier implements ModifierInterface, SpecializedInterface
      */
     public function apply(ImageInterface $image): ImageInterface
     {
-        $vipImage = $image->core()->native();
-
-        foreach ($vipImage->getFields() as $name) {
-            if (str_starts_with($name, 'exif-')) {
-                $vipImage->remove($name);
-            }
-        }
+        $buf = $image->core()->native()->tiffsave_buffer([
+            'keep' => ForeignKeep::ICC,
+        ]);
 
         $image->setExif(new Collection());
-        $image->core()->setNative($vipImage);
+        $image->core()->setNative(
+            VipsImage::newFromBuffer($buf)
+        );
 
         return $image;
     }
