@@ -25,6 +25,9 @@ class WebpEncoder extends GenericWebpEncoder implements SpecializedInterface
         return new EncodedImage($result, 'image/webp');
     }
 
+    /**
+     * @return array{lossless: int, Q: int, keep?: int, strip?: bool}
+     */
     protected function getOptions(): array
     {
         $options = [
