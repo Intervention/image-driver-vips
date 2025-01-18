@@ -25,6 +25,9 @@ class HeicEncoder extends GenericHeicEncoder implements SpecializedInterface
         return new EncodedImage($result, 'image/heic');
     }
 
+    /**
+     * @return array{lossless: bool, Q: int, keep?: int, strip?: bool}
+     */
     protected function getOptions(): array
     {
         $options = [

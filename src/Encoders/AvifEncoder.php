@@ -25,6 +25,9 @@ class AvifEncoder extends GenericAvifEncoder implements SpecializedInterface
         return new EncodedImage($result, 'image/avif');
     }
 
+    /**
+     * @return array{lossless: bool, Q: int, keep?: int, strip?: bool}
+     */
     protected function getOptions(): array
     {
         $options = [

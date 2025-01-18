@@ -31,6 +31,9 @@ class Jpeg2000Encoder extends GenericJpeg2000Encoder implements SpecializedInter
         return new EncodedImage($result, 'image/jp2');
     }
 
+    /**
+    * @return array{lossless: bool, Q: int, keep?: int, strip?: bool}
+    */
     protected function getOptions(): array
     {
         $options = [

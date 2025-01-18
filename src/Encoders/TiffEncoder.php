@@ -25,6 +25,9 @@ class TiffEncoder extends GenericTiffEncoder implements SpecializedInterface
         return new EncodedImage($result, 'image/tiff');
     }
 
+    /**
+     * @return array{lossless: bool, Q: int, keep?: int, strip?: bool}
+     */
     protected function getOptions(): array
     {
         $options = [

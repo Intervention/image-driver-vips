@@ -7,6 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Encoders;
 use Intervention\Image\Colors\Rgb\Colorspace as Rgb;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\JpegEncoder as GenericJpegEncoder;
+use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Jcupitt\Vips\Config as VipsConfig;
@@ -32,6 +33,11 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
         return new EncodedImage($result, 'image/jpeg');
     }
 
+    /**
+     * @throws RuntimeException
+     *
+     * @return array{Q: int, optimize_coding: bool, background: array<int>, keep?: int, strip?: bool}
+     */
     protected function getOptions(): array
     {
         $options = [

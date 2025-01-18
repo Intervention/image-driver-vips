@@ -26,7 +26,7 @@ class WebpEncoder extends GenericWebpEncoder implements SpecializedInterface
     }
 
     /**
-     * @return array{lossless: int, Q: int, keep?: int, strip?: bool}
+     * @return array{lossless: bool, Q: int, keep?: int, strip?: bool}
      */
     protected function getOptions(): array
     {
