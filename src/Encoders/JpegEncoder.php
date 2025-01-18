@@ -32,7 +32,7 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
         $result = $vipsImage->writeToBuffer('.jpg', [
             'Q' => $this->quality,
             'interlace' => $this->progressive,
-            'strip' => $this->strip || $this->driver()->config()->strip || false,
+            'strip' => $this->strip || (is_null($this->strip) && $this->driver()->config()->strip),
             'optimize_coding' => true,
             'background' => array_slice($blendingColor->convertTo(Rgb::class)->toArray(), 0, 3),
         ]);
