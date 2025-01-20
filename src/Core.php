@@ -142,15 +142,15 @@ class Core implements CoreInterface, Iterator
             throw new AnimationException('Frame #' . $position . ' could not be found in the image.');
         }
 
+        if ($count === 1) {
+            return new Frame($this->vipsImage);
+        }
+
         $sequential = in_array('vips-sequential', $this->vipsImage->getFields()) ?
             $this->vipsImage->get('vips-sequential') : null;
 
         if ($sequential) {
             $this->vipsImage = $this->vipsImage->copyMemory();
-        }
-
-        if ($count === 1) {
-            return new Frame($this->vipsImage);
         }
 
         $delay = in_array('delay', $this->vipsImage->getFields()) ?
