@@ -27,7 +27,6 @@
     "require-dev": {
         "ext-fileinfo": "*",
         "phpunit/phpunit": "^10.0 || ^11.0",
-        "mockery/mockery": "^1.6",
         "phpstan/phpstan": "^2",
         "squizlabs/php_codesniffer": "^3.8",
         "slevomat/coding-standard": "~8.0"

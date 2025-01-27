@@ -24,9 +24,9 @@ use Jcupitt\Vips\Exception;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
 use Jcupitt\Vips\Interpretation;
-use Mockery\Adapter\Phpunit\MockeryTestCase;
+use PHPUnit\Framework\TestCase;
 
-abstract class BaseTestCase extends MockeryTestCase
+abstract class BaseTestCase extends TestCase
 {
     public static function getTestResourcePath($filename = 'test.jpg'): string
     {
