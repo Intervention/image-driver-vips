@@ -186,7 +186,7 @@ class Driver extends AbstractDriver
             VipsConfig::version();
         } catch (VipsException $e) {
             throw new DriverException(
-                'libvips does not seem to be installed or not correctly configured.',
+                'libvips does not seem to be installed correctly.',
                 previous: $e
             );
         }
