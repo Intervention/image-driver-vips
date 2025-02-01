@@ -181,14 +181,14 @@ class Driver extends AbstractDriver
      */
     public function checkHealth(): void
     {
-        if (!extension_loaded('ffi') && !extension_loaded('vips')) {
+        try {
+            // check health by calling Jcupitt\Vips\FFI::init()
+            VipsConfig::version();
+        } catch (VipsException $e) {
             throw new DriverException(
-                'PHP extension FFI or VIPS must be enabled to use this driver.'
+                'libvips does not seem to be installed correctly.',
+                previous: $e
             );
-        }
-
-        if (version_compare(PHP_VERSION, '8.3', '>=') && ini_get('zend.max_allowed_stack_size') != '-1') {
-            throw new DriverException("zend.max_allowed_stack_size not set to '-1'");
         }
     }
 
