@@ -48,6 +48,9 @@ class FontProcessor extends AbstractFontProcessor
      */
     public function textToVipsImage(string $text, FontInterface $font, ?ColorInterface $color = null): VipsImage
     {
+        // VipsImage::text() can only handle certain characters as HTML entities
+        $text = htmlentities($text);
+
         if (!is_null($color)) {
             $text = '<span foreground="' . $color->toHex('#') . '">' . $text . '</span>';
         }
