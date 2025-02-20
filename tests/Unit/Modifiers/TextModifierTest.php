@@ -20,6 +20,6 @@ class TextModifierTest extends BaseTestCase
         $font->setWrapWidth(300);
         $font->setAlignment('center');
         $font->setLineHeight(2);
-        $image->modify(new TextModifier('ABC', new Point(150, 150), $font));
+        $image->modify(new TextModifier('ABC & D', new Point(150, 150), $font));
     }
 }
