@@ -39,6 +39,8 @@ class DriverTest extends BaseTestCase
         $this->assertInstanceOf(Image::class, $image);
         $this->assertEquals(3, $image->width());
         $this->assertEquals(2, $image->height());
+        $this->assertEquals(96, $image->resolution()->x());
+        $this->assertEquals(96, $image->resolution()->y());
     }
 
     public function testCreateAnimation(): void

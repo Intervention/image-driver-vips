@@ -49,7 +49,11 @@ class Driver extends AbstractDriver
             ->add(255) // add red channel
             ->cast(BandFormat::UCHAR) // cast to format
             ->embed(0, 0, $width, $height, ['extend' => Extend::COPY]) // extend to given width/height
-            ->copy(['interpretation' => Interpretation::SRGB]) // srgb
+            ->copy([
+                'interpretation' => Interpretation::SRGB,
+                'xres' => 96 / 25.4,
+                'yres' => 96 / 25.4,
+            ]) // srgb
             ->bandjoin([
                 255, // green
                 255, // blue
