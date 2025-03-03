@@ -67,6 +67,7 @@ class DriverTest extends BaseTestCase
         $result = $this->driver->colorProcessor(new Colorspace());
         $this->assertInstanceOf(ColorProcessorInterface::class, $result);
     }
+
     #[DataProvider('supportsDataProvider')]
     public function testSupports(bool $result, mixed $identifier): void
     {
