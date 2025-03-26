@@ -10,6 +10,7 @@ use Intervention\Image\Geometry\Point;
 use Intervention\Image\Interfaces\SizeInterface;
 use Intervention\Image\Typography\Font;
 use Intervention\Image\Typography\TextBlock;
+use Jcupitt\Vips\Image as VipsImage;
 
 class FontProcessorTest extends BaseTestCase
 {
@@ -61,6 +62,12 @@ class FontProcessorTest extends BaseTestCase
         $processor = new FontProcessor();
         $result = $processor->leading($this->testFont());
         $this->assertEquals(16, $result);
+    }
+
+    public function testTextToVipsImage(): void
+    {
+        $processor = new FontProcessor();
+        $this->assertInstanceOf(VipsImage::class, $processor->textToVipsImage('test', $this->testFont()));
     }
 
     private function testFont(): Font
