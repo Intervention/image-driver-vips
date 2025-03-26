@@ -147,8 +147,6 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
 
         $image->core()->setNative($modified);
 
-        $this->debugPos($image, $blockPosition, $blockSize);
-
         return $image;
     }
 
