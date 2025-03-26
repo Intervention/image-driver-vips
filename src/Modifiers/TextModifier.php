@@ -201,14 +201,11 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
         };
     }
 
-    /**
-     * Draw debug information for given position and given rectangle size
-     *
-     * @throws RuntimeException
-     */
+    /** @phpstan-ignore method.unused */
     private function debugPos(ImageInterface $image, PointInterface $position, Rectangle $size): void
     {
         // draw pos
+        // @phpstan-ignore missingType.checkedException
         $image->drawCircle($position->x(), $position->y(), function (CircleFactory $circle): void {
             $circle->diameter(8);
             $circle->background('red');
@@ -216,6 +213,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
 
         // draw points of size
         foreach (array_chunk($size->toArray(), 2) as $point) {
+            // @phpstan-ignore missingType.checkedException
             $image->drawCircle($point[0], $point[1], function (CircleFactory $circle): void {
                 $circle->diameter(12);
                 $circle->border('green');
@@ -223,6 +221,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
         }
 
         // draw size's pivot
+        // @phpstan-ignore missingType.checkedException
         $image->drawCircle($size->pivot()->x(), $size->pivot()->y(), function (CircleFactory $circle): void {
             $circle->diameter(20);
             $circle->border('blue');
