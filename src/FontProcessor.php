@@ -53,43 +53,8 @@ class FontProcessor extends AbstractFontProcessor
         FontInterface $font,
         ColorInterface $color = new Color(0, 0, 0),
     ): VipsImage {
-        // TODO: implement line spacing
-
-        // @font size 24:
-        // ---------------
-        // 1 -> -15
-        // 1.25 -> -10
-        // 2 -> 7
-        // 3 -> 18
-
-        // @font size 80:
-        // ---------------
-        // 1 -> -35
-        // 1.25 -> -30
-        // 2 -> 35
-        // 3 -> 110
-
-        // @font size 100:
-        // ---------------
-        // 1 -> -45
-        // 1.25 -> -35
-        // 2 -> -10
-        // 3 -> 55
-
-        // @font size 120:
-        // ---------------
-        // 1 -> -55
-        // 1.25 -> -30
-        // 2 -> 35
-        // 3 -> 110
-
-        // leading 168
-
-        // 1 point (computer) 1.3333333333 pixel (X)
-        // typicall like font size times 1.2.
-
         return VipsImage::text(
-            '<span foreground="' . $color->toHex('#') . '">' . htmlentities($text) . '</span>',
+            '<span ' . $this->pangoAttributes($font, $color) . '>' . htmlentities($text) . '</span>',
             [
                 'fontfile' => $font->filename(),
                 'font' => TrueTypeFont::fromPath($font->filename())->familyName() . ' ' . $font->size(),
@@ -102,8 +67,28 @@ class FontProcessor extends AbstractFontProcessor
                     'right' => Align::HIGH,
                     default => Align::LOW,
                 },
-                'spacing' => 0 // add value as pixel to each line
+                'spacing' => 0
             ]
         );
+    }
+
+    /**
+     * Return a pango markup attribute string based on the given font and color values
+     *
+     * @param FontInterface $font
+     * @param ColorInterface $color
+     * @return string
+     */
+    private function pangoAttributes(FontInterface $font, ColorInterface $color): string
+    {
+        $pango_attributes = [
+            'line_height' => (string) $font->lineHeight() / 1.62,
+            'foreground' => $color->toHex('#'),
+        ];
+
+        // format pango attributes
+        return join(' ', array_map(function ($value, $key): string {
+            return $key . '="' . $value . '"';
+        }, $pango_attributes, array_keys($pango_attributes)));
     }
 }
