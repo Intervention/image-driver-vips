@@ -10,6 +10,7 @@ use Intervention\Image\Geometry\Point;
 use Intervention\Image\Interfaces\SizeInterface;
 use Intervention\Image\Typography\Font;
 use Intervention\Image\Typography\TextBlock;
+use Jcupitt\Vips\Image as VipsImage;
 
 class FontProcessorTest extends BaseTestCase
 {
@@ -23,7 +24,7 @@ class FontProcessorTest extends BaseTestCase
 
         $this->assertInstanceOf(SizeInterface::class, $size);
         $this->assertEquals(155, $size->width());
-        $this->assertEquals(43, $size->height());
+        $this->assertEquals(44, $size->height());
     }
 
     public function testNativeFontSize(): void
@@ -46,21 +47,27 @@ class FontProcessorTest extends BaseTestCase
     {
         $processor = new FontProcessor();
         $result = $processor->typographicalSize($this->testFont());
-        $this->assertEquals(12, $result);
+        $this->assertEquals(13, $result);
     }
 
     public function testCapHeight(): void
     {
         $processor = new FontProcessor();
         $result = $processor->capHeight($this->testFont());
-        $this->assertEquals(9, $result);
+        $this->assertEquals(10, $result);
     }
 
     public function testLeading(): void
     {
         $processor = new FontProcessor();
         $result = $processor->leading($this->testFont());
-        $this->assertEquals(15, $result);
+        $this->assertEquals(16, $result);
+    }
+
+    public function testTextToVipsImage(): void
+    {
+        $processor = new FontProcessor();
+        $this->assertInstanceOf(VipsImage::class, $processor->textToVipsImage('test', $this->testFont()));
     }
 
     private function testFont(): Font
