@@ -14,6 +14,7 @@ use Intervention\Image\Interfaces\FontInterface;
 use Intervention\Image\Interfaces\SizeInterface;
 use Jcupitt\Vips\Align;
 use Jcupitt\Vips\Image as VipsImage;
+use Jcupitt\Vips\TextWrap;
 
 class FontProcessor extends AbstractFontProcessor
 {
@@ -61,6 +62,7 @@ class FontProcessor extends AbstractFontProcessor
                 'dpi' => 72,
                 'rgba' => true,
                 'width' => $font->wrapWidth(),
+                'wrap' => TextWrap::WORD,
                 'align' => match ($font->alignment()) {
                     'center',
                     'middle' => Align::CENTRE,
