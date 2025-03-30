@@ -41,6 +41,7 @@ class Driver extends AbstractDriver
      * {@inheritdoc}
      *
      * @see DriverInterface::createImage()
+     *
      * @throws VipsException|RuntimeException
      */
     public function createImage(int $width, int $height): ImageInterface
@@ -67,6 +68,7 @@ class Driver extends AbstractDriver
      * {@inheritdoc}
      *
      * @see DriverInterface::createAnimation()
+     *
      * @throws RuntimeException|VipsException
      */
     public function createAnimation(callable $init): ImageInterface
@@ -164,8 +166,9 @@ class Driver extends AbstractDriver
     /**
      * {@inheritdoc}
      *
-     * @throws RuntimeException
      * @see DriverInterface::supports()
+     *
+     * @throws RuntimeException
      */
     public function supports(string|Format|FileExtension|MediaType $identifier): bool
     {

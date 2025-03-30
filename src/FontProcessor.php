@@ -21,8 +21,9 @@ class FontProcessor extends AbstractFontProcessor
     /**
      * {@inheritdoc}
      *
-     * @throws RuntimeException
      * @see FontProcessorInterface::boxSize()
+     *
+     * @throws RuntimeException
      */
     public function boxSize(string $text, FontInterface $font): SizeInterface
     {

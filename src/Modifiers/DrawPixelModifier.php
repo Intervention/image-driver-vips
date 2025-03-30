@@ -20,8 +20,9 @@ class DrawPixelModifier extends GenericDrawPixelModifier implements SpecializedI
     /**
      * {@inheritdoc}
      *
-     * @throws VipsException|AnimationException|ColorException|RuntimeException
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
+     * @throws VipsException|AnimationException|ColorException|RuntimeException
      */
     public function apply(ImageInterface $image): ImageInterface
     {

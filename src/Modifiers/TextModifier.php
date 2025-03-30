@@ -25,6 +25,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
      * {@inheritdoc}
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
      * @throws RuntimeException
      * @throws VipsException
      */

@@ -21,8 +21,9 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
     /**
      * {@inheritdoc}
      *
-     * @throws DecoderException|RuntimeException
      * @see Intervention\Image\Interfaces\DecoderInterface::decode()
+     *
+     * @throws DecoderException|RuntimeException
      */
     public function decode(mixed $input): ImageInterface|ColorInterface
     {

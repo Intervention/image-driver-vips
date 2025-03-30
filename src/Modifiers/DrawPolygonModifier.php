@@ -19,6 +19,7 @@ class DrawPolygonModifier extends GenericDrawPolygonModifier implements Speciali
      * {@inheritdoc}
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
      * @throws VipsException|RuntimeException|\RuntimeException
      */
     public function apply(ImageInterface $image): ImageInterface

@@ -12,8 +12,9 @@ class CoverDownModifier extends CoverModifier
     /**
      * {@inheritdoc}
      *
-     * @throws GeometryException
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
+     * @throws GeometryException
      */
     public function getResizeSize(SizeInterface $size): SizeInterface
     {

@@ -19,8 +19,9 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
     /**
      * {@inheritdoc}
      *
-     * @throws RuntimeException|VipsException
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
+     * @throws RuntimeException|VipsException
      */
     public function apply(ImageInterface $image): ImageInterface
     {

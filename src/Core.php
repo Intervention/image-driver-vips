@@ -85,6 +85,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CoreInterface::count()
+     *
      * @throws VipsException
      */
     public function count(): int
@@ -94,7 +95,6 @@ class Core implements CoreInterface, Iterator
 
     /**
      * @param list<FrameInterface> $frames
-     *
      * @throws VipsException|AnimationException
      */
     public static function replaceFrames(VipsImage $vipsImage, array $frames): VipsImage
@@ -106,7 +106,6 @@ class Core implements CoreInterface, Iterator
 
     /**
      * @param list<FrameInterface> $frames
-     *
      * @throws VipsException
      */
     public static function createFromFrames(array $frames, int $loops = 0): self
@@ -132,6 +131,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CoreInterface::frame()
+     *
      * @throws AnimationException|VipsException
      */
     public function frame(int $position): FrameInterface
@@ -185,6 +185,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CoreInterface::add()
+     *
      * @throws AnimationException|VipsException
      */
     public function add(FrameInterface $frame): self
@@ -201,6 +202,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CoreInterface::loops()
+     *
      * @throws VipsException
      */
     public function loops(): int
@@ -212,6 +214,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CoreInterface::setLoops()
+     *
      * @throws VipsException
      */
     public function setLoops(int $loops): CoreInterface
@@ -225,6 +228,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CollectionInterface::first()
+     *
      * @throws AnimationException|VipsException
      */
     public function first(): FrameInterface
@@ -236,6 +240,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CollectableInterface::last()
+     *
      * @throws AnimationException|VipsException
      */
     public function last(): FrameInterface
@@ -261,6 +266,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CollectionInterface::push()
+     *
      * @throws AnimationException|VipsException
      */
     public function push($item): CollectionInterface
@@ -286,6 +292,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CollectionInterface::getAtPosition()
+     *
      * @throws Exception
      */
     public function getAtPosition(int $key = 0, $default = null): mixed
@@ -306,9 +313,8 @@ class Core implements CoreInterface, Iterator
     }
 
     /**
-     * @return list<FrameInterface>
-     *
      * @throws AnimationException|VipsException
+     * @return list<FrameInterface>
      */
     public function toArray(): array
     {
@@ -325,6 +331,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CollectionInterface::slice()
+     *
      * @throws AnimationException|VipsException
      */
     public function slice(int $offset, ?int $length = 0): CollectionInterface

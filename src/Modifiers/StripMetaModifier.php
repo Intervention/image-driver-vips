@@ -19,9 +19,9 @@ class StripMetaModifier implements ModifierInterface, SpecializedInterface
     /**
      * {@inheritdoc}
      *
-     * @throws VipsException|AnimationException
-     *
      * @see ModifierInterface::apply()
+     *
+     * @throws VipsException|AnimationException
      */
     public function apply(ImageInterface $image): ImageInterface
     {

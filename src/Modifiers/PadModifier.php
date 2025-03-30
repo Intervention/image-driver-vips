@@ -46,8 +46,8 @@ class PadModifier extends ContainModifier
      * @param FrameInterface $frame
      * @param SizeInterface $resize
      * @param ColorInterface $bgColor
-     * @return FrameInterface
      * @throws ColorException
+     * @return FrameInterface
      */
     private function pad(FrameInterface $frame, SizeInterface $resize, ColorInterface $bgColor): FrameInterface
     {

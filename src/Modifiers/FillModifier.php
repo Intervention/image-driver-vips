@@ -23,6 +23,7 @@ class FillModifier extends GenericFillModifier implements SpecializedInterface
      * {@inheritdoc}
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
      * @throws RuntimeException|\Jcupitt\Vips\Exception
      */
     public function apply(ImageInterface $image): ImageInterface

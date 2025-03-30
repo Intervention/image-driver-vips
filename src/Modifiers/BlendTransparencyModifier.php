@@ -27,10 +27,11 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
     /**
      * {@inheritdoc}
      *
+     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
      * @throws VipsException
      * @throws RuntimeException
      * @throws ColorException
-     * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      */
     public function apply(ImageInterface $image): ImageInterface
     {

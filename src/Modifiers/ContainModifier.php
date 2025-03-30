@@ -22,8 +22,9 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
     /**
      * {@inheritdoc}
      *
-     * @throws RuntimeException|VipsException
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
+     * @throws RuntimeException|VipsException
      */
     public function apply(ImageInterface $image): ImageInterface
     {

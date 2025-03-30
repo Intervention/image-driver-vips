@@ -50,9 +50,9 @@ abstract class BaseTestCase extends TestCase
      *
      * @param int $width
      * @param int $height
-     * @return Image
      * @throws ColorException
      * @throws Exception
+     * @return Image
      */
     public static function createTestImage(int $width, int $height): Image
     {
@@ -88,7 +88,6 @@ abstract class BaseTestCase extends TestCase
      * @param int $a
      * @param ColorInterface $color
      * @param int $tolerance
-     *
      * @throws ExpectationFailedException
      * @return void
      */

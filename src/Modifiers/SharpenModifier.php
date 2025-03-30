@@ -17,6 +17,7 @@ class SharpenModifier extends GenericSharpenModifier implements SpecializedInter
      * {@inheritdoc}
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
      * @throws AnimationException
      * @throws VipsException
      */
