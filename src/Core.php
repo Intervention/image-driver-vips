@@ -34,6 +34,29 @@ class Core implements CoreInterface, Iterator
     }
 
     /**
+     * @param list<FrameInterface> $frames
+     * @throws VipsException
+     */
+    public static function createFromFrames(array $frames, int $loops = 0): self
+    {
+        $natives = [];
+        $delay = [];
+
+        foreach ($frames as $frame) {
+            $delay[] = intval($frame->delay() * 1000);
+            $natives[] = $frame->native();
+        }
+
+        $image = VipsImage::arrayjoin($natives, ['across' => 1]);
+        $image->set('delay', $delay);
+        $image->set('loop', $loops);
+        $image->set('page-height', $natives[0]->height);
+        $image->set('n-pages', count($frames));
+
+        return new self($image);
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @see CoreInterface::native()
@@ -102,29 +125,6 @@ class Core implements CoreInterface, Iterator
         $loops = in_array('loop', $vipsImage->getFields()) ? $vipsImage->get('loop') : 0;
 
         return self::createFromFrames($frames, $loops)->native();
-    }
-
-    /**
-     * @param list<FrameInterface> $frames
-     * @throws VipsException
-     */
-    public static function createFromFrames(array $frames, int $loops = 0): self
-    {
-        $natives = [];
-        $delay = [];
-
-        foreach ($frames as $frame) {
-            $delay[] = intval($frame->delay() * 1000);
-            $natives[] = $frame->native();
-        }
-
-        $image = VipsImage::arrayjoin($natives, ['across' => 1]);
-        $image->set('delay', $delay);
-        $image->set('loop', $loops);
-        $image->set('page-height', $natives[0]->height);
-        $image->set('n-pages', count($frames));
-
-        return new self($image);
     }
 
     /**
