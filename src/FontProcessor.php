@@ -56,7 +56,7 @@ class FontProcessor extends AbstractFontProcessor
         ColorInterface $color = new Color(0, 0, 0),
     ): VipsImage {
         return VipsImage::text(
-            '<span ' . $this->pangoAttributes($font, $color) . '>' . htmlentities($text) . '</span>',
+            '<span ' . $this->pangoAttributes($font, $color) . '>' . htmlspecialchars($text) . '</span>',
             [
                 'fontfile' => $font->filename(),
                 'font' => TrueTypeFont::fromPath($font->filename())->familyName() . ' ' . $font->size(),
