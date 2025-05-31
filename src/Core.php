@@ -381,7 +381,7 @@ class Core implements CoreInterface, Iterator
      */
     public function next(): void
     {
-        $this->iteratorIndex = $this->iteratorIndex + 1;
+        $this->iteratorIndex += 1;
     }
 
     /**
