@@ -17,8 +17,6 @@ class Frame implements FrameInterface
     /**
      * Create new frame instance
      *
-     * @param VipsImage $vipsImage
-     * @param float $delay
      * @return void
      */
     public function __construct(protected VipsImage $vipsImage, protected float $delay = 0)

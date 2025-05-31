@@ -25,7 +25,6 @@ class Core implements CoreInterface, Iterator
     /**
      * Create new core instance
      *
-     * @param VipsImage $vipsImage
      * @return void
      */
     public function __construct(protected VipsImage $vipsImage)
@@ -81,9 +80,6 @@ class Core implements CoreInterface, Iterator
     /**
      * Renders vips image of given core into memory and serves any downstream
      * requests from the memory area
-     *
-     * @param CoreInterface $core
-     * @return CoreInterface
      */
     public static function ensureInMemory(CoreInterface $core): CoreInterface
     {

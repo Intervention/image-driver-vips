@@ -47,8 +47,6 @@ class LoaderDetector
 
     /**
      * Create instance via singleton variable
-     *
-     * @return self
      */
     public static function create(): self
     {
@@ -121,9 +119,7 @@ class LoaderDetector
     /**
      * Collect loaders
      *
-     * @param string $type
      * @throws VipsException
-     * @return void
      */
     private function collectLoaders(string $type): void
     {

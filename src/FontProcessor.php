@@ -43,12 +43,8 @@ class FontProcessor extends AbstractFontProcessor
     /**
      * Return renderable text/font combination in the specified colour as an vips image
      *
-     * @param string $text
-     * @param FontInterface $font
-     * @param ColorInterface $color
      * @throws FontException
      * @throws RuntimeException
-     * @return VipsImage
      */
     public function textToVipsImage(
         string $text,
@@ -77,10 +73,6 @@ class FontProcessor extends AbstractFontProcessor
 
     /**
      * Return a pango markup attribute string based on the given font and color values
-     *
-     * @param FontInterface $font
-     * @param ColorInterface $color
-     * @return string
      */
     private function pangoAttributes(FontInterface $font, ColorInterface $color): string
     {

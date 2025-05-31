@@ -67,12 +67,9 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
     /**
      * Create empty image with given background color in the size of the given image
      *
-     * @param ImageInterface $image
-     * @param ColorInterface $color
      * @throws ColorException
      * @throws VipsException
      * @throws RuntimeException
-     * @return ImageInterface
      */
     private function canvas(ImageInterface $image, ColorInterface $color): ImageInterface
     {
@@ -98,11 +95,9 @@ class BlendTransparencyModifier extends GenericBlendTransparencyModifier impleme
      * TODO: Remove this method and use parent class implementation
      * (requires unreleased 'intervention/image' version)
      *
-     * @param DriverInterface $driver
      * @throws RuntimeException
      * @throws DecoderException
      * @throws VipsException
-     * @return ColorInterface
      */
     protected function blendingColor(DriverInterface $driver): ColorInterface
     {

@@ -48,11 +48,8 @@ abstract class BaseTestCase extends TestCase
     /**
      * Create new test image with red (ff0000) background
      *
-     * @param int $width
-     * @param int $height
      * @throws ColorException
      * @throws Exception
-     * @return Image
      */
     public static function createTestImage(int $width, int $height): Image
     {
@@ -82,12 +79,6 @@ abstract class BaseTestCase extends TestCase
     /**
      * Assert that given color equals the given color channel values in the given optional tolerance
      *
-     * @param int $r
-     * @param int $g
-     * @param int $b
-     * @param int $a
-     * @param ColorInterface $color
-     * @param int $tolerance
      * @throws ExpectationFailedException
      * @return void
      */

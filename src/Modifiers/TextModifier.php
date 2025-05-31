@@ -153,12 +153,6 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
 
     /**
      * Place given text image at given position on given frame
-     *
-     * @param VipsImage $text
-     * @param FrameInterface $frame
-     * @param int $x
-     * @param int $y
-     * @return FrameInterface
      */
     private function placeTextOnFrame(VipsImage $text, FrameInterface $frame, int $x, int $y): FrameInterface
     {
@@ -171,9 +165,6 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
 
     /**
      * Build size from given vips image
-     *
-     * @param VipsImage $blockImage
-     * @return Rectangle
      */
     private function blockSize(VipsImage $blockImage): Rectangle
     {
@@ -187,9 +178,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
     /**
      * Maybe rotate text image according to current font angle
      *
-     * @param VipsImage $text
      * @throws VipsException
-     * @return VipsImage
      */
     private function maybeRotateText(VipsImage $text): VipsImage
     {

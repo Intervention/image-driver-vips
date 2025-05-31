@@ -34,7 +34,6 @@ class SharpenModifier extends GenericSharpenModifier implements SpecializedInter
      * Generate unsharp mask
      *
      * @throws VipsException
-     * @return VipsImage
      */
     private function getUnsharpMask(): VipsImage
     {

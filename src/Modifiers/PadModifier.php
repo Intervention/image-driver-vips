@@ -43,11 +43,7 @@ class PadModifier extends ContainModifier
     /**
      * Apply padded image resizing
      *
-     * @param FrameInterface $frame
-     * @param SizeInterface $resize
-     * @param ColorInterface $bgColor
      * @throws ColorException
-     * @return FrameInterface
      */
     private function pad(FrameInterface $frame, SizeInterface $resize, ColorInterface $bgColor): FrameInterface
     {

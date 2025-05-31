@@ -56,8 +56,6 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
 
     /**
      * Get options for vips library according to current configuration
-     *
-     * @return string
      */
     protected function stringOptions(): string
     {
@@ -72,9 +70,6 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
 
     /**
      * Return media type of given vips image instance
-     *
-     * @param VipsImage $vips
-     * @return null|MediaType
      */
     protected function vipsMediaType(VipsImage $vips): ?MediaType
     {
