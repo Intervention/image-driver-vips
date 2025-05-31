@@ -35,7 +35,7 @@ class LoaderDetector
         // normalize loader names
         $this->loaders = array_map(function (string $name): ?string {
             preg_match("/^(?P<identifier>[a-z0-9]+)load_/", $name, $matches);
-            return array_key_exists('identifier', $matches) ? $matches['identifier'] : null;
+            return $matches['identifier'] ?? null;
         }, $this->loaders);
 
         // filter out null values

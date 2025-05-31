@@ -418,13 +418,7 @@ class Core implements CoreInterface, Iterator
                 $value = "<$len bytes of binary data>";
             }
 
-            if (is_array($value)) {
-                $value = implode(", ", $value);
-            } else {
-                $value = (string) $value;
-            }
-
-            $debug[$name] = $value;
+            $debug[$name] = is_array($value) ? implode(", ", $value) : (string) $value;
         }
 
         return $debug;
