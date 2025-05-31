@@ -125,7 +125,7 @@ class LoaderDetector
      * @throws VipsException
      * @return void
      */
-    private function collectLoaders(string $type)
+    private function collectLoaders(string $type): void
     {
         $name = FFI::vips()->vips_nickname_find($type); // @phpstan-ignore-line
         $this->loaders[] = $name;
