@@ -90,7 +90,7 @@ class FontProcessor extends AbstractFontProcessor
         ];
 
         // format pango attributes
-        return join(' ', array_map(function ($value, $key): string {
+        return implode(' ', array_map(function ($value, $key): string {
             return $key . '="' . $value . '"';
         }, $pango_attributes, array_keys($pango_attributes)));
     }
