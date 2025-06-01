@@ -39,7 +39,7 @@ class Frame implements FrameInterface
      *
      * @see FrameInterface::setNative()
      */
-    public function setNative($native): FrameInterface
+    public function setNative(mixed $native): FrameInterface
     {
         $this->vipsImage = $native;
 
