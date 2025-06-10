@@ -56,6 +56,10 @@ class PadModifier extends ContainModifier
         ]);
 
         if (!$resized->hasAlpha()) {
+            if ($resized->bands === 1) {
+                // Grayscale -> RGB
+                $resized = $resized->colourspace('srgb');
+            }
             $resized = $resized->bandjoin_const(255);
         }
 
