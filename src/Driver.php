@@ -114,12 +114,8 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * @param string $shape
      * @param array<string, string|int> $attributes
-     * @param int $width
-     * @param int $height
      * @throws RuntimeException
-     * @return VipsImage
      */
     public static function createShape(string $shape, array $attributes, int $width, int $height): VipsImage
     {
@@ -201,8 +197,6 @@ class Driver extends AbstractDriver
 
     /**
      * Return version of libvips library
-     *
-     * @return string
      */
     public static function version(): string
     {

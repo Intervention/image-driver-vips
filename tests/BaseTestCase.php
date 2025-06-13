@@ -28,17 +28,17 @@ use PHPUnit\Framework\TestCase;
 
 abstract class BaseTestCase extends TestCase
 {
-    public static function getTestResourcePath($filename = 'test.jpg'): string
+    public static function getTestResourcePath(string $filename = 'test.jpg'): string
     {
         return sprintf('%s/resources/%s', __DIR__, $filename);
     }
 
-    public static function getTestResourceData($filename = 'test.jpg'): string
+    public static function getTestResourceData(string $filename = 'test.jpg'): string
     {
         return file_get_contents(self::getTestResourcePath($filename));
     }
 
-    public static function readTestImage($filename = 'test.jpg'): Image
+    public static function readTestImage(string $filename = 'test.jpg'): Image
     {
         return (new Driver())->specialize(new FilePathImageDecoder())->decode(
             static::getTestResourcePath($filename)
@@ -48,11 +48,8 @@ abstract class BaseTestCase extends TestCase
     /**
      * Create new test image with red (ff0000) background
      *
-     * @param int $width
-     * @param int $height
      * @throws ColorException
      * @throws Exception
-     * @return Image
      */
     public static function createTestImage(int $width, int $height): Image
     {
@@ -82,16 +79,9 @@ abstract class BaseTestCase extends TestCase
     /**
      * Assert that given color equals the given color channel values in the given optional tolerance
      *
-     * @param int $r
-     * @param int $g
-     * @param int $b
-     * @param int $a
-     * @param ColorInterface $color
-     * @param int $tolerance
      * @throws ExpectationFailedException
-     * @return void
      */
-    protected function assertColor(int $r, int $g, int $b, int $a, ColorInterface $color, int $tolerance = 0)
+    protected function assertColor(int $r, int $g, int $b, int $a, ColorInterface $color, int $tolerance = 0): void
     {
         // build errorMessage
         $errorMessage = function (int $r, int $g, $b, int $a, ColorInterface $color): string {

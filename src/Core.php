@@ -25,7 +25,6 @@ class Core implements CoreInterface, Iterator
     /**
      * Create new core instance
      *
-     * @param VipsImage $vipsImage
      * @return void
      */
     public function __construct(protected VipsImage $vipsImage)
@@ -81,9 +80,6 @@ class Core implements CoreInterface, Iterator
     /**
      * Renders vips image of given core into memory and serves any downstream
      * requests from the memory area
-     *
-     * @param CoreInterface $core
-     * @return CoreInterface
      */
     public static function ensureInMemory(CoreInterface $core): CoreInterface
     {
@@ -381,7 +377,7 @@ class Core implements CoreInterface, Iterator
      */
     public function next(): void
     {
-        $this->iteratorIndex = $this->iteratorIndex + 1;
+        $this->iteratorIndex += 1;
     }
 
     /**
@@ -422,13 +418,7 @@ class Core implements CoreInterface, Iterator
                 $value = "<$len bytes of binary data>";
             }
 
-            if (is_array($value)) {
-                $value = implode(", ", $value);
-            } else {
-                $value = (string) $value;
-            }
-
-            $debug[$name] = $value;
+            $debug[$name] = is_array($value) ? implode(", ", $value) : (string) $value;
         }
 
         return $debug;

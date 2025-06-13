@@ -40,7 +40,7 @@ final class PlaceModifierTest extends BaseTestCase
 
     public function testColorChangeAnimated(): void
     {
-        $image = (new Driver())->createAnimation(function ($animation) {
+        $image = (new Driver())->createAnimation(function ($animation): void {
             $animation->add($this->getTestResourcePath('test.jpg'), .25);
             $animation->add($this->getTestResourcePath('test.jpg'), .25);
         })->setLoops(5);

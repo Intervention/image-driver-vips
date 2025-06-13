@@ -25,11 +25,11 @@ class DrawBezierModifier extends GenericDrawBezierModifier implements Specialize
     public function apply(ImageInterface $image): ImageInterface
     {
         $chunks = array_chunk($this->drawable->toArray(), 2);
-        $points = join(' ', array_map(function (array $coordinates, int $key) use ($chunks): string {
+        $points = implode(' ', array_map(function (array $coordinates, int $key) use ($chunks): string {
             return match ($key) {
-                0 => 'M' . join(' ', $coordinates),
-                1 => count($chunks) === 3 ? 'Q' . join(' ', $coordinates) : 'C' . join(' ', $coordinates),
-                default => join(' ', $coordinates),
+                0 => 'M' . implode(' ', $coordinates),
+                1 => count($chunks) === 3 ? 'Q' . implode(' ', $coordinates) : 'C' . implode(' ', $coordinates),
+                default => implode(' ', $coordinates),
             };
         }, $chunks, array_keys($chunks)));
 

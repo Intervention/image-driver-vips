@@ -35,7 +35,7 @@ class LoaderDetector
         // normalize loader names
         $this->loaders = array_map(function (string $name): ?string {
             preg_match("/^(?P<identifier>[a-z0-9]+)load_/", $name, $matches);
-            return array_key_exists('identifier', $matches) ? $matches['identifier'] : null;
+            return $matches['identifier'] ?? null;
         }, $this->loaders);
 
         // filter out null values
@@ -47,8 +47,6 @@ class LoaderDetector
 
     /**
      * Create instance via singleton variable
-     *
-     * @return self
      */
     public static function create(): self
     {
@@ -121,11 +119,9 @@ class LoaderDetector
     /**
      * Collect loaders
      *
-     * @param string $type
      * @throws VipsException
-     * @return void
      */
-    private function collectLoaders(string $type)
+    private function collectLoaders(string $type): void
     {
         $name = FFI::vips()->vips_nickname_find($type); // @phpstan-ignore-line
         $this->loaders[] = $name;

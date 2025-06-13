@@ -36,4 +36,18 @@ final class PadModifierTest extends BaseTestCase
         $this->assertColor(100, 100, 255, 255, $image->pickColor(7, 17));
         $this->assertColor(100, 100, 255, 255, $image->pickColor(22, 17));
     }
+
+    public function testModifyGrayscale(): void
+    {
+        $image = $this->readTestImage('grayscale.png');
+        $this->assertEquals(150, $image->width());
+        $this->assertEquals(200, $image->height());
+        $image->modify(new PadModifier(200, 200, 'f00'));
+        $this->assertEquals(200, $image->width());
+        $this->assertEquals(200, $image->height());
+        $this->assertColor(255, 0, 0, 255, $image->pickColor(0, 0));
+        $this->assertColor(255, 0, 0, 255, $image->pickColor(0, 199));
+        $this->assertColor(255, 0, 0, 255, $image->pickColor(199, 0));
+        $this->assertColor(255, 0, 0, 255, $image->pickColor(199, 199));
+    }
 }

@@ -45,7 +45,7 @@ class DriverTest extends BaseTestCase
 
     public function testCreateAnimation(): void
     {
-        $image = $this->driver->createAnimation(function ($animation) {
+        $image = $this->driver->createAnimation(function ($animation): void {
             $animation->add($this->getTestResourcePath('red.gif'), 0);
             $animation->add($this->getTestResourcePath('green.gif'), .25);
         })->setLoops(5);

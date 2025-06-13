@@ -11,9 +11,6 @@ class TrueTypeFont extends File
 {
     /**
      * Create object from path in file system
-     *
-     * @param string $path
-     * @return TrueTypeFont
      */
     public static function fromPath(string $path): self
     {
@@ -24,7 +21,6 @@ class TrueTypeFont extends File
      * Return family name of current font
      *
      * @throws FontException
-     * @return string
      */
     public function familyName(): string
     {
@@ -34,9 +30,7 @@ class TrueTypeFont extends File
     /**
      * Query name table of current font file
      *
-     * @param int $id
      * @throws FontException
-     * @return string
      */
     private function queryNameTable(int $id): string
     {
@@ -77,9 +71,7 @@ class TrueTypeFont extends File
     /**
      * Return table offset of given table tag
      *
-     * @param string $tableTag
      * @throws FontException
-     * @return int
      */
     private function tableOffset(string $tableTag): int
     {

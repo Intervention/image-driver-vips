@@ -29,7 +29,7 @@ final class PixelateModifierTest extends BaseTestCase
 
     public function testModifyAnimated(): void
     {
-        $image = (new Driver())->createAnimation(function ($animation) {
+        $image = (new Driver())->createAnimation(function ($animation): void {
             $animation->add($this->getTestResourcePath('trim.png'), .25);
             $animation->add($this->getTestResourcePath('radial.png'), .25);
         })->setLoops(5);
