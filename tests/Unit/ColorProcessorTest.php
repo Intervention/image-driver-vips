@@ -40,6 +40,18 @@ final class ColorProcessorTest extends TestCase
         $this->assertEquals(255, $color->channel(Alpha::class)->value());
     }
 
+    public function testNativeToColorGrayscale(): void
+    {
+        // Test grayscale image handling - single value should be expanded to RGB
+        $processor = new ColorProcessor(new Colorspace());
+        $color = $processor->nativeToColor([128]); // Single grayscale value
+        $this->assertInstanceOf(Color::class, $color);
+        $this->assertEquals(128, $color->channel(Red::class)->value());
+        $this->assertEquals(128, $color->channel(Green::class)->value());
+        $this->assertEquals(128, $color->channel(Blue::class)->value());
+        $this->assertEquals(255, $color->channel(Alpha::class)->value()); // Default alpha
+    }
+
     #[DataProvider('interpretationToColorspaceProvider')]
     public function testInterpretationToColorspace(string $interpretation, string $colorspaceClassname): void
     {
