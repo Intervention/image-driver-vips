@@ -265,7 +265,7 @@ class Core implements CoreInterface, Iterator
      *
      * @throws AnimationException|VipsException
      */
-    public function push($item): CollectionInterface
+    public function push(mixed $item): CollectionInterface
     {
         return $this->add($item);
     }
@@ -275,7 +275,7 @@ class Core implements CoreInterface, Iterator
      *
      * @see CollectionInterface::get()
      */
-    public function get(int|string $key, $default = null): mixed
+    public function get(int|string $key, mixed $default = null): mixed
     {
         try {
             return $this->frame($key);
@@ -291,7 +291,7 @@ class Core implements CoreInterface, Iterator
      *
      * @throws Exception
      */
-    public function getAtPosition(int $key = 0, $default = null): mixed
+    public function getAtPosition(int $key = 0, mixed $default = null): mixed
     {
         return $this->get($key, $default);
     }
