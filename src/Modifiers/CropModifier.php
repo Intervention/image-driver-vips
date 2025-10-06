@@ -76,16 +76,22 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
             $bgColor->channel(Blue::class)->value(),
         ];
 
+        $originalImage = $image->core()->native();
+        if ($originalImage->bands === 1) {
+            // Grayscale -> RGB
+            $originalImage = $originalImage->colourspace('srgb');
+        }
+
         // original image and background must have the same number of bands
-        if ($image->core()->native()->hasAlpha()) {
+        if ($originalImage->hasAlpha()) {
             $bands[] = $bgColor->channel(Alpha::class)->value();
         }
 
         return VipsImage::black(1, 1)
             ->add($bgColor->channel(Red::class)->value())
-            ->cast($image->core()->native()->format)
+            ->cast($originalImage->format)
             ->embed(0, 0, $resizeTo->width(), $resizeTo->height(), ['extend' => Extend::COPY])
-            ->copy(['interpretation' => $image->core()->native()->interpretation])
+            ->copy(['interpretation' => $originalImage->interpretation])
             ->bandjoin($bands);
     }
 
