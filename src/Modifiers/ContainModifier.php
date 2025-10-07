@@ -57,6 +57,11 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
             'no_rotate' => true,
         ]);
 
+        if ($resized->bands < 3) {
+            // Grayscale -> RGB
+            $resized = $resized->colourspace('srgb');
+        }
+
         if (!$resized->hasAlpha()) {
             $resized = $resized->bandjoin_const(255);
         }

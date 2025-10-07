@@ -55,11 +55,12 @@ class PadModifier extends ContainModifier
             'no_rotate' => true,
         ]);
 
+        if ($resized->bands < 3) {
+            // Grayscale -> RGB
+            $resized = $resized->colourspace('srgb');
+        }
+
         if (!$resized->hasAlpha()) {
-            if ($resized->bands === 1) {
-                // Grayscale -> RGB
-                $resized = $resized->colourspace('srgb');
-            }
             $resized = $resized->bandjoin_const(255);
         }
 
