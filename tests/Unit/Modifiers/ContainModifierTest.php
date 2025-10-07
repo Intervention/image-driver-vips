@@ -65,4 +65,28 @@ final class ContainModifierTest extends BaseTestCase
             $this->assertColor(255, 255, 255, 0, $frame->toImage(new Driver())->pickColor(0, 0));
         }
     }
+
+    public function testModifyContainGrayscale(): void
+    {
+        $image = $this->readTestImage('grayscale.png');
+        $this->assertEquals(150, $image->width());
+        $this->assertEquals(200, $image->height());
+        $image->modify(new ContainModifier(200, 200, 'transparent', 'top'));
+        $this->assertEquals(200, $image->width());
+        $this->assertEquals(200, $image->height());
+        $this->assertColor(255, 255, 255, 0, $image->pickColor(0, 0));
+        $this->assertColor(0, 0, 0, 255, $image->pickColor(50, 0));
+    }
+
+    public function testModifyContainGrayscaleAlpha(): void
+    {
+        $image = $this->readTestImage('grayscale-alpha.png');
+        $this->assertEquals(256, $image->width());
+        $this->assertEquals(256, $image->height());
+        $image->modify(new ContainModifier(258, 256, 'transparent', 'top'));
+        $this->assertEquals(258, $image->width());
+        $this->assertEquals(256, $image->height());
+        $this->assertColor(255, 255, 255, 0, $image->pickColor(0, 0));
+        $this->assertColor(0, 0, 0, 128, $image->pickColor(1, 0));
+    }
 }

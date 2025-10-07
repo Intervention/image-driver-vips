@@ -77,7 +77,7 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
         ];
 
         $imageNative = $image->core()->native();
-        if ($imageNative->bands === 1) {
+        if ($imageNative->bands < 3) {
             // Grayscale -> RGB
             $imageNative = $imageNative->colourspace('srgb');
         }
@@ -136,6 +136,11 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
         );
 
         if ($crop->width() > $originalSize->width() || $cropped->height < $crop->height()) {
+            if ($cropped->bands < 3) {
+                // Grayscale -> RGB
+                $cropped = $cropped->colourspace('srgb');
+            }
+
             $cropped = $background->insert(
                 $cropped,
                 max($offset_x * -1, 0),
