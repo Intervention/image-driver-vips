@@ -35,15 +35,18 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
             throw new DecoderException('Unable to decode input');
         }
 
+        $core = new Core($input);
+
         // auto-rotate
-        if ($this->driver()->config()->autoOrientation === true) {
-            $input = $input->autorot();
+        if ($this->driver()->config()->autoOrientation === true && $this->exifRotation($input) > 1) {
+            // autorot() does not seem to work with the default sequential access of this library
+            $core->setNative(Core::ensureInMemory($core)->native()->autorot());
         }
 
         // build image instance
         $image = new Image(
             $this->driver(),
-            new Core($input)
+            $core
         );
 
         // set media type on origin
@@ -95,5 +98,23 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
             'webp' => MediaType::IMAGE_WEBP,
             default => null
         };
+    }
+
+    /**
+     * Return the exif rotation of the given image or null if there isn't any
+     */
+    protected function exifRotation(VipsImage $vips): ?int
+    {
+        if (!in_array('exif-ifd0-Orientation', $vips->getFields())) {
+            return null;
+        }
+
+        $orientation = substr($vips->get('exif-ifd0-Orientation'), 0, 1);
+
+        if (!is_numeric($orientation)) {
+            return null;
+        }
+
+        return (int) $orientation;
     }
 }
