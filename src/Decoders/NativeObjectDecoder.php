@@ -6,6 +6,7 @@ namespace Intervention\Image\Drivers\Vips\Decoders;
 
 use Intervention\Image\Drivers\SpecializableDecoder;
 use Intervention\Image\Drivers\Vips\Core;
+use Intervention\Image\Drivers\Vips\Modifiers\AlignRotationModifier;
 use Intervention\Image\Exceptions\DecoderException;
 use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Image;
@@ -35,19 +36,16 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
             throw new DecoderException('Unable to decode input');
         }
 
-        $core = new Core($input);
-
-        // auto-rotate
-        if ($this->driver()->config()->autoOrientation === true && $this->exifRotation($input) > 1) {
-            // autorot() does not seem to work with the default sequential access of this library
-            $core->setNative(Core::ensureInMemory($core)->native()->autorot());
-        }
-
         // build image instance
         $image = new Image(
             $this->driver(),
-            $core
+            new Core($input)
         );
+
+        // auto-rotate
+        if ($this->driver()->config()->autoOrientation === true && $this->exifRotation($input) > 1) {
+            $image->modify(new AlignRotationModifier());
+        }
 
         // set media type on origin
         if ($mediaType = $this->vipsMediaType($input)) {
@@ -109,7 +107,11 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
             return null;
         }
 
-        $orientation = substr($vips->get('exif-ifd0-Orientation'), 0, 1);
+        try {
+            $orientation = substr($vips->get('exif-ifd0-Orientation'), 0, 1);
+        } catch (VipsException) {
+            return null;
+        }
 
         if (!is_numeric($orientation)) {
             return null;
