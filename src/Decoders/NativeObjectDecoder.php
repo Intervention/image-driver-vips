@@ -103,20 +103,16 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
      */
     protected function exifRotation(VipsImage $vips): ?int
     {
-        if (!in_array('exif-ifd0-Orientation', $vips->getFields())) {
+        if (!in_array('orientation', $vips->getFields())) {
             return null;
         }
 
         try {
-            $orientation = substr($vips->get('exif-ifd0-Orientation'), 0, 1);
+            $orientation = $vips->get('orientation');
         } catch (VipsException) {
             return null;
         }
 
-        if (!is_numeric($orientation)) {
-            return null;
-        }
-
-        return (int) $orientation;
+        return is_int($orientation) ? $orientation : null;
     }
 }
