@@ -7,6 +7,8 @@ RUN apt update \
             libffi-dev \
             libexif-dev \
             libheif-dev \
+            libheif-plugin-aomenc \
+            libheif-plugin-x265\
             git \
             unzip \
             zip \
