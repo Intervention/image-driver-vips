@@ -41,4 +41,19 @@ final class PixelateModifierTest extends BaseTestCase
         // encode to gif and read again to verify animation frame count
         $this->assertEquals(2, ImageManager::withDriver(Driver::class)->read($image->toGif())->count());
     }
+
+    public function testModifyWithNonDivisibleDimensions(): void
+    {
+        // test2.jpg is 900x506 - dimensions not evenly divisible by 20
+        // This would cause "extract_area: bad extract area" error before fix
+        $image = $this->readTestImage('test2.jpg');
+        $originalWidth = $image->width();
+        $originalHeight = $image->height();
+
+        $image->modify(new PixelateModifier(20));
+
+        // Verify dimensions are preserved
+        $this->assertEquals($originalWidth, $image->width());
+        $this->assertEquals($originalHeight, $image->height());
+    }
 }

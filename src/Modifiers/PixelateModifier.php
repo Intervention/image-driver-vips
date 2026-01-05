@@ -11,6 +11,7 @@ use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\PixelateModifier as GenericPixelateModifier;
 use Jcupitt\Vips\Exception as VipsException;
+use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Kernel;
 
 class PixelateModifier extends GenericPixelateModifier implements SpecializedInterface
@@ -45,7 +46,7 @@ class PixelateModifier extends GenericPixelateModifier implements SpecializedInt
             $frame->native()
                 ->resize(1 / $this->size)
                 ->resize($this->size, ['kernel' => Kernel::NEAREST])
-                ->crop(0, 0, $frame->size()->width(), $frame->size()->height())
+                ->embed(0, 0, $frame->size()->width(), $frame->size()->height(), ['extend' => Extend::COPY])
         );
 
         return $frame;
