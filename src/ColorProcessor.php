@@ -30,7 +30,7 @@ class ColorProcessor implements ColorProcessorInterface
      *
      * @see ColorProcessorInterface::colorToNative()
      */
-    public function colorToNative(ColorInterface $color)
+    public function colorToNative(ColorInterface $color): mixed
     {
         return array_map(fn(float $value) => $value * 255, $color->normalize());
     }
