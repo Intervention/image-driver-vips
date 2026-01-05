@@ -26,8 +26,9 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
     /**
      * {@inheritdoc}
      *
-     * @throws RuntimeException|\Jcupitt\Vips\Exception
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
+     * @throws RuntimeException|\Jcupitt\Vips\Exception
      */
     public function apply(ImageInterface $image): ImageInterface
     {
@@ -75,16 +76,22 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
             $bgColor->channel(Blue::class)->value(),
         ];
 
+        $imageNative = $image->core()->native();
+        if ($imageNative->bands < 3) {
+            // Grayscale -> RGB
+            $imageNative = $imageNative->colourspace('srgb');
+        }
+
         // original image and background must have the same number of bands
-        if ($image->core()->native()->hasAlpha()) {
+        if ($imageNative->hasAlpha()) {
             $bands[] = $bgColor->channel(Alpha::class)->value();
         }
 
         return VipsImage::black(1, 1)
             ->add($bgColor->channel(Red::class)->value())
-            ->cast($image->core()->native()->format)
+            ->cast($imageNative->format)
             ->embed(0, 0, $resizeTo->width(), $resizeTo->height(), ['extend' => Extend::COPY])
-            ->copy(['interpretation' => $image->core()->native()->interpretation])
+            ->copy(['interpretation' => $imageNative->interpretation])
             ->bandjoin($bands);
     }
 
@@ -129,6 +136,11 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
         );
 
         if ($crop->width() > $originalSize->width() || $cropped->height < $crop->height()) {
+            if ($cropped->bands < 3) {
+                // Grayscale -> RGB
+                $cropped = $cropped->colourspace('srgb');
+            }
+
             $cropped = $background->insert(
                 $cropped,
                 max($offset_x * -1, 0),

@@ -46,6 +46,14 @@ class ColorProcessor implements ColorProcessorInterface
             throw new ColorException('Vips driver can only decode colors in array format.');
         }
 
+        // Handle grayscale images (single-band) when creating RgbColor
+        // VIPS returns single value for grayscale images, but RgbColor constructor needs 3 values
+        // Only grayscale images have single-band data; HSV/HSL would have 3 bands
+        if ($this->colorspace::class !== CmykColorspace::class && count($native) === 1) {
+            // Expand grayscale luminance to RGB triplet
+            $native = [$native[0], $native[0], $native[0]];
+        }
+
         return match ($this->colorspace::class) {
             CmykColorspace::class => new CmykColor(...$native),
             default => new RgbColor(...$native),
@@ -55,9 +63,7 @@ class ColorProcessor implements ColorProcessorInterface
     /**
      * Transform vips interpretation into colorspace object
      *
-     * @param string $interpretation
      * @throws ColorException
-     * @return ColorspaceInterface
      */
     public static function interpretationToColorspace(string $interpretation): ColorspaceInterface
     {
@@ -89,9 +95,6 @@ class ColorProcessor implements ColorProcessorInterface
 
     /**
      * Transform colorspace into vips interpretation
-     *
-     * @param string|ColorspaceInterface $colorspace
-     * @return string
      */
     public static function colorspaceToInterpretation(string|ColorspaceInterface $colorspace): string
     {

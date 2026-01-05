@@ -19,6 +19,7 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
      * {@inheritdoc}
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
      * @throws VipsException|AnimationException|RuntimeException
      */
     public function apply(ImageInterface $image): ImageInterface

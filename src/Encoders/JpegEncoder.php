@@ -35,7 +35,6 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
 
     /**
      * @throws RuntimeException
-     *
      * @return array{Q: int, optimize_coding: bool, background: array<int>, keep?: int, strip?: bool}
      */
     protected function getOptions(): array

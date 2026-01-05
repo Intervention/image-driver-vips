@@ -19,6 +19,7 @@ class DrawPolygonModifier extends GenericDrawPolygonModifier implements Speciali
      * {@inheritdoc}
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
      * @throws VipsException|RuntimeException|\RuntimeException
      */
     public function apply(ImageInterface $image): ImageInterface
@@ -29,8 +30,8 @@ class DrawPolygonModifier extends GenericDrawPolygonModifier implements Speciali
                 'fill' => $this->backgroundColor()->toString(),
                 'stroke' => $this->borderColor()->toString(),
                 'stroke-width' => $this->drawable->borderSize(),
-                'points' => join(' ', array_map(
-                    fn(array $coordinates): string => join(',', $coordinates),
+                'points' => implode(' ', array_map(
+                    fn(array $coordinates): string => implode(',', $coordinates),
                     array_chunk($this->drawable->toArray(), 2),
                 )),
             ],

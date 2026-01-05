@@ -43,10 +43,6 @@ class PadModifier extends ContainModifier
     /**
      * Apply padded image resizing
      *
-     * @param FrameInterface $frame
-     * @param SizeInterface $resize
-     * @param ColorInterface $bgColor
-     * @return FrameInterface
      * @throws ColorException
      */
     private function pad(FrameInterface $frame, SizeInterface $resize, ColorInterface $bgColor): FrameInterface
@@ -58,6 +54,11 @@ class PadModifier extends ContainModifier
             'height' => $cropHeight,
             'no_rotate' => true,
         ]);
+
+        if ($resized->bands < 3) {
+            // Grayscale -> RGB
+            $resized = $resized->colourspace('srgb');
+        }
 
         if (!$resized->hasAlpha()) {
             $resized = $resized->bandjoin_const(255);

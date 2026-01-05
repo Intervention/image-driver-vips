@@ -25,7 +25,7 @@ class BlendTransparencyModifierTest extends BaseTestCase
 
     public function testApplyAnimated(): void
     {
-        $image = (new Driver())->createAnimation(function ($animation) {
+        $image = (new Driver())->createAnimation(function ($animation): void {
             $animation->add($this->getTestResourcePath('red.gif'), .25);
             $animation->add($this->getTestResourcePath('green.gif'), .25);
             $animation->add($this->getTestResourcePath('blue.gif'), .25);

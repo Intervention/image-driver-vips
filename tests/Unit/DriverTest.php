@@ -39,11 +39,13 @@ class DriverTest extends BaseTestCase
         $this->assertInstanceOf(Image::class, $image);
         $this->assertEquals(3, $image->width());
         $this->assertEquals(2, $image->height());
+        $this->assertEquals(96, $image->resolution()->x());
+        $this->assertEquals(96, $image->resolution()->y());
     }
 
     public function testCreateAnimation(): void
     {
-        $image = $this->driver->createAnimation(function ($animation) {
+        $image = $this->driver->createAnimation(function ($animation): void {
             $animation->add($this->getTestResourcePath('red.gif'), 0);
             $animation->add($this->getTestResourcePath('green.gif'), .25);
         })->setLoops(5);
@@ -65,6 +67,7 @@ class DriverTest extends BaseTestCase
         $result = $this->driver->colorProcessor(new Colorspace());
         $this->assertInstanceOf(ColorProcessorInterface::class, $result);
     }
+
     #[DataProvider('supportsDataProvider')]
     public function testSupports(bool $result, mixed $identifier): void
     {

@@ -6,6 +6,7 @@ namespace Intervention\Image\Drivers\Vips\Decoders;
 
 use Intervention\Image\Drivers\SpecializableDecoder;
 use Intervention\Image\Drivers\Vips\Core;
+use Intervention\Image\Drivers\Vips\Modifiers\AlignRotationModifier;
 use Intervention\Image\Exceptions\DecoderException;
 use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Image;
@@ -21,8 +22,9 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
     /**
      * {@inheritdoc}
      *
-     * @throws DecoderException|RuntimeException
      * @see Intervention\Image\Interfaces\DecoderInterface::decode()
+     *
+     * @throws DecoderException|RuntimeException
      */
     public function decode(mixed $input): ImageInterface|ColorInterface
     {
@@ -34,16 +36,16 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
             throw new DecoderException('Unable to decode input');
         }
 
-        // auto-rotate
-        if ($this->driver()->config()->autoOrientation === true) {
-            $input = $input->autorot();
-        }
-
         // build image instance
         $image = new Image(
             $this->driver(),
             new Core($input)
         );
+
+        // auto-rotate
+        if ($this->driver()->config()->autoOrientation === true && $this->exifRotation($input) > 1) {
+            $image->modify(new AlignRotationModifier());
+        }
 
         // set media type on origin
         if ($mediaType = $this->vipsMediaType($input)) {
@@ -55,8 +57,6 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
 
     /**
      * Get options for vips library according to current configuration
-     *
-     * @return string
      */
     protected function stringOptions(): string
     {
@@ -71,9 +71,6 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
 
     /**
      * Return media type of given vips image instance
-     *
-     * @param VipsImage $vips
-     * @return null|MediaType
      */
     protected function vipsMediaType(VipsImage $vips): ?MediaType
     {
@@ -99,5 +96,23 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
             'webp' => MediaType::IMAGE_WEBP,
             default => null
         };
+    }
+
+    /**
+     * Return the exif rotation of the given image or null if there isn't any
+     */
+    protected function exifRotation(VipsImage $vips): ?int
+    {
+        if (!in_array('orientation', $vips->getFields())) {
+            return null;
+        }
+
+        try {
+            $orientation = $vips->get('orientation');
+        } catch (VipsException) {
+            return null;
+        }
+
+        return is_int($orientation) ? $orientation : null;
     }
 }

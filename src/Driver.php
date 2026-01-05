@@ -41,6 +41,7 @@ class Driver extends AbstractDriver
      * {@inheritdoc}
      *
      * @see DriverInterface::createImage()
+     *
      * @throws VipsException|RuntimeException
      */
     public function createImage(int $width, int $height): ImageInterface
@@ -49,7 +50,11 @@ class Driver extends AbstractDriver
             ->add(255) // add red channel
             ->cast(BandFormat::UCHAR) // cast to format
             ->embed(0, 0, $width, $height, ['extend' => Extend::COPY]) // extend to given width/height
-            ->copy(['interpretation' => Interpretation::SRGB]) // srgb
+            ->copy([
+                'interpretation' => Interpretation::SRGB,
+                'xres' => 96 / 25.4,
+                'yres' => 96 / 25.4,
+            ]) // srgb
             ->bandjoin([
                 255, // green
                 255, // blue
@@ -63,6 +68,7 @@ class Driver extends AbstractDriver
      * {@inheritdoc}
      *
      * @see DriverInterface::createAnimation()
+     *
      * @throws RuntimeException|VipsException
      */
     public function createAnimation(callable $init): ImageInterface
@@ -108,12 +114,8 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * @param string $shape
      * @param array<string, string|int> $attributes
-     * @param int $width
-     * @param int $height
      * @throws RuntimeException
-     * @return VipsImage
      */
     public static function createShape(string $shape, array $attributes, int $width, int $height): VipsImage
     {
@@ -160,8 +162,9 @@ class Driver extends AbstractDriver
     /**
      * {@inheritdoc}
      *
-     * @throws RuntimeException
      * @see DriverInterface::supports()
+     *
+     * @throws RuntimeException
      */
     public function supports(string|Format|FileExtension|MediaType $identifier): bool
     {
@@ -181,21 +184,19 @@ class Driver extends AbstractDriver
      */
     public function checkHealth(): void
     {
-        if (!extension_loaded('ffi') && !extension_loaded('vips')) {
+        try {
+            // check health by calling Jcupitt\Vips\FFI::init()
+            VipsConfig::version();
+        } catch (VipsException $e) {
             throw new DriverException(
-                'PHP extension FFI or VIPS must be enabled to use this driver.'
+                'libvips does not seem to be installed correctly.',
+                previous: $e
             );
-        }
-
-        if (version_compare(PHP_VERSION, '8.3', '>=') && ini_get('zend.max_allowed_stack_size') != '-1') {
-            throw new DriverException("zend.max_allowed_stack_size not set to '-1'");
         }
     }
 
     /**
      * Return version of libvips library
-     *
-     * @return string
      */
     public static function version(): string
     {

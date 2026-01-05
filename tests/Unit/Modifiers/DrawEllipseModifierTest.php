@@ -30,7 +30,7 @@ final class DrawEllipseModifierTest extends BaseTestCase
 
     public function testApplyAnimated(): void
     {
-        $image = (new Driver())->createAnimation(function ($animation) {
+        $image = (new Driver())->createAnimation(function ($animation): void {
             $animation->add($this->getTestResourcePath('trim.png'), .25);
             $animation->add($this->getTestResourcePath('radial.png'), .25);
         });

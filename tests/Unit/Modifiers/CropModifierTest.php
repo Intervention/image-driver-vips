@@ -88,4 +88,28 @@ final class CropModifierTest extends BaseTestCase
         $this->assertEquals(15, $image->height());
         $this->assertColor(255, 166, 1, 255, $image->pickColor(8, 8));
     }
+
+    public function testCropGrayscale(): void
+    {
+        $image = $this->readTestImage('grayscale.jpg');
+        $image->modify(new CropModifier(258, 258, 0, 0, 'ff0000', 'center'));
+        $this->assertColor(255, 0, 0, 255, $image->pickColor(0, 0));
+        $this->assertColor(255, 255, 255, 255, $image->pickColor(1, 1));
+        $this->assertColor(0, 0, 0, 255, $image->pickColor(1, 256));
+
+        // Ensure the image is encodable
+        $image->encode();
+    }
+
+    public function testCropGrayscaleAlpha(): void
+    {
+        $image = $this->readTestImage('grayscale-alpha.png');
+        $image->modify(new CropModifier(258, 258, 0, 0, 'ff0000', 'center'));
+        $this->assertColor(255, 0, 0, 255, $image->pickColor(0, 0));
+        $this->assertColor(0, 0, 0, 128, $image->pickColor(1, 1));
+        $this->assertColor(255, 255, 255, 128, $image->pickColor(256, 1));
+
+        // Ensure the image is encodable
+        $image->encode();
+    }
 }

@@ -22,8 +22,9 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
     /**
      * {@inheritdoc}
      *
-     * @throws RuntimeException|VipsException
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
+     * @throws RuntimeException|VipsException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
@@ -55,6 +56,11 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
             'height' => $resize->height(),
             'no_rotate' => true,
         ]);
+
+        if ($resized->bands < 3) {
+            // Grayscale -> RGB
+            $resized = $resized->colourspace('srgb');
+        }
 
         if (!$resized->hasAlpha()) {
             $resized = $resized->bandjoin_const(255);

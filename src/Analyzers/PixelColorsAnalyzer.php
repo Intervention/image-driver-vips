@@ -15,8 +15,9 @@ class PixelColorsAnalyzer extends PixelColorAnalyzer implements SpecializedInter
     /**
      * {@inheritdoc}
      *
-     * @throws ColorException|RuntimeException
      * @see Intervention\Image\Interfaces\AnalyzerInterface::analyze()
+     *
+     * @throws ColorException|RuntimeException
      */
     public function analyze(ImageInterface $image): mixed
     {

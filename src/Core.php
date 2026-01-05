@@ -25,12 +25,34 @@ class Core implements CoreInterface, Iterator
     /**
      * Create new core instance
      *
-     * @param VipsImage $vipsImage
      * @return void
      */
     public function __construct(protected VipsImage $vipsImage)
     {
         //
+    }
+
+    /**
+     * @param list<FrameInterface> $frames
+     * @throws VipsException
+     */
+    public static function createFromFrames(array $frames, int $loops = 0): self
+    {
+        $natives = [];
+        $delay = [];
+
+        foreach ($frames as $frame) {
+            $delay[] = intval($frame->delay() * 1000);
+            $natives[] = $frame->native();
+        }
+
+        $image = VipsImage::arrayjoin($natives, ['across' => 1]);
+        $image->set('delay', $delay);
+        $image->set('loop', $loops);
+        $image->set('page-height', $natives[0]->height);
+        $image->set('n-pages', count($frames));
+
+        return new self($image);
     }
 
     /**
@@ -58,9 +80,6 @@ class Core implements CoreInterface, Iterator
     /**
      * Renders vips image of given core into memory and serves any downstream
      * requests from the memory area
-     *
-     * @param CoreInterface $core
-     * @return CoreInterface
      */
     public static function ensureInMemory(CoreInterface $core): CoreInterface
     {
@@ -85,6 +104,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CoreInterface::count()
+     *
      * @throws VipsException
      */
     public function count(): int
@@ -94,7 +114,6 @@ class Core implements CoreInterface, Iterator
 
     /**
      * @param list<FrameInterface> $frames
-     *
      * @throws VipsException|AnimationException
      */
     public static function replaceFrames(VipsImage $vipsImage, array $frames): VipsImage
@@ -105,33 +124,10 @@ class Core implements CoreInterface, Iterator
     }
 
     /**
-     * @param list<FrameInterface> $frames
-     *
-     * @throws VipsException
-     */
-    public static function createFromFrames(array $frames, int $loops = 0): self
-    {
-        $natives = [];
-        $delay = [];
-
-        foreach ($frames as $frame) {
-            $delay[] = intval($frame->delay() * 1000);
-            $natives[] = $frame->native();
-        }
-
-        $image = VipsImage::arrayjoin($natives, ['across' => 1]);
-        $image->set('delay', $delay);
-        $image->set('loop', $loops);
-        $image->set('page-height', $natives[0]->height);
-        $image->set('n-pages', count($frames));
-
-        return new self($image);
-    }
-
-    /**
      * {@inheritdoc}
      *
      * @see CoreInterface::frame()
+     *
      * @throws AnimationException|VipsException
      */
     public function frame(int $position): FrameInterface
@@ -185,6 +181,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CoreInterface::add()
+     *
      * @throws AnimationException|VipsException
      */
     public function add(FrameInterface $frame): self
@@ -201,6 +198,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CoreInterface::loops()
+     *
      * @throws VipsException
      */
     public function loops(): int
@@ -212,6 +210,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CoreInterface::setLoops()
+     *
      * @throws VipsException
      */
     public function setLoops(int $loops): CoreInterface
@@ -225,6 +224,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CollectionInterface::first()
+     *
      * @throws AnimationException|VipsException
      */
     public function first(): FrameInterface
@@ -236,6 +236,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CollectableInterface::last()
+     *
      * @throws AnimationException|VipsException
      */
     public function last(): FrameInterface
@@ -261,9 +262,10 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CollectionInterface::push()
+     *
      * @throws AnimationException|VipsException
      */
-    public function push($item): CollectionInterface
+    public function push(mixed $item): CollectionInterface
     {
         return $this->add($item);
     }
@@ -273,7 +275,7 @@ class Core implements CoreInterface, Iterator
      *
      * @see CollectionInterface::get()
      */
-    public function get(int|string $key, $default = null): mixed
+    public function get(int|string $key, mixed $default = null): mixed
     {
         try {
             return $this->frame($key);
@@ -286,9 +288,10 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CollectionInterface::getAtPosition()
+     *
      * @throws Exception
      */
-    public function getAtPosition(int $key = 0, $default = null): mixed
+    public function getAtPosition(int $key = 0, mixed $default = null): mixed
     {
         return $this->get($key, $default);
     }
@@ -306,9 +309,8 @@ class Core implements CoreInterface, Iterator
     }
 
     /**
-     * @return list<FrameInterface>
-     *
      * @throws AnimationException|VipsException
+     * @return list<FrameInterface>
      */
     public function toArray(): array
     {
@@ -325,6 +327,7 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CollectionInterface::slice()
+     *
      * @throws AnimationException|VipsException
      */
     public function slice(int $offset, ?int $length = 0): CollectionInterface
@@ -374,7 +377,7 @@ class Core implements CoreInterface, Iterator
      */
     public function next(): void
     {
-        $this->iteratorIndex = $this->iteratorIndex + 1;
+        $this->iteratorIndex += 1;
     }
 
     /**
@@ -415,13 +418,7 @@ class Core implements CoreInterface, Iterator
                 $value = "<$len bytes of binary data>";
             }
 
-            if (is_array($value)) {
-                $value = implode(", ", $value);
-            } else {
-                $value = (string) $value;
-            }
-
-            $debug[$name] = $value;
+            $debug[$name] = is_array($value) ? implode(", ", $value) : (string) $value;
         }
 
         return $debug;

@@ -42,4 +42,20 @@ final class PixelColorAnalyzerTest extends BaseTestCase
             $this->assertEquals('1eccff', $result->toHex(), 'Failed for format: ' . $format);
         }
     }
+
+    public function testAnalyzeGrayscale(): void
+    {
+        $image = $this->readTestImage('grayscale.png');
+        $analyzer = new PixelColorAnalyzer(0, 0);
+        $analyzer->setDriver(new Driver());
+        $result = $analyzer->analyze($image);
+        $this->assertInstanceOf(ColorInterface::class, $result);
+        // Grayscale images should return a color where R=G=B
+        $hex = $result->toHex();
+        $r = substr($hex, 0, 2);
+        $g = substr($hex, 2, 2);
+        $b = substr($hex, 4, 2);
+        $this->assertEquals($r, $g, 'Red and green channels should be equal for grayscale');
+        $this->assertEquals($g, $b, 'Green and blue channels should be equal for grayscale');
+    }
 }

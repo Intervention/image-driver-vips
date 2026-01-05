@@ -109,7 +109,7 @@ class CoreTest extends BaseTestCase
 
     public function testSlice(): void
     {
-        $image = (new Driver())->createAnimation(function ($animation) {
+        $image = (new Driver())->createAnimation(function ($animation): void {
             $animation->add($this->getTestResourcePath('red.gif'), 0);
             $animation->add($this->getTestResourcePath('green.gif'), .25);
             $animation->add($this->getTestResourcePath('blue.gif'), .50);

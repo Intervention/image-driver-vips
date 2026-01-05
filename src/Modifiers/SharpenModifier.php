@@ -17,6 +17,7 @@ class SharpenModifier extends GenericSharpenModifier implements SpecializedInter
      * {@inheritdoc}
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
      * @throws AnimationException
      * @throws VipsException
      */
@@ -33,7 +34,6 @@ class SharpenModifier extends GenericSharpenModifier implements SpecializedInter
      * Generate unsharp mask
      *
      * @throws VipsException
-     * @return VipsImage
      */
     private function getUnsharpMask(): VipsImage
     {
