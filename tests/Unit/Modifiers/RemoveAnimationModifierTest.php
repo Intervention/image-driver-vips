@@ -6,7 +6,7 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Modifiers\RemoveAnimationModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
-use Intervention\Image\Exceptions\InputException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(\Intervention\Image\Drivers\Vips\Modifiers\RemoveAnimationModifier::class)]
@@ -42,7 +42,7 @@ final class RemoveAnimationModifierTest extends BaseTestCase
     public function testApplyInvalid(): void
     {
         $image = $this->readTestImage('animation.gif');
-        $this->expectException(InputException::class);
+        $this->expectException(InvalidArgumentException::class);
         $image->modify(new RemoveAnimationModifier('test'));
     }
 }

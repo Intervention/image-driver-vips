@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Core;
-use Intervention\Image\Exceptions\AnimationException;
-use Intervention\Image\Exceptions\ColorException;
-use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Exceptions\DriverException;
+use Intervention\Image\Exceptions\ModifierException;
+use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\DrawPixelModifier as GenericDrawPixelModifier;
@@ -22,37 +22,49 @@ class DrawPixelModifier extends GenericDrawPixelModifier implements SpecializedI
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      *
-     * @throws VipsException|AnimationException|ColorException|RuntimeException
+     * @throws StateException
+     * @throws ModifierException
+     * @throws DriverException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
         // decode pixel color
-        $color = $this->driver()->colorProcessor($image->colorspace())->colorToNative(
-            $this->driver()->handleInput($this->color)
+        $color = $this->driver()->colorProcessor($image)->colorToNative(
+            $this->color()
         );
 
-        $pixel = VipsImage::black(1, 1)
-            ->add($color[0]) // red
-            ->cast($image->core()->native()->format)
-            ->copy(['interpretation' => $image->core()->native()->interpretation])
-            ->bandjoin([
-                $color[1], // green
-                $color[2], // blue
-                $color[3], // alpha
-            ]);
+        try {
+            $pixel = VipsImage::black(1, 1)
+                ->add(array_slice($color, 0, 1)) // red
+                ->cast($image->core()->native()->format)
+                ->copy(['interpretation' => $image->core()->native()->interpretation])
+                ->bandjoin(array_slice($color, 1));
+        } catch (VipsException $e) {
+            throw new ModifierException(
+                'Failed to apply ' . self::class . ', unable to draw pixel',
+                previous: $e
+            );
+        }
 
         $frames = [];
         foreach ($image as $frame) {
-            $frames[] = $frame->setNative(
-                $frame->native()->composite2(
+            try {
+                $native = $frame->native()->composite2(
                     $pixel,
                     BlendMode::OVER,
                     [
                         'x' => $this->position->x(),
                         'y' => $this->position->y(),
                     ],
-                )
-            );
+                );
+            } catch (VipsException $e) {
+                throw new ModifierException(
+                    'Failed to apply ' . self::class . ', unable to draw pixel',
+                    previous: $e
+                );
+            }
+
+            $frames[] = $frame->setNative($native);
         }
 
         $image->core()->setNative(

@@ -7,7 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Encoders;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Encoders\WebpEncoder;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
-use Intervention\Image\ImageManager;
+use Intervention\Image\Image;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(WebpEncoder::class)]
@@ -39,7 +39,7 @@ final class WebpEncoderTest extends BaseTestCase
         $encoder = new WebpEncoder(strip: true);
         $encoder->setDriver(new Driver());
         $result = $encoder->encode($image);
-        $image = ImageManager::withDriver(Driver::class)->read($result);
+        $image = Image::usingDriver(Driver::class)->from($result);
         $this->assertNull($image->exif('IFD0.Artist'));
     }
 }

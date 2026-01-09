@@ -8,7 +8,7 @@ use Intervention\Image\Colors\Profile;
 use Intervention\Image\Drivers\Vips\Analyzers\ProfileAnalyzer;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
-use Intervention\Image\Exceptions\ColorException;
+use Intervention\Image\Exceptions\AnalyzerException;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(ProfileAnalyzer::class)]
@@ -28,7 +28,7 @@ final class ProfileAnalyzerTest extends BaseTestCase
         $image = $this->readTestImage('tile.png');
         $analyzer = new ProfileAnalyzer();
         $analyzer->setDriver(new Driver());
-        $this->expectException(ColorException::class);
+        $this->expectException(AnalyzerException::class);
         $analyzer->analyze($image);
     }
 }

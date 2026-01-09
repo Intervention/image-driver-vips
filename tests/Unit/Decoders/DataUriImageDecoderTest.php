@@ -8,7 +8,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Intervention\Image\Drivers\Vips\Decoders\DataUriImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
-use Intervention\Image\Exceptions\DecoderException;
+use Intervention\Image\Exceptions\ImageDecoderException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Image;
 use stdClass;
 
@@ -34,19 +35,19 @@ final class DataUriImageDecoderTest extends BaseTestCase
 
     public function testDecoderNonString(): void
     {
-        $this->expectException(DecoderException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->decoder->decode(new stdClass());
     }
 
     public function testDecoderInvalid(): void
     {
-        $this->expectException(DecoderException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->decoder->decode('invalid');
     }
 
     public function testDecoderNonImage(): void
     {
-        $this->expectException(DecoderException::class);
+        $this->expectException(ImageDecoderException::class);
         $this->decoder->decode('data:text/plain;charset=utf-8,test');
     }
 }

@@ -6,16 +6,14 @@ namespace Intervention\Image\Drivers\Vips;
 
 use Intervention\Image\Drivers\AbstractDriver;
 use Intervention\Image\Exceptions\DriverException;
-use Intervention\Image\Exceptions\NotSupportedException;
-use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
+use Intervention\Image\Exceptions\MissingDependencyException;
 use Intervention\Image\FileExtension;
 use Intervention\Image\Format;
 use Intervention\Image\Image;
-use Intervention\Image\Interfaces\DriverInterface;
-use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
-use Intervention\Image\Interfaces\ColorspaceInterface;
 use Intervention\Image\Interfaces\ColorProcessorInterface;
+use Intervention\Image\Interfaces\CoreInterface;
 use Intervention\Image\Interfaces\FontProcessorInterface;
 use Intervention\Image\MediaType;
 use Jcupitt\Vips\BandFormat;
@@ -42,80 +40,52 @@ class Driver extends AbstractDriver
      *
      * @see DriverInterface::createImage()
      *
-     * @throws VipsException|RuntimeException
+     * @throws InvalidArgumentException
+     * @throws DriverException
      */
     public function createImage(int $width, int $height): ImageInterface
     {
-        $vipsImage = VipsImage::black(1, 1) // make a 1x1 pixel
-            ->add(255) // add red channel
-            ->cast(BandFormat::UCHAR) // cast to format
-            ->embed(0, 0, $width, $height, ['extend' => Extend::COPY]) // extend to given width/height
-            ->copy([
-                'interpretation' => Interpretation::SRGB,
-                'xres' => 96 / 25.4,
-                'yres' => 96 / 25.4,
-            ]) // srgb
-            ->bandjoin([
-                255, // green
-                255, // blue
-                0, // alpha
-            ]);
+        if ($width < 1 || $height < 1) {
+            throw new InvalidArgumentException('Invalid image size. Only use int<1, max>');
+        }
 
-        return new Image($this, new Core($vipsImage));
+        try {
+            $vipsImage = VipsImage::black(1, 1) // make a 1x1 pixel
+                ->add(255) // add red channel
+                ->cast(BandFormat::UCHAR) // cast to format
+                ->embed(0, 0, $width, $height, ['extend' => Extend::COPY]) // extend to given width/height
+                ->copy([
+                    'interpretation' => Interpretation::SRGB,
+                    'xres' => 96 / 25.4,
+                    'yres' => 96 / 25.4,
+                ]) // srgb
+                ->bandjoin([
+                    255, // green
+                    255, // blue
+                    0, // alpha
+                ]);
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to create new image', previous: $e);
+        }
+
+        return Image::usingDriver($this)->setCore(new Core($vipsImage));
     }
 
     /**
      * {@inheritdoc}
      *
-     * @see DriverInterface::createAnimation()
+     * @see DriverInterface::createCore()
      *
-     * @throws RuntimeException|VipsException
+     * @throws DriverException
      */
-    public function createAnimation(callable $init): ImageInterface
+    public function createCore(array $frames): CoreInterface
     {
-        $animation = new class ($this)
-        {
-            /**
-             * @var list<FrameInterface>
-             */
-            protected array $frames = [];
-
-            public function __construct(
-                protected DriverInterface $driver,
-            ) {
-                //
-            }
-
-            /**
-             * @throws RuntimeException
-             */
-            public function add(mixed $source, float $delay = 1): self
-            {
-                $this->frames[] = $this->driver->handleInput($source)->core()->first()->setDelay($delay);
-
-                return $this;
-            }
-
-            /**
-             * @throws RuntimeException|VipsException
-             */
-            public function __invoke(): ImageInterface
-            {
-                return new Image(
-                    $this->driver,
-                    Core::createFromFrames($this->frames)
-                );
-            }
-        };
-
-        $init($animation);
-
-        return call_user_func($animation);
+        return Core::createFromFrames($frames);
     }
 
     /**
      * @param array<string, string|int> $attributes
-     * @throws RuntimeException
+     * @throws DriverException
      */
     public static function createShape(string $shape, array $attributes, int $width, int $height): VipsImage
     {
@@ -135,7 +105,7 @@ class Driver extends AbstractDriver
         try {
             return VipsImage::svgload_buffer($svg);
         } catch (VipsException $e) {
-            throw new RuntimeException('Could not create shape: ' . $e->getMessage(), previous: $e);
+            throw new DriverException('Failed to create geometric shape', previous: $e);
         }
     }
 
@@ -144,9 +114,9 @@ class Driver extends AbstractDriver
      *
      * @see DriverInterface::colorProcessor()
      */
-    public function colorProcessor(ColorspaceInterface $colorspace): ColorProcessorInterface
+    public function colorProcessor(ImageInterface $image): ColorProcessorInterface
     {
-        return new ColorProcessor($colorspace);
+        return new ColorProcessor($image);
     }
 
     /**
@@ -164,13 +134,13 @@ class Driver extends AbstractDriver
      *
      * @see DriverInterface::supports()
      *
-     * @throws RuntimeException
+     * @throws DriverException
      */
     public function supports(string|Format|FileExtension|MediaType $identifier): bool
     {
         try {
             $format = Format::create($identifier);
-        } catch (NotSupportedException) {
+        } catch (InvalidArgumentException) {
             return false;
         }
 
@@ -188,8 +158,8 @@ class Driver extends AbstractDriver
             // check health by calling Jcupitt\Vips\FFI::init()
             VipsConfig::version();
         } catch (VipsException $e) {
-            throw new DriverException(
-                'libvips does not seem to be installed correctly.',
+            throw new MissingDependencyException(
+                'libvips does not seem to be installed correctly',
                 previous: $e
             );
         }
@@ -198,7 +168,7 @@ class Driver extends AbstractDriver
     /**
      * Return version of libvips library
      */
-    public static function version(): string
+    public function version(): string
     {
         return VipsConfig::version();
     }

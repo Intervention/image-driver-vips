@@ -7,7 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 use Intervention\Image\Colors\Profile;
 use Intervention\Image\Drivers\Vips\Modifiers\ProfileModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
-use Intervention\Image\Exceptions\ColorException;
+use Intervention\Image\Exceptions\AnalyzerException;
 
 class ProfileModifierTest extends BaseTestCase
 {
@@ -17,7 +17,7 @@ class ProfileModifierTest extends BaseTestCase
 
         try {
             $profile = $image->profile();
-        } catch (ColorException) {
+        } catch (AnalyzerException) {
             $profile = null;
         }
 

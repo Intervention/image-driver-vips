@@ -6,14 +6,13 @@ namespace Intervention\Image\Drivers\Vips\Analyzers;
 
 use Intervention\Image\Analyzers\PixelColorAnalyzer as GenericPixelColorAnalyzer;
 use Intervention\Image\Drivers\Vips\Core;
-use Intervention\Image\Exceptions\AnimationException;
-use Intervention\Image\Exceptions\ColorException;
-use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Exceptions\AnalyzerException;
+use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ColorInterface;
-use Intervention\Image\Interfaces\ColorspaceInterface;
 use Intervention\Image\Interfaces\CoreInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
+use Jcupitt\Vips\Exception as VipsException;
 
 class PixelColorAnalyzer extends GenericPixelColorAnalyzer implements SpecializedInterface
 {
@@ -22,12 +21,13 @@ class PixelColorAnalyzer extends GenericPixelColorAnalyzer implements Specialize
      *
      * @see Intervention\Image\Interfaces\AnalyzerInterface::analyze()
      *
-     * @throws ColorException|RuntimeException
+     * @throws StateException
+     * @throws AnalyzerException
      */
     public function analyze(ImageInterface $image): mixed
     {
         return $this->colorAt(
-            $image->colorspace(),
+            $image,
             $image->core(),
             $this->x,
             $this->y,
@@ -37,17 +37,22 @@ class PixelColorAnalyzer extends GenericPixelColorAnalyzer implements Specialize
     /**
      * Detects color at given position and returns it as ColorInterface
      *
-     * @throws ColorException|AnimationException
+     * @throws StateException
+     * @throws AnalyzerException
      */
-    protected function colorAt(ColorspaceInterface $colorspace, CoreInterface $core, int $x, int $y): ColorInterface
+    protected function colorAt(ImageInterface $image, CoreInterface $core, int $x, int $y): ColorInterface
     {
         $core = Core::ensureInMemory($core);
 
-        return $this->driver()
-            ->colorProcessor($colorspace)
-            ->nativeToColor(array_map(
-                fn(int|float $value): int => (int) max(min($value, 255), 0),
-                $core->native()->getpoint($x, $y)
-            ));
+        try {
+            return $this->driver()
+                ->colorProcessor($image)
+                ->nativeToColor(array_map(
+                    fn(int|float $value): int => (int) max(min($value, 255), 0),
+                    $core->native()->getpoint($x, $y)
+                ));
+        } catch (VipsException $e) {
+            throw new AnalyzerException('Failed to read pixel color at position ' . $x . ', ' . $y, previous: $e);
+        }
     }
 }

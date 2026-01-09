@@ -6,7 +6,7 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Modifiers\ProfileRemovalModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
-use Intervention\Image\Exceptions\ColorException;
+use Intervention\Image\Exceptions\AnalyzerException;
 
 class ProfileRemovalModifierTest extends BaseTestCase
 {
@@ -14,7 +14,7 @@ class ProfileRemovalModifierTest extends BaseTestCase
     {
         $image = $this->readTestImage('icc.jpg');
         $image->modify(new ProfileRemovalModifier());
-        $this->expectException(ColorException::class);
+        $this->expectException(AnalyzerException::class);
         $image->profile();
     }
 }

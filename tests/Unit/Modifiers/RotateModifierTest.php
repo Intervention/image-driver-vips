@@ -7,6 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 use Intervention\Image\Colors\Rgb\Color;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
+use Intervention\Image\Image;
 use Intervention\Image\Modifiers\RotateModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
 
@@ -27,12 +28,12 @@ final class RotateModifierTest extends BaseTestCase
         $image->modify(new RotateModifier(120, 'fff'));
         $this->assertEquals(397, $image->width());
         $this->assertEquals(368, $image->height());
-        $this->assertEquals('ffffff', $image->pickColor(10, 10)->toHex());
+        $this->assertEquals('ffffff', $image->colorAt(10, 10)->toHex());
     }
 
     public function testRotateAnimated(): void
     {
-        $image = (new Driver())->createAnimation(function ($animation): void {
+        $image = Image::usingDriver(Driver::class)->create(320, 240, function ($animation): void {
             $animation->add($this->getTestResourcePath('test.jpg'), .25);
             $animation->add($this->getTestResourcePath('test.jpg'), .25);
         })->setLoops(5);
@@ -47,7 +48,7 @@ final class RotateModifierTest extends BaseTestCase
         foreach ($image as $frame) {
             $this->assertEquals(397, $frame->size()->width());
             $this->assertEquals(368, $image->size()->height());
-            $this->assertEquals('ffffff', $frame->toImage(new Driver())->pickColor(10, 10)->toHex());
+            $this->assertEquals('ffffff', $frame->toImage(new Driver())->colorAt(10, 10)->toHex());
         }
     }
 
@@ -59,11 +60,11 @@ final class RotateModifierTest extends BaseTestCase
         $this->assertEquals(25, $image->height());
 
         $this->assertEquals(
-            array_map(fn(Color $color): string => $color->toHex(), $image->pickColors(1, 1)->toArray()),
+            array_map(fn(Color $color): string => $color->toHex(), $image->colorsAt(1, 1)->toArray()),
             ['ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000']
         );
         $this->assertEquals(
-            array_map(fn(Color $color): string => $color->toHex(), $image->pickColors(12, 12)->toArray()),
+            array_map(fn(Color $color): string => $color->toHex(), $image->colorsAt(12, 12)->toArray()),
             ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63']
         );
     }

@@ -10,7 +10,6 @@ use Intervention\Image\Colors\Rgb\Channels\Blue;
 use Intervention\Image\Colors\Rgb\Channels\Green;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 use Intervention\Image\Colors\Rgb\Color as RgbColor;
-use Intervention\Image\Colors\Rgb\Colorspace;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
@@ -40,51 +39,48 @@ abstract class BaseTestCase extends TestCase
 
     public static function readTestImage(string $filename = 'test.jpg'): Image
     {
-        return (new Driver())->specialize(new FilePathImageDecoder())->decode(
-            static::getTestResourcePath($filename)
+        return (new Driver())->handleImageInput(
+            static::getTestResourcePath($filename),
+            [FilePathImageDecoder::class],
         );
     }
 
     /**
-     * Create new test image with red (ff0000) background
+     * Create new test image with red (ff0000) background.
      *
      * @throws ColorException
      * @throws Exception
      */
     public static function createTestImage(int $width, int $height): Image
     {
-        return new Image(
-            new Driver(),
-            new Core(self::vipsImage($width, $height, [255, 0, 0, 255]))
-        );
-    }
-
-    protected static function vipsImage(int $width, int $height, ?array $background = null): VipsImage
-    {
-        $driver = new Driver();
-        $background = $driver->colorProcessor(new Colorspace())->nativeToColor($background ?? [255, 255, 255, 0]);
-
-        return VipsImage::black(1, 1)
-            ->add($background->channel(Red::class)->value())
-            ->cast(BandFormat::UCHAR)
-            ->embed(0, 0, $width, $height, ['extend' => Extend::COPY])
-            ->copy(['interpretation' => Interpretation::SRGB])
-            ->bandjoin([
-                $background->channel(Green::class)->value(),
-                $background->channel(Blue::class)->value(),
-                $background->channel(Alpha::class)->value(),
-            ]);
+        return Image::usingDriver(new Driver())
+            ->setCore(new Core(self::vipsImage($width, $height, [255, 0, 0, 255])));
     }
 
     /**
-     * Assert that given color equals the given color channel values in the given optional tolerance
+     * Create new vips image in the given dimensions and background color.
+     *
+     * @param array<float> $bands
+     */
+    protected static function vipsImage(int $width, int $height, array $bands): VipsImage
+    {
+        return VipsImage::black(1, 1)
+            ->add(array_slice($bands, 0, 1))
+            ->cast(BandFormat::UCHAR)
+            ->embed(0, 0, $width, $height, ['extend' => Extend::COPY])
+            ->copy(['interpretation' => Interpretation::SRGB])
+            ->bandjoin(array_slice($bands, 1));
+    }
+
+    /**
+     * Assert that given color equals the given color channel values in the given optional tolerance.
      *
      * @throws ExpectationFailedException
      */
     protected function assertColor(int $r, int $g, int $b, int $a, ColorInterface $color, int $tolerance = 0): void
     {
         // build errorMessage
-        $errorMessage = function (int $r, int $g, $b, int $a, ColorInterface $color): string {
+        $errorMessage = function (int $r, int $g, int $b, int $a, ColorInterface $color): string {
             $color = 'rgba(' . implode(', ', [
                 $color->channel(Red::class)->value(),
                 $color->channel(Green::class)->value(),
@@ -100,34 +96,16 @@ abstract class BaseTestCase extends TestCase
             ]);
         };
 
-        // build color channel value range
-        $range = function (int $base, int $tolerance): array {
-            return range(max($base - $tolerance, 0), min($base + $tolerance, 255));
-        };
-
-        $this->assertContains(
-            $color->channel(Red::class)->value(),
-            $range($r, $tolerance),
-            $errorMessage($r, $g, $b, $a, $color)
-        );
-
-        $this->assertContains(
-            $color->channel(Green::class)->value(),
-            $range($g, $tolerance),
-            $errorMessage($r, $g, $b, $a, $color)
-        );
-
-        $this->assertContains(
-            $color->channel(Blue::class)->value(),
-            $range($b, $tolerance),
-            $errorMessage($r, $g, $b, $a, $color)
-        );
-
-        $this->assertContains(
-            $color->channel(Alpha::class)->value(),
-            $range($a, $tolerance),
-            $errorMessage($r, $g, $b, $a, $color)
-        );
+        foreach ([Red::class => $r, Green::class => $g, Blue::class => $b, Alpha::class => $a] as $channel => $value) {
+            $this->assertThat(
+                $color->channel($channel)->value(),
+                $this->logicalAnd(
+                    $this->greaterThanOrEqual(max($channel::min(), $value - $tolerance)),
+                    $this->lessThanOrEqual(min($channel::max(), $value + $tolerance))
+                ),
+                message: $errorMessage($r, $g, $b, $a, $color)
+            );
+        }
     }
 
     protected function assertMediaType(string|array $allowed, string|EncodedImage $input): void

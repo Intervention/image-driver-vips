@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips;
 
 use ArrayIterator;
-use Exception;
-use Intervention\Image\Exceptions\AnimationException;
+use Intervention\Image\Collection;
+use Intervention\Image\Exceptions\DriverException;
+use Intervention\Image\Exceptions\ImageException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
+use Intervention\Image\Exceptions\NotSupportedException;
 use Intervention\Image\Interfaces\CollectionInterface;
 use Intervention\Image\Interfaces\CoreInterface;
 use Intervention\Image\Interfaces\FrameInterface;
@@ -21,6 +24,7 @@ use Traversable;
 class Core implements CoreInterface, Iterator
 {
     protected int $iteratorIndex = 0;
+    protected CollectionInterface $meta;
 
     /**
      * Create new core instance
@@ -29,12 +33,12 @@ class Core implements CoreInterface, Iterator
      */
     public function __construct(protected VipsImage $vipsImage)
     {
-        //
+        $this->meta = new Collection();
     }
 
     /**
      * @param list<FrameInterface> $frames
-     * @throws VipsException
+     * @throws DriverException
      */
     public static function createFromFrames(array $frames, int $loops = 0): self
     {
@@ -46,13 +50,47 @@ class Core implements CoreInterface, Iterator
             $natives[] = $frame->native();
         }
 
-        $image = VipsImage::arrayjoin($natives, ['across' => 1]);
-        $image->set('delay', $delay);
-        $image->set('loop', $loops);
-        $image->set('page-height', $natives[0]->height);
-        $image->set('n-pages', count($frames));
+        try {
+            $image = VipsImage::arrayjoin($natives, ['across' => 1]);
+            $image->set('delay', $delay);
+            $image->set('loop', $loops);
+            $image->set('page-height', $natives[0]->height);
+            $image->set('n-pages', count($frames));
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to create image core from frames', previous: $e);
+        }
 
         return new self($image);
+    }
+
+    public function meta(): CollectionInterface
+    {
+        return $this->meta;
+    }
+
+    /**
+     * @throws NotSupportedException
+     */
+    public function set(int|string $key, mixed $item): CollectionInterface
+    {
+        throw new NotSupportedException('Not implemented');
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws DriverException
+     */
+    public function at(int $key = 0, mixed $default = null): mixed
+    {
+        return $this->frame($key);
+    }
+
+    /**
+     * @throws NotSupportedException
+     */
+    public function clear(): CollectionInterface
+    {
+        throw new NotSupportedException('Not implemented');
     }
 
     /**
@@ -83,19 +121,15 @@ class Core implements CoreInterface, Iterator
      */
     public static function ensureInMemory(CoreInterface $core): CoreInterface
     {
-        try {
-            if (!in_array('vips-sequential', $core->native()->getFields())) {
-                return $core;
-            }
-
-            if (false === (bool) $core->native()->get('vips-sequential')) {
-                return $core;
-            }
-
-            $core->setNative($core->native()->copyMemory());
-        } catch (AnimationException) {
-            //
+        if (!in_array('vips-sequential', $core->native()->getFields())) {
+            return $core;
         }
+
+        if (false === (bool) $core->native()->get('vips-sequential')) {
+            return $core;
+        }
+
+        $core->setNative($core->native()->copyMemory());
 
         return $core;
     }
@@ -105,20 +139,28 @@ class Core implements CoreInterface, Iterator
      *
      * @see CoreInterface::count()
      *
-     * @throws VipsException
+     * @throws DriverException
      */
     public function count(): int
     {
-        return $this->vipsImage->getType('n-pages') === 0 ? 1 : $this->vipsImage->get('n-pages');
+        try {
+            return $this->vipsImage->getType('n-pages') === 0 ? 1 : $this->vipsImage->get('n-pages');
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to count image frames', previous: $e);
+        }
     }
 
     /**
      * @param list<FrameInterface> $frames
-     * @throws VipsException|AnimationException
+     * @throws DriverException
      */
     public static function replaceFrames(VipsImage $vipsImage, array $frames): VipsImage
     {
-        $loops = in_array('loop', $vipsImage->getFields()) ? $vipsImage->get('loop') : 0;
+        try {
+            $loops = in_array('loop', $vipsImage->getFields()) ? $vipsImage->get('loop') : 0;
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to replace frames', previous: $e);
+        }
 
         return self::createFromFrames($frames, $loops)->native();
     }
@@ -128,31 +170,32 @@ class Core implements CoreInterface, Iterator
      *
      * @see CoreInterface::frame()
      *
-     * @throws AnimationException|VipsException
+     * @throws InvalidArgumentException
+     * @throws DriverException
      */
     public function frame(int $position): FrameInterface
     {
         $count = $this->count();
 
         if ($position > ($count - 1)) {
-            throw new AnimationException('Frame #' . $position . ' could not be found in the image.');
+            throw new InvalidArgumentException('Frame #' . $position . ' could not be found in the image.');
         }
 
         if ($count === 1) {
             return new Frame($this->vipsImage);
         }
 
-        $sequential = in_array('vips-sequential', $this->vipsImage->getFields()) ?
-            $this->vipsImage->get('vips-sequential') : null;
-
-        if ($sequential) {
-            $this->vipsImage = $this->vipsImage->copyMemory();
-        }
-
-        $delay = in_array('delay', $this->vipsImage->getFields()) ?
-            ($this->vipsImage->get('delay')[$position] ?? 0) : null;
-
         try {
+            $sequential = in_array('vips-sequential', $this->vipsImage->getFields()) ?
+                $this->vipsImage->get('vips-sequential') : null;
+
+            if ($sequential) {
+                $this->vipsImage = $this->vipsImage->copyMemory();
+            }
+
+            $delay = in_array('delay', $this->vipsImage->getFields()) ?
+                ($this->vipsImage->get('delay')[$position] ?? 0) : null;
+
             $height = $this->vipsImage->getType('page-height') === 0 ?
                 $this->vipsImage->height : $this->vipsImage->get('page-height');
 
@@ -170,11 +213,11 @@ class Core implements CoreInterface, Iterator
 
                 return new Frame($vipsImage, $delay / 1000);
             }
-
-            return new Frame($vipsImage);
-        } catch (VipsException) {
-            throw new AnimationException('Frame #' . $position . ' could not be found in the image.');
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to extract frame from image core', previous: $e);
         }
+
+        return new Frame($vipsImage);
     }
 
     /**
@@ -182,7 +225,7 @@ class Core implements CoreInterface, Iterator
      *
      * @see CoreInterface::add()
      *
-     * @throws AnimationException|VipsException
+     * @throws DriverException
      */
     public function add(FrameInterface $frame): self
     {
@@ -199,11 +242,15 @@ class Core implements CoreInterface, Iterator
      *
      * @see CoreInterface::loops()
      *
-     * @throws VipsException
+     * @throws DriverException
      */
     public function loops(): int
     {
-        return (int) $this->vipsImage->get('loop');
+        try {
+            return (int) $this->vipsImage->get('loop');
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to load loop count', previous: $e);
+        }
     }
 
     /**
@@ -211,11 +258,15 @@ class Core implements CoreInterface, Iterator
      *
      * @see CoreInterface::setLoops()
      *
-     * @throws VipsException
+     * @throws DriverException
      */
     public function setLoops(int $loops): CoreInterface
     {
-        $this->vipsImage->set('loop', $loops);
+        try {
+            $this->vipsImage->set('loop', $loops);
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to set loop count', previous: $e);
+        }
 
         return $this;
     }
@@ -225,7 +276,8 @@ class Core implements CoreInterface, Iterator
      *
      * @see CollectionInterface::first()
      *
-     * @throws AnimationException|VipsException
+     * @throws InvalidArgumentException
+     * @throws DriverException
      */
     public function first(): FrameInterface
     {
@@ -237,7 +289,8 @@ class Core implements CoreInterface, Iterator
      *
      * @see CollectableInterface::last()
      *
-     * @throws AnimationException|VipsException
+     * @throws InvalidArgumentException
+     * @throws DriverException
      */
     public function last(): FrameInterface
     {
@@ -251,11 +304,7 @@ class Core implements CoreInterface, Iterator
      */
     public function has(int|string $key): bool
     {
-        try {
-            return (bool) $this->frame($key);
-        } catch (VipsException | AnimationException) {
-            return false;
-        }
+        return $this->get($key) instanceof FrameInterface;
     }
 
     /**
@@ -263,7 +312,7 @@ class Core implements CoreInterface, Iterator
      *
      * @see CollectionInterface::push()
      *
-     * @throws AnimationException|VipsException
+     * @throws DriverException
      */
     public function push(mixed $item): CollectionInterface
     {
@@ -278,8 +327,8 @@ class Core implements CoreInterface, Iterator
     public function get(int|string $key, mixed $default = null): mixed
     {
         try {
-            return $this->frame($key);
-        } catch (VipsException | AnimationException) {
+            return $this->frame(intval($key));
+        } catch (ImageException) {
             return $default;
         }
     }
@@ -288,8 +337,6 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CollectionInterface::getAtPosition()
-     *
-     * @throws Exception
      */
     public function getAtPosition(int $key = 0, mixed $default = null): mixed
     {
@@ -309,15 +356,19 @@ class Core implements CoreInterface, Iterator
     }
 
     /**
-     * @throws AnimationException|VipsException
+     * @throws DriverException
      * @return list<FrameInterface>
      */
     public function toArray(): array
     {
         $frames = [];
 
-        for ($i = 0; $i < $this->count(); $i++) {
-            $frames[] = $this->frame($i);
+        try {
+            for ($i = 0; $i < $this->count(); $i++) {
+                $frames[] = $this->frame($i);
+            }
+        } catch (InvalidArgumentException $e) {
+            throw new DriverException('Failed to cast ' . $this::class . ' to array', previous: $e);
         }
 
         return $frames;
@@ -328,7 +379,7 @@ class Core implements CoreInterface, Iterator
      *
      * @see CollectionInterface::slice()
      *
-     * @throws AnimationException|VipsException
+     * @throws DriverException
      */
     public function slice(int $offset, ?int $length = 0): CollectionInterface
     {
@@ -403,22 +454,26 @@ class Core implements CoreInterface, Iterator
     /**
      * Show debug info for the current image
      *
-     * @throws VipsException
+     * @throws DriverException
      * @return array<string, mixed>
      */
     public function __debugInfo(): array
     {
         $debug = [];
 
-        foreach ($this->vipsImage->getFields() as $name) {
-            $value = $this->vipsImage->get($name);
+        try {
+            foreach ($this->vipsImage->getFields() as $name) {
+                $value = $this->vipsImage->get($name);
 
-            if (str_ends_with($name, "-data")) {
-                $len = strlen($value);
-                $value = "<$len bytes of binary data>";
+                if (str_ends_with($name, "-data")) {
+                    $len = strlen($value);
+                    $value = "<$len bytes of binary data>";
+                }
+
+                $debug[$name] = is_array($value) ? implode(", ", $value) : (string) $value;
             }
-
-            $debug[$name] = is_array($value) ? implode(", ", $value) : (string) $value;
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to read image field names', previous: $e);
         }
 
         return $debug;

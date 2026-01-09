@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips;
 
+use Intervention\Image\Alignment;
 use Intervention\Image\Colors\Rgb\Color;
 use Intervention\Image\Drivers\AbstractFontProcessor;
-use Intervention\Image\Exceptions\FontException;
-use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Exceptions\DirectoryNotFoundException;
+use Intervention\Image\Exceptions\DriverException;
+use Intervention\Image\Exceptions\FileNotFoundException;
+use Intervention\Image\Exceptions\FileNotReadableException;
+use Intervention\Image\Exceptions\FilePointerException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Geometry\Rectangle;
 use Intervention\Image\Interfaces\ColorInterface;
 use Intervention\Image\Interfaces\FontInterface;
@@ -23,7 +28,12 @@ class FontProcessor extends AbstractFontProcessor
      *
      * @see FontProcessorInterface::boxSize()
      *
-     * @throws RuntimeException
+     * @throws InvalidArgumentException
+     * @throws DriverException
+     * @throws DirectoryNotFoundException
+     * @throws FileNotFoundException
+     * @throws FileNotReadableException
+     * @throws FilePointerException
      */
     public function boxSize(string $text, FontInterface $font): SizeInterface
     {
@@ -43,8 +53,12 @@ class FontProcessor extends AbstractFontProcessor
     /**
      * Return renderable text/font combination in the specified colour as an vips image
      *
-     * @throws FontException
-     * @throws RuntimeException
+     * @throws InvalidArgumentException
+     * @throws DriverException
+     * @throws DirectoryNotFoundException
+     * @throws FileNotFoundException
+     * @throws FileNotReadableException
+     * @throws FilePointerException
      */
     public function textToVipsImage(
         string $text,
@@ -54,16 +68,15 @@ class FontProcessor extends AbstractFontProcessor
         return VipsImage::text(
             '<span ' . $this->pangoAttributes($font, $color) . '>' . htmlspecialchars($text) . '</span>',
             [
-                'fontfile' => $font->filename(),
-                'font' => TrueTypeFont::fromPath($font->filename())->familyName() . ' ' . $font->size(),
+                'fontfile' => $font->filepath(),
+                'font' => TrueTypeFont::fromPath($font->filepath())->familyName() . ' ' . $font->size(),
                 'dpi' => 72,
                 'rgba' => true,
                 'width' => $font->wrapWidth(),
                 'wrap' => TextWrap::WORD,
-                'align' => match ($font->alignment()) {
-                    'center',
-                    'middle' => Align::CENTRE,
-                    'right' => Align::HIGH,
+                'align' => match ($font->horizontalAlignment()) {
+                    Alignment::CENTER,
+                    Alignment::RIGHT => Align::HIGH,
                     default => Align::LOW,
                 },
                 'spacing' => 0
@@ -76,7 +89,7 @@ class FontProcessor extends AbstractFontProcessor
      */
     private function pangoAttributes(FontInterface $font, ColorInterface $color): string
     {
-        $pango_attributes = [
+        $pangoAttributes = [
             'line_height' => (string) $font->lineHeight() / 1.62,
             'foreground' => $color->toHex('#'),
         ];
@@ -84,6 +97,6 @@ class FontProcessor extends AbstractFontProcessor
         // format pango attributes
         return implode(' ', array_map(function ($value, $key): string {
             return $key . '="' . $value . '"';
-        }, $pango_attributes, array_keys($pango_attributes)));
+        }, $pangoAttributes, array_keys($pangoAttributes)));
     }
 }

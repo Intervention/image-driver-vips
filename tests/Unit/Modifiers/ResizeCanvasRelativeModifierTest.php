@@ -19,9 +19,9 @@ final class ResizeCanvasRelativeModifierTest extends BaseTestCase
         $image->modify(new ResizeCanvasRelativeModifier(2, 2, 'ff0', 'center'));
         $this->assertEquals(3, $image->width());
         $this->assertEquals(3, $image->height());
-        $this->assertColor(255, 255, 0, 255, $image->pickColor(0, 0));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(1, 1));
-        $this->assertColor(255, 255, 0, 255, $image->pickColor(2, 2));
+        $this->assertColor(255, 255, 0, 255, $image->colorAt(0, 0));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(1, 1));
+        $this->assertColor(255, 255, 0, 255, $image->colorAt(2, 2));
     }
 
     public function testModifyWithTransparency(): void
@@ -32,10 +32,10 @@ final class ResizeCanvasRelativeModifierTest extends BaseTestCase
         $image->modify(new ResizeCanvasRelativeModifier(2, 2, 'ff0', 'center'));
         $this->assertEquals(18, $image->width());
         $this->assertEquals(18, $image->height());
-        $this->assertColor(255, 255, 0, 255, $image->pickColor(0, 0));
-        $this->assertColor(180, 224, 0, 255, $image->pickColor(1, 1));
-        $this->assertColor(180, 224, 0, 255, $image->pickColor(2, 2));
-        $this->assertColor(255, 255, 0, 255, $image->pickColor(17, 17));
-        $this->assertTransparency($image->pickColor(12, 1));
+        $this->assertColor(255, 255, 0, 255, $image->colorAt(0, 0));
+        $this->assertColor(180, 224, 0, 255, $image->colorAt(1, 1));
+        $this->assertColor(180, 224, 0, 255, $image->colorAt(2, 2));
+        $this->assertColor(255, 255, 0, 255, $image->colorAt(17, 17));
+        $this->assertTransparency($image->colorAt(12, 1));
     }
 }

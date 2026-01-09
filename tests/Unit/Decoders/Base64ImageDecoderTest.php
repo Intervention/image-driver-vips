@@ -7,7 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Decoders;
 use Intervention\Image\Drivers\Vips\Decoders\Base64ImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
-use Intervention\Image\Exceptions\DecoderException;
+use Intervention\Image\Exceptions\ImageDecoderException;
 use Intervention\Image\Image;
 use PHPUnit\Framework\Attributes\CoversClass;
 
@@ -33,7 +33,7 @@ class Base64ImageDecoderTest extends BaseTestCase
 
     public function testDecoderInvalid(): void
     {
-        $this->expectException(DecoderException::class);
+        $this->expectException(ImageDecoderException::class);
         $this->decoder->decode('test');
     }
 }

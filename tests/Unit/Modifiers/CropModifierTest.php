@@ -20,9 +20,9 @@ final class CropModifierTest extends BaseTestCase
         $image = $image->modify(new CropModifier(200, 200, 0, 0, 'ffffff', 'bottom-right'));
         $this->assertEquals(200, $image->width());
         $this->assertEquals(200, $image->height());
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(5, 5));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(100, 100));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(190, 190));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(5, 5));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(100, 100));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(190, 190));
     }
 
     public function testModifyCropExtend(): void
@@ -31,21 +31,21 @@ final class CropModifierTest extends BaseTestCase
         $image = $image->modify(new CropModifier(800, 100, -10, -10, 'ff0000', 'top-left'));
         $this->assertEquals(800, $image->width());
         $this->assertEquals(100, $image->height());
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(9, 9));
-        $this->assertColor(0, 0, 255, 255, $image->pickColor(16, 16));
-        $this->assertColor(0, 0, 255, 255, $image->pickColor(445, 16));
-        $this->assertTransparency($image->pickColor(460, 16));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(9, 9));
+        $this->assertColor(0, 0, 255, 255, $image->colorAt(16, 16));
+        $this->assertColor(0, 0, 255, 255, $image->colorAt(445, 16));
+        $this->assertTransparency($image->colorAt(460, 16));
     }
 
     public function testModifyCropExtendWithPosition(): void
     {
         $image = (new Driver())->createImage(50, 50)
             ->fill('ff0000')
-            ->crop(100, 25, background: '00f', position: 'center');
+            ->crop(100, 25, background: '00f', alignment: 'center');
 
         $this->assertEquals(100, $image->width());
         $this->assertEquals(25, $image->height());
-        $this->assertEquals('ff0000', $image->pickColor(50, 24)->toHex());
+        $this->assertEquals('ff0000', $image->colorAt(50, 24)->toHex());
     }
 
     public function testModifyCropExtendWithAlpha(): void
@@ -55,7 +55,7 @@ final class CropModifierTest extends BaseTestCase
         $this->assertEquals(800, $image->width());
         $this->assertEquals(379, $image->height());
 
-        $this->assertTransparency($image->pickColor(799, 378));
+        $this->assertTransparency($image->colorAt(799, 378));
     }
 
     public function testModifyCropSmart(): void
@@ -64,18 +64,18 @@ final class CropModifierTest extends BaseTestCase
         $image = $image->modify(new CropModifier(50, 50, 0, 0, 'ff0000', 'interesting-attention'));
         $this->assertEquals(50, $image->width());
         $this->assertEquals(50, $image->height());
-        $this->assertColor(255, 219, 154, 255, $image->pickColor(25, 25));
+        $this->assertColor(255, 219, 154, 255, $image->colorAt(25, 25));
     }
 
     public function testModifyCropAnimated(): void
     {
         $image = $this->readTestImage('animation.gif');
-        $image = $image->modify(new CropModifier(15, 15, 0, 0, position: 'center'));
+        $image = $image->modify(new CropModifier(15, 15, 0, 0, alignment: 'center'));
         $this->assertEquals(15, $image->width());
         $this->assertEquals(15, $image->height());
 
         $this->assertEquals(
-            array_map(fn(Color $color): string => $color->toHex(), $image->pickColors(8, 8)->toArray()),
+            array_map(fn(Color $color): string => $color->toHex(), $image->colorsAt(8, 8)->toArray()),
             ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63']
         );
     }
@@ -86,16 +86,16 @@ final class CropModifierTest extends BaseTestCase
         $image = $image->modify(new CropModifier(15, 15, 0, 0, 'ff0000', 'interesting-attention'));
         $this->assertEquals(15, $image->width());
         $this->assertEquals(15, $image->height());
-        $this->assertColor(255, 166, 1, 255, $image->pickColor(8, 8));
+        $this->assertColor(255, 166, 1, 255, $image->colorAt(8, 8));
     }
 
     public function testCropGrayscale(): void
     {
         $image = $this->readTestImage('grayscale.jpg');
         $image->modify(new CropModifier(258, 258, 0, 0, 'ff0000', 'center'));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(0, 0));
-        $this->assertColor(255, 255, 255, 255, $image->pickColor(1, 1));
-        $this->assertColor(0, 0, 0, 255, $image->pickColor(1, 256));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(0, 0));
+        $this->assertColor(255, 255, 255, 255, $image->colorAt(1, 1));
+        $this->assertColor(0, 0, 0, 255, $image->colorAt(1, 256));
 
         // Ensure the image is encodable
         $image->encode();
@@ -105,9 +105,9 @@ final class CropModifierTest extends BaseTestCase
     {
         $image = $this->readTestImage('grayscale-alpha.png');
         $image->modify(new CropModifier(258, 258, 0, 0, 'ff0000', 'center'));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(0, 0));
-        $this->assertColor(0, 0, 0, 128, $image->pickColor(1, 1));
-        $this->assertColor(255, 255, 255, 128, $image->pickColor(256, 1));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(0, 0));
+        $this->assertColor(0, 0, 0, 127, $image->colorAt(1, 1), 1);
+        $this->assertColor(255, 255, 255, 127, $image->colorAt(256, 1), 1);
 
         // Ensure the image is encodable
         $image->encode();

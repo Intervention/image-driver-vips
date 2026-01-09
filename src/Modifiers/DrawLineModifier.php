@@ -6,7 +6,9 @@ namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Driver;
-use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Exceptions\DriverException;
+use Intervention\Image\Exceptions\ModifierException;
+use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\DrawLineModifier as GenericDrawLineModifier;
@@ -20,29 +22,38 @@ class DrawLineModifier extends GenericDrawLineModifier implements SpecializedInt
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      *
-     * @throws VipsException|RuntimeException|\RuntimeException
+     * @throws StateException
+     * @throws ModifierException
+     * @throws DriverException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
-        $line = Driver::createShape(
-            'line',
-            [
-                'x1' => $this->drawable->start()->x(),
-                'y1' => $this->drawable->start()->y(),
-                'x2' => $this->drawable->end()->x(),
-                'y2' => $this->drawable->end()->y(),
-                'stroke' => $this->backgroundColor()->toString(),
-                'stroke-width' => $this->drawable->width(),
-            ],
-            $image->width(),
-            $image->height(),
-        );
+        $xmlAttributes = [
+            'x1' => $this->drawable->start()->x(),
+            'y1' => $this->drawable->start()->y(),
+            'x2' => $this->drawable->end()->x(),
+            'y2' => $this->drawable->end()->y(),
+        ];
+
+        if ($this->drawable->hasBackgroundColor()) {
+            $xmlAttributes['stroke'] = $this->backgroundColor()->toString();
+            $xmlAttributes['stroke-width'] = $this->drawable->width();
+        }
+
+        $line = Driver::createShape('line', $xmlAttributes, $image->width(), $image->height());
 
         $frames = [];
         foreach ($image as $frame) {
-            $frames[] = $frame->setNative(
-                $frame->native()->composite($line, [BlendMode::OVER])
-            );
+            try {
+                $native = $frame->native()->composite($line, [BlendMode::OVER]);
+            } catch (VipsException $e) {
+                throw new ModifierException(
+                    'Failed to apply ' . self::class . ', unable to draw line',
+                    previous: $e
+                );
+            }
+
+            $frames[] = $frame->setNative($native);
         }
 
         $image->core()->setNative(

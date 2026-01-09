@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
-use Intervention\Image\Exceptions\AnimationException;
+use Intervention\Image\Exceptions\ModifierException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\SharpenModifier as GenericSharpenModifier;
@@ -18,14 +18,17 @@ class SharpenModifier extends GenericSharpenModifier implements SpecializedInter
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      *
-     * @throws AnimationException
-     * @throws VipsException
+     * @throws ModifierException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
-        $image->core()->setNative(
-            $image->core()->native()->conv($this->getUnsharpMask())
-        );
+        try {
+            $native = $image->core()->native()->conv($this->unsharpMask());
+        } catch (VipsException $e) {
+            throw new ModifierException('Failed to sharpen image', previous: $e);
+        }
+
+        $image->core()->setNative($native);
 
         return $image;
     }
@@ -35,7 +38,7 @@ class SharpenModifier extends GenericSharpenModifier implements SpecializedInter
      *
      * @throws VipsException
      */
-    private function getUnsharpMask(): VipsImage
+    private function unsharpMask(): VipsImage
     {
         $min = $this->amount >= 10 ? $this->amount * -0.01 : 0;
         $max = $this->amount * -0.025;

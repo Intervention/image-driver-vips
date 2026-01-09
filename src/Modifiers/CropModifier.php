@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
-use Intervention\Image\Colors\Rgb\Channels\Alpha;
-use Intervention\Image\Colors\Rgb\Channels\Blue;
-use Intervention\Image\Colors\Rgb\Channels\Green;
-use Intervention\Image\Colors\Rgb\Channels\Red;
 use Intervention\Image\Drivers\Vips\Core;
-use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Exceptions\DriverException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
+use Intervention\Image\Exceptions\ModifierException;
+use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SizeInterface;
@@ -18,6 +17,7 @@ use Intervention\Image\Modifiers\CropModifier as GenericCropModifier;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
 use Jcupitt\Vips\Interesting;
+use Jcupitt\Vips\Exception as VipsException;
 
 class CropModifier extends GenericCropModifier implements SpecializedInterface
 {
@@ -28,28 +28,44 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      *
-     * @throws RuntimeException|\Jcupitt\Vips\Exception
+     * @throws StateException
+     * @throws ModifierException
+     * @throws DriverException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
-        $originalSize = $image->size();
-        $crop = $this->crop($image);
+        try {
+            $originalSize = $image->size();
+            $crop = $this->crop($image);
+        } catch (InvalidArgumentException $e) {
+            throw new ModifierException(
+                'Failed to apply ' . self::class . ', unable to calculate target size',
+                previous: $e
+            );
+        }
+
         $background = $this->background($crop, $image);
 
         if (
-            in_array($this->position, $this->getInterestingPositions()) &&
+            in_array($this->alignment, $this->interestingPositions()) &&
             (
                 $crop->width() < $originalSize->width() ||
                 $crop->height() < $originalSize->height()
             )
         ) {
-            $image->core()->setNative(
-                $image->core()->native()->smartcrop(
+            try {
+                $cropped = $image->core()->native()->smartcrop(
                     $crop->width(),
                     $crop->height(),
-                    ['interesting' => str_replace(self::INTERESTING_PREFIX, '', $this->position)]
-                )
-            );
+                    ['interesting' => str_replace(self::INTERESTING_PREFIX, '', $this->alignment)]
+                );
+            } catch (VipsException $e) {
+                throw new ModifierException(
+                    'Failed to apply ' . self::class . ', unable to process resizing',
+                    previous: $e
+                );
+            }
+            $image->core()->setNative($cropped);
         } else {
             $frames = [];
             foreach ($image as $frame) {
@@ -65,52 +81,28 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
     }
 
     /**
-     * @throws RuntimeException|\Jcupitt\Vips\Exception
+     * @throws StateException
+     * @throws ModifierException
      */
     private function background(SizeInterface $resizeTo, ImageInterface $image): VipsImage
     {
-        $bgColor = $this->driver()->handleInput($this->background);
+        $backgroundColor = $this->driver()->colorProcessor($image)->colorToNative(
+            $this->backgroundColor()
+        );
 
-        $bands = [
-            $bgColor->channel(Green::class)->value(),
-            $bgColor->channel(Blue::class)->value(),
-        ];
-
-        $imageNative = $image->core()->native();
-        if ($imageNative->bands < 3) {
-            // Grayscale -> RGB
-            $imageNative = $imageNative->colourspace('srgb');
+        try {
+            return VipsImage::black(1, 1)
+                ->add(array_slice($backgroundColor, 0, 1))
+                ->cast($image->core()->native()->format)
+                ->embed(0, 0, $resizeTo->width(), $resizeTo->height(), ['extend' => Extend::COPY])
+                ->copy(['interpretation' => $image->core()->native()->interpretation])
+                ->bandjoin(array_slice($backgroundColor, 1));
+        } catch (VipsException $e) {
+            throw new ModifierException(
+                'Failed to apply ' . self::class . ', unable to build background color',
+                previous: $e
+            );
         }
-
-        // original image and background must have the same number of bands
-        if ($imageNative->hasAlpha()) {
-            $bands[] = $bgColor->channel(Alpha::class)->value();
-        }
-
-        return VipsImage::black(1, 1)
-            ->add($bgColor->channel(Red::class)->value())
-            ->cast($imageNative->format)
-            ->embed(0, 0, $resizeTo->width(), $resizeTo->height(), ['extend' => Extend::COPY])
-            ->copy(['interpretation' => $imageNative->interpretation])
-            ->bandjoin($bands);
-    }
-
-    /**
-     * Smart crop interesting positions, prefixed with `interesting-`.
-     *
-     * @return list<string>
-     */
-    private function getInterestingPositions(): array
-    {
-        return array_map(fn (string $position): string => self::INTERESTING_PREFIX . $position, [
-            Interesting::NONE,
-            Interesting::CENTRE,
-            Interesting::ENTROPY,
-            Interesting::ATTENTION,
-            Interesting::LOW,
-            Interesting::HIGH,
-            Interesting::ALL,
-        ]);
     }
 
     private function cropFrame(
@@ -119,35 +111,48 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
         SizeInterface $originalSize,
         VipsImage $background
     ): VipsImage {
-        $offset_x = $crop->pivot()->x() + $this->offset_x;
-        $offset_y = $crop->pivot()->y() + $this->offset_y;
+        $offsetX = $crop->pivot()->x() + $this->x;
+        $offsetY = $crop->pivot()->y() + $this->y;
 
         $targetWidth = min($crop->width(), $originalSize->width());
         $targetHeight = min($crop->height(), $originalSize->height());
 
-        $targetWidth = $targetWidth > $originalSize->width() ? $targetWidth + $offset_x : $targetWidth;
-        $targetHeight = $targetHeight > $originalSize->height() ? $targetHeight + $offset_y : $targetHeight;
+        $targetWidth = $targetWidth > $originalSize->width() ? $targetWidth + $offsetX : $targetWidth;
+        $targetHeight = $targetHeight > $originalSize->height() ? $targetHeight + $offsetY : $targetHeight;
 
         $cropped = $frame->native()->crop(
-            max($offset_x, 0),
-            max($offset_y, 0),
+            max($offsetX, 0),
+            max($offsetY, 0),
             $targetWidth,
             $targetHeight
         );
 
         if ($crop->width() > $originalSize->width() || $cropped->height < $crop->height()) {
-            if ($cropped->bands < 3) {
-                // Grayscale -> RGB
-                $cropped = $cropped->colourspace('srgb');
-            }
-
             $cropped = $background->insert(
                 $cropped,
-                max($offset_x * -1, 0),
-                max($offset_y * -1, 0)
+                max($offsetX * -1, 0),
+                max($offsetY * -1, 0)
             );
         }
 
         return $cropped;
+    }
+
+    /**
+     * Smart crop interesting positions, prefixed with `interesting-`.
+     *
+     * @return list<string>
+     */
+    private function interestingPositions(): array
+    {
+        return array_map(fn(string $position): string => self::INTERESTING_PREFIX . $position, [
+            Interesting::NONE,
+            Interesting::CENTRE,
+            Interesting::ENTROPY,
+            Interesting::ATTENTION,
+            Interesting::LOW,
+            Interesting::HIGH,
+            Interesting::ALL,
+        ]);
     }
 }

@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
+use Intervention\Image\Drivers\Vips\ColorProcessor;
 use Intervention\Image\Drivers\Vips\Core;
-use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Exceptions\DriverException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
+use Intervention\Image\Exceptions\ModifierException;
+use Intervention\Image\Interfaces\ColorspaceInterface;
 use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SizeInterface;
@@ -21,16 +25,25 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      *
-     * @throws RuntimeException|VipsException
+     * @throws ModifierException
+     * @throws DriverException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
-        $crop = $this->getCropSize($image);
-        $resize = $this->getResizeSize($crop);
+        try {
+            $crop = $this->cropSize($image);
+            $resize = $this->resizeSize($crop);
+        } catch (InvalidArgumentException $e) {
+            throw new ModifierException(
+                'Failed to apply ' . self::class . ', unable to calculate target size',
+                previous: $e
+            );
+        }
 
         $frames = [];
         foreach ($image as $frame) {
-            $frames[] = $frame->setNative($this->cropResizeFrame($frame, $crop, $resize));
+            $native = $this->cropResizeFrame($frame, $crop, $resize, $image->colorspace());
+            $frames[] = $frame->setNative($native);
         }
 
         $image->core()->setNative(
@@ -40,20 +53,32 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
         return $image;
     }
 
+    /**
+     * @throws ModifierException
+     */
     private function cropResizeFrame(
         FrameInterface $frame,
         SizeInterface $cropSize,
-        SizeInterface $resizeSize
+        SizeInterface $resizeSize,
+        ColorspaceInterface $colorspace
     ): VipsImage {
-        return $frame->native()->crop(
-            $cropSize->pivot()->x(),
-            $cropSize->pivot()->y(),
-            $cropSize->width(),
-            $cropSize->height()
-        )->thumbnail_image($resizeSize->width(), [
-            'height' => $resizeSize->height(),
-            'size' => 'force',
-            'no_rotate' => true,
-        ]) ;
+        try {
+            return $frame->native()->crop(
+                $cropSize->pivot()->x(),
+                $cropSize->pivot()->y(),
+                $cropSize->width(),
+                $cropSize->height()
+            )->thumbnail_image($resizeSize->width(), [
+                'height' => $resizeSize->height(),
+                'size' => 'force',
+                'no_rotate' => true,
+                'export-profile' => ColorProcessor::colorspaceToInterpretation($colorspace),
+            ]);
+        } catch (VipsException $e) {
+            throw new ModifierException(
+                'Failed to apply ' . self::class . ', unable to process resizing',
+                previous: $e
+            );
+        }
     }
 }

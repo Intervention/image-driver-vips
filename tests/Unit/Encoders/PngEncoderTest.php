@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Encoders;
 
+use Generator;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Encoders\PngEncoder;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
@@ -55,7 +56,7 @@ final class PngEncoderTest extends BaseTestCase
         );
     }
 
-    public static function indexedDataProvider(): \Generator
+    public static function indexedDataProvider(): Generator
     {
         yield [
             (new Driver())->createImage(3, 2), // new
@@ -95,7 +96,7 @@ final class PngEncoderTest extends BaseTestCase
         yield [
             static::readTestImage('test.jpg'), // jpeg
             new PngEncoder(indexed: false),
-            'truecolor', // should be 'truecolor-alpha' but there seems to be no way to force this with vips
+            'truecolor-alpha',
         ];
         yield [
             static::readTestImage('test.jpg'), // jpeg

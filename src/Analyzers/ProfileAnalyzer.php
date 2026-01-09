@@ -6,7 +6,9 @@ namespace Intervention\Image\Drivers\Vips\Analyzers;
 
 use Intervention\Image\Analyzers\ProfileAnalyzer as GenericProfileAnalyzer;
 use Intervention\Image\Colors\Profile;
-use Intervention\Image\Exceptions\ColorException;
+use Intervention\Image\Exceptions\AnalyzerException;
+use Intervention\Image\Exceptions\FilePointerException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Jcupitt\Vips\Exception as VipsException;
@@ -17,13 +19,17 @@ class ProfileAnalyzer extends GenericProfileAnalyzer implements SpecializedInter
      * {@inheritdoc}
      *
      * @see Intervention\Image\Interfaces\AnalyzerInterface::analyze()
+     *
+     * @throws InvalidArgumentException
+     * @throws AnalyzerException
+     * @throws FilePointerException
      */
     public function analyze(ImageInterface $image): mixed
     {
         try {
             $profiles = $image->core()->native()->get('icc-profile-data');
         } catch (VipsException) {
-            throw new ColorException('No ICC profile found in image.');
+            throw new AnalyzerException('No ICC profile found in image');
         }
 
         return new Profile($profiles);

@@ -6,9 +6,15 @@ namespace Intervention\Image\Drivers\Vips\Encoders;
 
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\HeicEncoder as GenericHeicEncoder;
+use Intervention\Image\Exceptions\EncoderException;
+use Intervention\Image\Exceptions\FilePointerException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
+use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
+use Intervention\Image\MediaType;
 use Jcupitt\Vips\Config as VipsConfig;
+use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\ForeignKeep;
 
 class HeicEncoder extends GenericHeicEncoder implements SpecializedInterface
@@ -17,18 +23,28 @@ class HeicEncoder extends GenericHeicEncoder implements SpecializedInterface
      * {@inheritdoc}
      *
      * @see Intervention\Image\Interfaces\EncoderInterface::encode()
+     *
+     * @throws InvalidArgumentException
+     * @throws EncoderException
+     * @throws FilePointerException
+     * @throws StateException
      */
     public function encode(ImageInterface $image): EncodedImage
     {
-        $result = $image->core()->native()->writeToBuffer('.heic', $this->getOptions());
+        try {
+            $result = $image->core()->native()->writeToBuffer('.heic', $this->options());
+        } catch (VipsException $e) {
+            throw new EncoderException('Failed to encode HEIC image format', previous: $e);
+        }
 
-        return new EncodedImage($result, 'image/heic');
+        return new EncodedImage($result, MediaType::IMAGE_HEIC->value);
     }
 
     /**
+     * @throws StateException
      * @return array{lossless: bool, Q: int, keep?: int, strip?: bool}
      */
-    protected function getOptions(): array
+    private function options(): array
     {
         $options = [
             'lossless' => $this->quality === 100,

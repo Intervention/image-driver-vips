@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Collection;
-use Intervention\Image\Exceptions\AnimationException;
+use Intervention\Image\Exceptions\ModifierException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\ModifierInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
@@ -21,7 +21,7 @@ class StripMetaModifier implements ModifierInterface, SpecializedInterface
      *
      * @see ModifierInterface::apply()
      *
-     * @throws VipsException|AnimationException
+     * @throws ModifierException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
@@ -31,12 +31,16 @@ class StripMetaModifier implements ModifierInterface, SpecializedInterface
             'strip' => true,
         ];
 
-        $buf = $image->core()->native()->tiffsave_buffer($options);
+        try {
+            $buf = $image->core()->native()->tiffsave_buffer($options);
+            $image->setExif(new Collection());
+            $image->core()->setNative(
+                VipsImage::newFromBuffer($buf)
+            );
+        } catch (VipsException $e) {
+            throw new ModifierException('Failed to strip meta data from image', previous: $e);
+        }
 
-        $image->setExif(new Collection());
-        $image->core()->setNative(
-            VipsImage::newFromBuffer($buf)
-        );
 
         return $image;
     }

@@ -14,7 +14,7 @@ class ResizeDownModifier extends ResizeModifier
      *
      * @see Intervention\Image\Drivers\Modifiers\ResizeModifier::getAdjustedSize()
      */
-    protected function getAdjustedSize(ImageInterface $image): SizeInterface
+    protected function adjustedSize(ImageInterface $image): SizeInterface
     {
         return $image->size()->resizeDown($this->width, $this->height);
     }

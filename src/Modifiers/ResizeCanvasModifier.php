@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
+use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\ResizeCanvasModifier as GenericResizeCanvasModifier;
@@ -14,6 +15,8 @@ class ResizeCanvasModifier extends GenericResizeCanvasModifier implements Specia
      * {@inheritdoc}
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
+     *
+     * @throws InvalidArgumentException
      */
     public function apply(ImageInterface $image): ImageInterface
     {

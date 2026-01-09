@@ -8,7 +8,7 @@ use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Encoders\JpegEncoder;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Drivers\Vips\Tests\Traits\CanDetectProgressiveJpeg;
-use Intervention\Image\ImageManager;
+use Intervention\Image\Image;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(JpegEncoder::class)]
@@ -53,7 +53,7 @@ final class JpegEncoderTest extends BaseTestCase
         $encoder = new JpegEncoder();
         $encoder->setDriver(new Driver());
         $result = $encoder->encode($image);
-        $image = ImageManager::withDriver(Driver::class)->read($result);
+        $image = Image::usingDriver(Driver::class)->from($result);
         $this->assertEquals('Oliver Vogel', $image->exif('IFD0.Artist'));
     }
 
@@ -64,7 +64,7 @@ final class JpegEncoderTest extends BaseTestCase
         $encoder = new JpegEncoder(strip: true);
         $encoder->setDriver(new Driver());
         $result = $encoder->encode($image);
-        $image = ImageManager::withDriver(Driver::class)->read($result);
+        $image = Image::usingDriver(Driver::class)->from($result);
         $this->assertNull($image->exif('IFD0.Artist'));
     }
 }

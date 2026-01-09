@@ -6,7 +6,9 @@ namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Driver;
-use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Exceptions\DriverException;
+use Intervention\Image\Exceptions\ModifierException;
+use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\DrawPolygonModifier as GenericDrawPolygonModifier;
@@ -20,30 +22,47 @@ class DrawPolygonModifier extends GenericDrawPolygonModifier implements Speciali
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      *
-     * @throws VipsException|RuntimeException|\RuntimeException
+     * @throws StateException
+     * @throws ModifierException
+     * @throws DriverException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
+        $xmlAttributes = [
+            'points' => implode(' ', array_map(
+                fn(array $coordinates): string => implode(',', $coordinates),
+                array_chunk($this->drawable->toArray(), 2),
+            )),
+        ];
+
+        if ($this->drawable->hasBackgroundColor()) {
+            $xmlAttributes['fill'] = $this->backgroundColor()->toString();
+        }
+
+        if ($this->drawable->hasBorder()) {
+            $xmlAttributes['stroke'] = $this->borderColor()->toString();
+            $xmlAttributes['stroke-width'] = $this->drawable->borderSize();
+        }
+
         $polygon = Driver::createShape(
             'polygon',
-            [
-                'fill' => $this->backgroundColor()->toString(),
-                'stroke' => $this->borderColor()->toString(),
-                'stroke-width' => $this->drawable->borderSize(),
-                'points' => implode(' ', array_map(
-                    fn(array $coordinates): string => implode(',', $coordinates),
-                    array_chunk($this->drawable->toArray(), 2),
-                )),
-            ],
+            $xmlAttributes,
             $image->width(),
             $image->height(),
         );
 
         $frames = [];
         foreach ($image as $frame) {
-            $frames[] = $frame->setNative(
-                $frame->native()->composite($polygon, [BlendMode::OVER])
-            );
+            try {
+                $native = $frame->native()->composite($polygon, [BlendMode::OVER]);
+            } catch (VipsException $e) {
+                throw new ModifierException(
+                    'Failed to apply ' . self::class . ', unable to draw polygon',
+                    previous: $e
+                );
+            }
+
+            $frames[] = $frame->setNative($native);
         }
 
         $image->core()->setNative(

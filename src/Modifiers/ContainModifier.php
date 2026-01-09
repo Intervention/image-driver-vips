@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
+use Intervention\Image\Alignment;
+use Intervention\Image\Drivers\Vips\ColorProcessor;
 use Intervention\Image\Drivers\Vips\Core;
-use Intervention\Image\Exceptions\ColorException;
-use Intervention\Image\Exceptions\RuntimeException;
-use Intervention\Image\Interfaces\ColorInterface;
+use Intervention\Image\Exceptions\DriverException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
+use Intervention\Image\Exceptions\ModifierException;
+use Intervention\Image\Exceptions\StateException;
+use Intervention\Image\Interfaces\ColorspaceInterface;
 use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SizeInterface;
@@ -24,19 +28,42 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      *
-     * @throws RuntimeException|VipsException
+     * @throws StateException
+     * @throws ModifierException
+     * @throws DriverException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
-        $resize = $this->getResizeSize($image);
-        $bgColor = $this->driver()->handleInput($this->background);
+        try {
+            $targetSize = $this->resizeSize($image);
+        } catch (InvalidArgumentException $e) {
+            throw new ModifierException(
+                'Failed to apply ' . self::class . ', unable to calculate target size',
+                previous: $e
+            );
+        }
+
+        $colorspace = $image->colorspace();
+        $bgColor = $this->driver()->colorProcessor($image)->colorToNative(
+            $this->backgroundColor()
+        );
 
         if (!$image->isAnimated()) {
-            $contained = $this->contain($image->core()->first(), $resize, $bgColor)->native();
+            $contained = $this->contain(
+                $image->core()->first(),
+                $targetSize,
+                $bgColor,
+                $colorspace,
+            )->native();
         } else {
             $frames = [];
             foreach ($image as $frame) {
-                $frames[] = $this->contain($frame, $resize, $bgColor);
+                $frames[] = $this->contain(
+                    $frame,
+                    $targetSize,
+                    $bgColor,
+                    $colorspace,
+                );
             }
 
             $contained = Core::replaceFrames($image->core()->native(), $frames);
@@ -48,73 +75,58 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
     }
 
     /**
-     * @throws ColorException
+     * @param array<int> $bgColor
+     * @throws ModifierException
      */
-    private function contain(FrameInterface $frame, SizeInterface $resize, ColorInterface $bgColor): FrameInterface
-    {
-        $resized = $frame->native()->thumbnail_image($resize->width(), [
-            'height' => $resize->height(),
-            'no_rotate' => true,
-        ]);
+    private function contain(
+        FrameInterface $frame,
+        SizeInterface $resize,
+        array $bgColor,
+        ColorspaceInterface $colorspace,
+    ): FrameInterface {
+        try {
+            $resized = $frame->native()->thumbnail_image($resize->width(), [
+                'height' => $resize->height(),
+                'no_rotate' => true,
+                'export-profile' => ColorProcessor::colorspaceToInterpretation($colorspace),
+            ]);
 
-        if ($resized->bands < 3) {
-            // Grayscale -> RGB
-            $resized = $resized->colourspace('srgb');
-        }
-
-        if (!$resized->hasAlpha()) {
-            $resized = $resized->bandjoin_const(255);
-        }
-
-        $frame->setNative(
-            $resized->gravity(
-                $this->positionToGravity($this->position),
+            $native = $resized->gravity(
+                $this->alignmentToGravity($this->alignment),
                 $resize->width(),
                 $resize->height(),
                 [
                     'extend' => Extend::BACKGROUND,
-                    'background' => $bgColor->toArray(),
+                    'background' => $bgColor,
                 ]
-            )
-        );
+            );
+        } catch (VipsException $e) {
+            throw new ModifierException(
+                'Failed to apply ' . self::class . ', unable to process resizing',
+                previous: $e
+            );
+        }
+
+        $frame->setNative($native);
 
         return $frame;
     }
 
     /**
-     * Convert position string to libvips gravity string.
+     * Convert alignment to libvips gravity.
      */
-    public function positionToGravity(string $position): string
+    protected function alignmentToGravity(string|Alignment $alignment): string
     {
-        return match (strtolower($position)) {
-            'top', 'top-center',
-            'top-middle',
-            'center-top',
-            'middle-top' => CompassDirection::NORTH,
-            'top-right',
-            'right-top' => CompassDirection::NORTH_EAST,
-            'left',
-            'left-center',
-            'left-middle',
-            'center-left',
-            'middle-left' => CompassDirection::WEST,
-            'right',
-            'right-center',
-            'right-middle',
-            'center-right',
-            'middle-right' => CompassDirection::EAST,
-            'bottom-left',
-            'left-bottom' => CompassDirection::SOUTH_WEST,
-            'bottom',
-            'bottom-center',
-            'bottom-middle',
-            'center-bottom',
-            'middle-bottom' => CompassDirection::SOUTH,
-            'bottom-right',
-            'right-bottom' => CompassDirection::SOUTH_EAST,
-            'top-left',
-            'left-top' => CompassDirection::NORTH_WEST,
-            default => CompassDirection::CENTRE
+        return match (Alignment::tryCreate($alignment)) {
+            Alignment::TOP => CompassDirection::NORTH,
+            Alignment::TOP_RIGHT => CompassDirection::NORTH_EAST,
+            Alignment::LEFT => CompassDirection::WEST,
+            Alignment::RIGHT => CompassDirection::EAST,
+            Alignment::BOTTOM_LEFT => CompassDirection::SOUTH_WEST,
+            Alignment::BOTTOM => CompassDirection::SOUTH,
+            Alignment::BOTTOM_RIGHT => CompassDirection::SOUTH_EAST,
+            Alignment::TOP_LEFT => CompassDirection::NORTH_WEST,
+            default => CompassDirection::CENTRE,
         };
     }
 }

@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Tests\Unit;
 
 use Generator;
-use Intervention\Image\Colors\Rgb\Colorspace;
 use Intervention\Image\Drivers\Vips\Driver;
+use Intervention\Image\Drivers\Vips\Frame;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\FileExtension;
 use Intervention\Image\Format;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ColorProcessorInterface;
-use Intervention\Image\Interfaces\FrameInterface;
-use Intervention\Image\Interfaces\ImageInterface;
+use Intervention\Image\Interfaces\CoreInterface;
 use Intervention\Image\MediaType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Jcupitt\Vips\Image as VipsImage;
 
 #[CoversClass(Driver::class)]
 class DriverTest extends BaseTestCase
@@ -43,28 +43,19 @@ class DriverTest extends BaseTestCase
         $this->assertEquals(96, $image->resolution()->y());
     }
 
-    public function testCreateAnimation(): void
+    public function testCreateCore(): void
     {
-        $image = $this->driver->createAnimation(function ($animation): void {
-            $animation->add($this->getTestResourcePath('red.gif'), 0);
-            $animation->add($this->getTestResourcePath('green.gif'), .25);
-        })->setLoops(5);
-        $this->assertInstanceOf(ImageInterface::class, $image);
-
-        $this->assertEquals(16, $image->width());
-        $this->assertEquals(16, $image->height());
-        $this->assertEquals(5, $image->loops());
-        $this->assertEquals(2, $image->count());
-
-        foreach ($image as $i => $frame) {
-            $this->assertInstanceOf(FrameInterface::class, $frame);
-            $this->assertEquals($i * .25, $frame->delay());
-        }
+        $core = $this->driver->createCore([
+            new Frame(VipsImage::black(3, 2)),
+            new Frame(VipsImage::black(3, 2)),
+            new Frame(VipsImage::black(3, 2)),
+        ]);
+        $this->assertInstanceOf(CoreInterface::class, $core);
     }
 
     public function testColorProcessor(): void
     {
-        $result = $this->driver->colorProcessor(new Colorspace());
+        $result = $this->driver->colorProcessor($this->driver->createImage(3, 2));
         $this->assertInstanceOf(ColorProcessorInterface::class, $result);
     }
 

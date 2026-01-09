@@ -7,40 +7,56 @@ namespace Intervention\Image\Drivers\Vips\Decoders;
 use Intervention\Image\Drivers\SpecializableDecoder;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Modifiers\AlignRotationModifier;
-use Intervention\Image\Exceptions\DecoderException;
-use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
+use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ImageInterface;
-use Intervention\Image\Interfaces\ColorInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\MediaType;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Image as VipsImage;
+use Jcupitt\Vips\Interpretation;
 
 class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInterface
 {
     /**
      * {@inheritdoc}
      *
+     * @see Intervention\Image\Interfaces\DecoderInterface::supports()
+     */
+    public function supports(mixed $input): bool
+    {
+        return $input instanceof VipsImage;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
      * @see Intervention\Image\Interfaces\DecoderInterface::decode()
      *
-     * @throws DecoderException|RuntimeException
+     * @throws InvalidArgumentException
+     * @throws StateException
      */
-    public function decode(mixed $input): ImageInterface|ColorInterface
+    public function decode(mixed $input): ImageInterface
     {
         if (!is_object($input)) {
-            throw new DecoderException('Unable to decode input');
+            throw new InvalidArgumentException('Input must be of type ' . VipsImage::class);
         }
 
         if (!($input instanceof VipsImage)) {
-            throw new DecoderException('Unable to decode input');
+            throw new InvalidArgumentException('Input must be of type ' . VipsImage::class);
+        }
+
+        if (in_array($input->interpretation, [Interpretation::B_W, Interpretation::GREY16])) {
+            $input = $input->icc_transform(Interpretation::SRGB); // normalize to srgb
+        }
+
+        if ($input->interpretation === Interpretation::SRGB && $input->bands === 3) {
+            $input = $input->bandjoin_const(255); // add alpha channel
         }
 
         // build image instance
-        $image = new Image(
-            $this->driver(),
-            new Core($input)
-        );
+        $image = Image::usingDriver($this->driver())->setCore(new Core($input));
 
         // auto-rotate
         if ($this->driver()->config()->autoOrientation === true && $this->exifRotation($input) > 1) {
@@ -57,6 +73,8 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
 
     /**
      * Get options for vips library according to current configuration
+     *
+     * @throws StateException
      */
     protected function stringOptions(): string
     {
@@ -94,6 +112,7 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
             'png' => MediaType::IMAGE_PNG,
             'tiff' => MediaType::IMAGE_TIFF,
             'webp' => MediaType::IMAGE_WEBP,
+            // todo: implement ICO format
             default => null
         };
     }

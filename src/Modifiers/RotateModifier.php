@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Core;
-use Intervention\Image\Exceptions\AnimationException;
-use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Exceptions\DriverException;
+use Intervention\Image\Exceptions\ModifierException;
+use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\RotateModifier as GenericRotateModifier;
@@ -20,21 +21,34 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      *
-     * @throws VipsException|AnimationException|RuntimeException
+     * @throws ModifierException
+     * @throws StateException
+     * @throws DriverException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
+        $backgroundColor = $this->driver()
+            ->colorProcessor($image)
+            ->colorToNative($this->backgroundColor());
+
         $frames = [];
         foreach ($image as $frame) {
-            $vipsImage = match ($this->rotationAngle()) {
-                0.0 => $frame->native(),
-                90.0, -270.0 => $frame->native()->rot90(),
-                180.0, -180.0 => $frame->native()->rot180(),
-                -90.0, 270.0 => $frame->native()->rot270(),
-                default => $this->rotate($frame->native()),
-            };
+            try {
+                $native = match ($this->rotationAngle()) {
+                    0.0 => $frame->native(),
+                    90.0, -270.0 => $frame->native()->rot90(),
+                    180.0, -180.0 => $frame->native()->rot180(),
+                    -90.0, 270.0 => $frame->native()->rot270(),
+                    default => $this->rotate($frame->native(), $backgroundColor),
+                };
+            } catch (VipsException $e) {
+                throw new ModifierException(
+                    'Failed to apply ' . self::class . ', unable to rotate image',
+                    previous: $e
+                );
+            }
 
-            $frames[] = $frame->setNative($vipsImage);
+            $frames[] = $frame->setNative($native);
         }
 
         $image->core()->setNative(
@@ -45,19 +59,17 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
     }
 
     /**
-     * @throws RuntimeException
+     * @param array<float> $backgroundColor
      */
-    public function rotate(VipsImage $vipsImage): VipsImage
+    private function rotate(VipsImage $vipsImage, array $backgroundColor): VipsImage
     {
-        $background = $this->driver()->handleInput($this->background);
-
         if (!$vipsImage->hasAlpha()) {
             $vipsImage = $vipsImage->bandjoin_const(255);
         }
 
         return $vipsImage->similarity([
-            'background' => $background->toArray(),
             'angle' => $this->rotationAngle(),
+            'background' => $backgroundColor,
         ]);
     }
 }

@@ -6,10 +6,16 @@ namespace Intervention\Image\Drivers\Vips\Encoders;
 
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\WebpEncoder as GenericWebpEncoder;
+use Intervention\Image\Exceptions\EncoderException;
+use Intervention\Image\Exceptions\FilePointerException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
+use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
+use Intervention\Image\MediaType;
 use Jcupitt\Vips\Config as VipsConfig;
 use Jcupitt\Vips\ForeignKeep;
+use Jcupitt\Vips\Exception as VipsException;
 
 class WebpEncoder extends GenericWebpEncoder implements SpecializedInterface
 {
@@ -17,18 +23,28 @@ class WebpEncoder extends GenericWebpEncoder implements SpecializedInterface
      * {@inheritdoc}
      *
      * @see Intervention\Image\Interfaces\EncoderInterface::encode()
+     *
+     * @throws InvalidArgumentException
+     * @throws StateException
+     * @throws EncoderException
+     * @throws FilePointerException
      */
     public function encode(ImageInterface $image): EncodedImage
     {
-        $result = $image->core()->native()->writeToBuffer('.webp', $this->getOptions());
+        try {
+            $result = $image->core()->native()->writeToBuffer('.webp', $this->options());
+        } catch (VipsException $e) {
+            throw new EncoderException('Failed to encode WEBP image format ', previous: $e);
+        }
 
-        return new EncodedImage($result, 'image/webp');
+        return new EncodedImage($result, MediaType::IMAGE_WEBP->value);
     }
 
     /**
+     * @throws StateException
      * @return array{lossless: bool, Q: int, keep?: int, strip?: bool}
      */
-    protected function getOptions(): array
+    private function options(): array
     {
         $options = [
             'lossless' => $this->quality === 100,

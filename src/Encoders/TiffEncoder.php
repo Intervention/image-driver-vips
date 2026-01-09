@@ -6,10 +6,16 @@ namespace Intervention\Image\Drivers\Vips\Encoders;
 
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\TiffEncoder as GenericTiffEncoder;
+use Intervention\Image\Exceptions\EncoderException;
+use Intervention\Image\Exceptions\FilePointerException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
+use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
+use Intervention\Image\MediaType;
 use Jcupitt\Vips\Config as VipsConfig;
 use Jcupitt\Vips\ForeignKeep;
+use Jcupitt\Vips\Exception as VipsException;
 
 class TiffEncoder extends GenericTiffEncoder implements SpecializedInterface
 {
@@ -17,18 +23,28 @@ class TiffEncoder extends GenericTiffEncoder implements SpecializedInterface
      * {@inheritdoc}
      *
      * @see Intervention\Image\Interfaces\EncoderInterface::encode()
+     *
+     * @throws InvalidArgumentException
+     * @throws EncoderException
+     * @throws FilePointerException
+     * @throws StateException
      */
     public function encode(ImageInterface $image): EncodedImage
     {
-        $result = $image->core()->native()->writeToBuffer('.tiff', $this->getOptions());
+        try {
+            $result = $image->core()->native()->writeToBuffer('.tiff', $this->options());
+        } catch (VipsException $e) {
+            throw new EncoderException('Failed to encode TIFF image format', previous: $e);
+        }
 
-        return new EncodedImage($result, 'image/tiff');
+        return new EncodedImage($result, MediaType::IMAGE_TIFF->value);
     }
 
     /**
+     * @throws StateException
      * @return array{lossless: bool, Q: int, keep?: int, strip?: bool}
      */
-    protected function getOptions(): array
+    private function options(): array
     {
         $options = [
             'lossless' => $this->quality === 100,

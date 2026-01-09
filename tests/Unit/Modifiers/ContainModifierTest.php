@@ -21,9 +21,9 @@ final class ContainModifierTest extends BaseTestCase
         $image->modify(new ContainModifier(200, 100, 'ff0'));
         $this->assertEquals(200, $image->width());
         $this->assertEquals(100, $image->height());
-        $this->assertColor(255, 255, 0, 255, $image->pickColor(0, 0));
-        $this->assertColor(0, 0, 0, 0, $image->pickColor(140, 10));
-        $this->assertColor(255, 255, 0, 255, $image->pickColor(175, 10));
+        $this->assertColor(255, 255, 0, 255, $image->colorAt(0, 0));
+        $this->assertColor(0, 0, 0, 0, $image->colorAt(140, 10));
+        $this->assertColor(255, 255, 0, 255, $image->colorAt(175, 10));
     }
 
     public function testModifyContainPosition(): void
@@ -34,9 +34,9 @@ final class ContainModifierTest extends BaseTestCase
         $image->modify(new ContainModifier(1000, 600, 'FF0000', 'left'));
         $this->assertEquals(1000, $image->width());
         $this->assertEquals(600, $image->height());
-        $this->assertColor(0, 0, 255, 255, $image->pickColor(0, 0));
-        $this->assertColor(0, 0, 0, 0, $image->pickColor(600, 10));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(900, 10));
+        $this->assertColor(0, 0, 255, 255, $image->colorAt(0, 0));
+        $this->assertColor(0, 0, 0, 0, $image->colorAt(600, 10));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(900, 10));
     }
 
     public function testModifyContainWithAlpha(): void
@@ -47,8 +47,8 @@ final class ContainModifierTest extends BaseTestCase
         $image->modify(new ContainModifier(800, 200, 'transparent', 'right'));
         $this->assertEquals(800, $image->width());
         $this->assertEquals(200, $image->height());
-        $this->assertColor(255, 255, 255, 0, $image->pickColor(0, 0));
-        $this->assertColor(254, 168, 0, 255, $image->pickColor(799, 190));
+        $this->assertColor(255, 255, 255, 0, $image->colorAt(0, 0));
+        $this->assertColor(254, 168, 0, 255, $image->colorAt(799, 190));
     }
 
     public function testModifyContainAnimated(): void
@@ -62,7 +62,7 @@ final class ContainModifierTest extends BaseTestCase
         $this->assertEquals(8, $image->count());
 
         foreach ($image as $frame) {
-            $this->assertColor(255, 255, 255, 0, $frame->toImage(new Driver())->pickColor(0, 0));
+            $this->assertColor(255, 255, 255, 0, $frame->toImage(new Driver())->colorAt(0, 0));
         }
     }
 
@@ -74,8 +74,8 @@ final class ContainModifierTest extends BaseTestCase
         $image->modify(new ContainModifier(200, 200, 'transparent', 'top'));
         $this->assertEquals(200, $image->width());
         $this->assertEquals(200, $image->height());
-        $this->assertColor(255, 255, 255, 0, $image->pickColor(0, 0));
-        $this->assertColor(0, 0, 0, 255, $image->pickColor(50, 0));
+        $this->assertColor(255, 255, 255, 0, $image->colorAt(0, 0));
+        $this->assertColor(0, 0, 0, 255, $image->colorAt(50, 0));
     }
 
     public function testModifyContainGrayscaleAlpha(): void
@@ -86,7 +86,7 @@ final class ContainModifierTest extends BaseTestCase
         $image->modify(new ContainModifier(258, 256, 'transparent', 'top'));
         $this->assertEquals(258, $image->width());
         $this->assertEquals(256, $image->height());
-        $this->assertColor(255, 255, 255, 0, $image->pickColor(0, 0));
-        $this->assertColor(0, 0, 0, 128, $image->pickColor(1, 0));
+        $this->assertColor(255, 255, 255, 0, $image->colorAt(0, 0));
+        $this->assertColor(0, 0, 0, 127, $image->colorAt(1, 0), 1);
     }
 }

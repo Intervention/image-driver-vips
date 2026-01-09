@@ -11,7 +11,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
-use Intervention\Image\Exceptions\DecoderException;
+use Intervention\Image\Exceptions\FileNotFoundException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Image;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -28,10 +29,10 @@ final class FilePathImageDecoderTest extends BaseTestCase
     }
 
     #[DataProvider('filePathsProvider')]
-    public function testDecode(string $path, bool $result): void
+    public function testDecode(string $path, true|string $result): void
     {
-        if ($result === false) {
-            $this->expectException(DecoderException::class);
+        if (is_string($result)) {
+            $this->expectException($result);
         }
 
         $result = $this->decoder->decode($path);
@@ -46,10 +47,10 @@ final class FilePathImageDecoderTest extends BaseTestCase
         $image = $this->decoder->decode(self::getTestResourcePath('trim.png'));
 
         // run more than 1 operation to test sequential mode
-        $image->pickColor(14, 14)->toHex();
+        $image->colorAt(14, 14)->toHex();
         $image->modify(new BlurModifier(30));
         $image->modify(new ResizeModifier(10, 10));
-        $image->pickColor(7, 7)->toHex();
+        $image->colorAt(7, 7)->toHex();
         $this->assertInstanceOf(Image::class, $image);
 
         $image = $this->decoder->decode(self::getTestResourcePath('trim.png'));
@@ -77,8 +78,8 @@ final class FilePathImageDecoderTest extends BaseTestCase
             [self::getTestResourcePath('circle.png'), true],
             [self::getTestResourcePath('test.jpg'), true],
             [self::getTestResourcePath('test.jpeg'), true],
-            ['no-path', false],
-            [str_repeat('x', PHP_MAXPATHLEN + 1), false],
+            ['no-path', FileNotFoundException::class],
+            [str_repeat('x', PHP_MAXPATHLEN + 1), InvalidArgumentException::class],
         ];
     }
 }

@@ -5,51 +5,75 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Tests\Unit;
 
 use Generator;
-use Intervention\Image\Colors\Cmyk\Colorspace as CmykColorspace;
-use Intervention\Image\Colors\Rgb\Colorspace as RgbColorspace;
-use Intervention\Image\Colors\Hsv\Colorspace as HsvColorspace;
-use Intervention\Image\Colors\Hsl\Colorspace as HslColorspace;
-use Intervention\Image\Colors\Rgb\Channels\Alpha;
-use Intervention\Image\Colors\Rgb\Channels\Blue;
-use Intervention\Image\Colors\Rgb\Channels\Green;
-use Intervention\Image\Colors\Rgb\Channels\Red;
-use Intervention\Image\Colors\Rgb\Color;
-use Intervention\Image\Colors\Rgb\Colorspace;
+use Intervention\Image\Colors\Cmyk\Colorspace as Cmyk;
+use Intervention\Image\Colors\Rgb\Colorspace as Rgb;
+use Intervention\Image\Colors\Hsv\Colorspace as Hsv;
+use Intervention\Image\Colors\Hsl\Colorspace as Hsl;
+use Intervention\Image\Colors\Oklab\Colorspace as Oklab;
+use Intervention\Image\Colors\Oklch\Colorspace as Oklch;
+use Intervention\Image\Colors\Rgb\Color as RgbColor;
+use Intervention\Image\Colors\Cmyk\Color as CmykColor;
 use Intervention\Image\Drivers\Vips\ColorProcessor;
+use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
+use Intervention\Image\Interfaces\ColorInterface;
+use Intervention\Image\Interfaces\ImageInterface;
 use Jcupitt\Vips\Interpretation;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
 
-final class ColorProcessorTest extends TestCase
+final class ColorProcessorTest extends BaseTestCase
 {
-    public function testColorToNative(): void
+    /**
+     * @param array<float> $bands
+     */
+    #[DataProvider('colorToNativeDataProvider')]
+    public function testColorToNative(ImageInterface $image, ColorInterface $color, array $bands): void
     {
-        $processor = new ColorProcessor(new Colorspace());
-        $result = $processor->colorToNative(new Color(255, 55, 0, 255));
-        $this->assertEquals([255, 55, 0, 255], $result);
+        $this->assertEquals($bands, (new ColorProcessor($image))->colorToNative($color));
     }
 
-    public function testNativeToColor(): void
+    public static function colorToNativeDataProvider(): Generator
     {
-        $processor = new ColorProcessor(new Colorspace());
-        $color = $processor->nativeToColor([255, 55, 0, 255]);
-        $this->assertInstanceOf(Color::class, $color);
-        $this->assertEquals(255, $color->channel(Red::class)->value());
-        $this->assertEquals(55, $color->channel(Green::class)->value());
-        $this->assertEquals(0, $color->channel(Blue::class)->value());
-        $this->assertEquals(255, $color->channel(Alpha::class)->value());
+        yield [static::readTestImage('blue.gif'), new RgbColor(255, 0, 55), [255.0, 0.0, 55.0, 255.0]];
+        yield [static::readTestImage('blue.gif'), new RgbColor(255, 0, 55, .2), [255.0, 0.0, 55.0, 51.0]];
+        yield [static::readTestImage('300dpi.png'), new RgbColor(255, 0, 55), [255.0, 0.0, 55.0, 255.0]];
+        yield [static::readTestImage('300dpi.png'), new RgbColor(255, 0, 55, .2), [255.0, 0.0, 55.0, 51.0]];
+        yield [static::readTestImage('grayscale.jpg'), new RgbColor(30, 0, 30), [30.0, 0.0, 30.0, 255.0]];
+        yield [static::readTestImage('grayscale.jpg'), new RgbColor(30, 0, 30, .2), [30.0, 0.0, 30.0, 51.0]];
+        yield [static::readTestImage('grayscale-alpha.png'), new RgbColor(30, 0, 30), [30.0, 0.0, 30.0, 255.0]];
+        yield [static::readTestImage('grayscale-alpha.png'), new RgbColor(30, 0, 30, .2), [30.0, 0.0, 30.0, 51.0]];
+        yield [static::readTestImage('gradient.bmp'), new RgbColor(255, 0, 55), [255.0, 0.0, 55.0, 255.0]];
+        yield [static::readTestImage('gradient.bmp'), new RgbColor(255, 0, 55, .2), [255.0, 0.0, 55.0, 51.0]];
+        yield [static::readTestImage('blocks.png'), new RgbColor(255, 0, 55), [255.0, 0.0, 55.0, 255.0]];
+        yield [static::readTestImage('blocks.png'), new RgbColor(255, 0, 55, .2), [255.0, 0.0, 55.0, 51.0]];
+        yield [static::readTestImage('cmyk.jpg'), new RgbColor(0, 0, 0), [0.0, 0.0, 0.0, 255.0]];
+        yield [static::readTestImage('cmyk.jpg'), new RgbColor(0, 0, 0, .2), [0.0, 0.0, 0.0, 255.0]];
+        yield [static::readTestImage('blue.gif'), new CmykColor(0, 100, 100, 0), [255.0, 0.0, 0.0, 255.0]];
+        yield [static::readTestImage('blue.gif'), new CmykColor(0, 100, 100, 0, .2), [255.0, 0.0, 0.0, 51.0]];
     }
 
-    public function testNativeToColorGrayscale(): void
+    /**
+     * @param array<float> $bands
+     */
+    #[DataProvider('nativeToColorDataProvider')]
+    public function testNativeToColor(ImageInterface $image, array $bands, ColorInterface $color): void
     {
-        // Test grayscale image handling - single value should be expanded to RGB
-        $processor = new ColorProcessor(new Colorspace());
-        $color = $processor->nativeToColor([128]); // Single grayscale value
-        $this->assertInstanceOf(Color::class, $color);
-        $this->assertEquals(128, $color->channel(Red::class)->value());
-        $this->assertEquals(128, $color->channel(Green::class)->value());
-        $this->assertEquals(128, $color->channel(Blue::class)->value());
-        $this->assertEquals(255, $color->channel(Alpha::class)->value()); // Default alpha
+        $this->assertEquals($color, (new ColorProcessor($image))->nativeToColor($bands));
+    }
+
+    public static function nativeToColorDataProvider(): Generator
+    {
+        yield [static::readTestImage('blue.gif'), [255.0], new RgbColor(255, 255, 255, 1)];
+        yield [static::readTestImage('blue.gif'), [255.0, 51.], new RgbColor(255, 255, 255, .2)];
+        yield [static::readTestImage('blue.gif'), [255.0, 0.0, 55.0], new RgbColor(255, 0, 55, 1)];
+        yield [static::readTestImage('blue.gif'), [255.0, 0.0, 55.0, 255.0], new RgbColor(255, 0, 55, 1)];
+        yield [static::readTestImage('grayscale-alpha.png'), [255.0], new RgbColor(255, 255, 255, 1)];
+        yield [static::readTestImage('grayscale-alpha.png'), [255.0, 51.0], new RgbColor(255, 255, 255, .2)];
+        yield [static::readTestImage('grayscale-alpha.png'), [255.0, 0.0, 55.0], new RgbColor(255, 0, 55, 1)];
+        yield [static::readTestImage('grayscale-alpha.png'), [255.0, 0.0, 55.0, 51.0], new RgbColor(255, 0, 55, .2)];
+        yield [static::readTestImage('cmyk.jpg'), [25.0], new CmykColor(10, 10, 10, 10, 1)];
+        yield [static::readTestImage('cmyk.jpg'), [25.0, 51.0], new CmykColor(10, 10, 10, 10, .2)];
+        yield [static::readTestImage('cmyk.jpg'), [255.0, 0.0, 127.0, 255.0], new CmykColor(100, 0, 50, 100, 1)];
+        yield [static::readTestImage('cmyk.jpg'), [255.0, 0.0, 127.0, 255.0, 51.0], new CmykColor(100, 0, 50, 100, .2)];
     }
 
     #[DataProvider('interpretationToColorspaceProvider')]
@@ -60,25 +84,25 @@ final class ColorProcessorTest extends TestCase
 
     public static function interpretationToColorspaceProvider(): Generator
     {
-        yield [Interpretation::MULTIBAND, RgbColorspace::class];
-        yield [Interpretation::B_W, RgbColorspace::class];
-        yield [Interpretation::HISTOGRAM, RgbColorspace::class];
-        yield [Interpretation::FOURIER, RgbColorspace::class];
-        yield [Interpretation::XYZ, RgbColorspace::class];
-        yield [Interpretation::LAB, RgbColorspace::class];
-        yield [Interpretation::CMYK, CmykColorspace::class];
-        yield [Interpretation::LABQ, RgbColorspace::class];
-        yield [Interpretation::RGB, RgbColorspace::class];
-        yield [Interpretation::CMC, RgbColorspace::class];
-        yield [Interpretation::LCH, RgbColorspace::class];
-        yield [Interpretation::LABS, RgbColorspace::class];
-        yield [Interpretation::SRGB, RgbColorspace::class];
-        yield [Interpretation::HSV, HsvColorspace::class];
-        yield [Interpretation::SCRGB, RgbColorspace::class];
-        yield [Interpretation::XYZ, RgbColorspace::class];
-        yield [Interpretation::RGB16, RgbColorspace::class];
-        yield [Interpretation::GREY16, RgbColorspace::class];
-        yield [Interpretation::MATRIX, RgbColorspace::class];
+        yield [Interpretation::MULTIBAND, Rgb::class];
+        yield [Interpretation::B_W, Rgb::class];
+        yield [Interpretation::HISTOGRAM, Rgb::class];
+        yield [Interpretation::FOURIER, Rgb::class];
+        yield [Interpretation::XYZ, Rgb::class];
+        yield [Interpretation::LAB, Rgb::class];
+        yield [Interpretation::CMYK, Cmyk::class];
+        yield [Interpretation::LABQ, Rgb::class];
+        yield [Interpretation::RGB, Rgb::class];
+        yield [Interpretation::CMC, Rgb::class];
+        yield [Interpretation::LCH, Rgb::class];
+        yield [Interpretation::LABS, Rgb::class];
+        yield [Interpretation::SRGB, Rgb::class];
+        yield [Interpretation::HSV, Hsv::class];
+        yield [Interpretation::SCRGB, Rgb::class];
+        yield [Interpretation::XYZ, Rgb::class];
+        yield [Interpretation::RGB16, Rgb::class];
+        yield [Interpretation::GREY16, Rgb::class];
+        yield [Interpretation::MATRIX, Rgb::class];
     }
 
     #[DataProvider('colorspaceToInterpretationProvider')]
@@ -89,9 +113,11 @@ final class ColorProcessorTest extends TestCase
 
     public static function colorspaceToInterpretationProvider(): Generator
     {
-        yield [RgbColorspace::class, Interpretation::SRGB];
-        yield [HsvColorspace::class, Interpretation::HSV];
-        yield [HslColorspace::class, Interpretation::SRGB];
-        yield [CmykColorspace::class, Interpretation::CMYK];
+        yield [Rgb::class, Interpretation::SRGB];
+        yield [Hsv::class, Interpretation::HSV];
+        yield [Hsl::class, Interpretation::SRGB];
+        yield [Cmyk::class, Interpretation::CMYK];
+        yield [Oklch::class, Interpretation::SRGB];
+        yield [Oklab::class, Interpretation::SRGB];
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips;
 
-use Intervention\Image\Exceptions\FontException;
+use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\File;
 
 class TrueTypeFont extends File
@@ -20,7 +20,7 @@ class TrueTypeFont extends File
     /**
      * Return family name of current font
      *
-     * @throws FontException
+     * @throws DriverException
      */
     public function familyName(): string
     {
@@ -30,7 +30,7 @@ class TrueTypeFont extends File
     /**
      * Query name table of current font file
      *
-     * @throws FontException
+     * @throws DriverException
      */
     private function queryNameTable(int $id): string
     {
@@ -65,13 +65,13 @@ class TrueTypeFont extends File
             }
         }
 
-        throw new FontException('Unable to find id ' . $id . ' in name table.');
+        throw new DriverException('Unable to find id ' . $id . ' in name table');
     }
 
     /**
      * Return table offset of given table tag
      *
-     * @throws FontException
+     * @throws DriverException
      */
     private function tableOffset(string $tableTag): int
     {
@@ -87,7 +87,7 @@ class TrueTypeFont extends File
             $offsets[substr($record, 0, 4)] = unpack('N', substr($record, 8, 4))[1];
         }
         if (!array_key_exists($tableTag, $offsets)) {
-            throw new FontException('Unable to find offset for table ' . $tableTag . '.');
+            throw new DriverException('Unable to find offset for table ' . $tableTag);
         }
 
         return $offsets[$tableTag];

@@ -1,4 +1,4 @@
-# libvips driver for Intervention Image 3
+# libvips driver for Intervention Image
 
 [![Latest Version](https://img.shields.io/packagist/v/intervention/image-driver-vips.svg)](https://packagist.org/packages/intervention/image-driver-vips)
 [![Build Status](https://github.com/Intervention/image-driver-vips/actions/workflows/run-tests.yml/badge.svg)](https://github.com/Intervention/image-driver-vips/actions)
@@ -14,8 +14,7 @@ easy-to-use API.
 
 ## Installation
 
-You can easily install this library using [Composer](https://getcomposer.org).
-Simply request the package with the following command:
+Install this library using [Composer](https://getcomposer.org). Simply request the package with the following command:
     
 ```bash
 composer require intervention/image-driver-vips
@@ -23,30 +22,32 @@ composer require intervention/image-driver-vips
 
 ## Getting Started
 
-The public [API](https://image.intervention.io/v3) of Intervention Image can be
-used unchanged. The only [configuration](https://image.intervention.io/v3/basics/image-manager) that needs to be done is to ensure that
+The public [API](https://image.intervention.io) of Intervention Image can be
+used unchanged. The only [configuration](https://image.intervention.io/v4/basics/image-manager) that needs to be done is to ensure that
 `Intervention\Image\Drivers\Vips\Driver` by this library is used by `Intervention\Image\ImageManager`.
 
 ## Code Examples
 
 ```php
-use Intervention\Image\ImageManager;
+use Intervention\Image\Image;
 use Intervention\Image\Drivers\Vips\Driver as VipsDriver;
+use Intervention\Image\Alignment;
+use Intervention\Image\Format;
 
-// create image manager with vips driver
-$manager = ImageManager::withDriver(VipsDriver::class);
+// create image with vips driver
+$image = Image::usingDriver(VipsDriver::class);
 
-// open an image file
-$image = $manager->read('images/example.gif');
+// read image data from path
+$image->fromPath('images/example.gif');
 
-// resize image instance
-$image->resize(height: 300);
+// scale image by height
+$image->scale(height: 300);
 
 // insert a watermark
-$image->place('images/watermark.png');
+$image->insert('images/watermark.png', alignment: Alignment::BOTTOM_RIGHT);
 
 // encode edited image
-$encoded = $image->toJpg();
+$encoded = $image->encodeUsingFormat(format: Format::JPEG, quality: 65);
 
 // save encoded image
 $encoded->save('images/example.jpg');
@@ -54,7 +55,7 @@ $encoded->save('images/example.jpg');
 
 ## Requirements
 
-- PHP >= 8.1
+- PHP >= 8.3
 
 ## Caveats
 

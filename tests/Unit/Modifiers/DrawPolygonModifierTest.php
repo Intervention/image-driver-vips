@@ -16,14 +16,14 @@ final class DrawPolygonModifierTest extends BaseTestCase
     public function testApply(): void
     {
         $image = $this->readTestImage('trim.png');
-        $this->assertEquals('00aef0', $image->pickColor(14, 14)->toHex());
+        $this->assertEquals('00aef0', $image->colorAt(14, 14)->toHex());
         $drawable = new Polygon([new Point(10, 10), new Point(40, 10), new Point(40, 40), new Point(10, 40)]);
         $drawable->setBackgroundColor('b53717');
         $drawable->setBorder('0f0', 2);
         $result = $image->modify(new DrawPolygonModifier($drawable));
-        $this->assertEquals('b53717', $image->pickColor(25, 25)->toHex());
-        $this->assertEquals('b53717', $result->pickColor(25, 25)->toHex());
-        $this->assertEquals('00ff00', $image->pickColor(10, 10)->toHex());
-        $this->assertEquals('00ff00', $result->pickColor(40, 40)->toHex());
+        $this->assertEquals('b53717', $image->colorAt(25, 25)->toHex());
+        $this->assertEquals('b53717', $result->colorAt(25, 25)->toHex());
+        $this->assertEquals('00ff00', $image->colorAt(10, 10)->toHex());
+        $this->assertEquals('00ff00', $result->colorAt(40, 40)->toHex());
     }
 }

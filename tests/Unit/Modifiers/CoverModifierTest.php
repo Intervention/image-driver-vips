@@ -22,10 +22,10 @@ final class CoverModifierTest extends BaseTestCase
         $image->modify(new CoverModifier(100, 100, 'center'));
         $this->assertEquals(100, $image->width());
         $this->assertEquals(100, $image->height());
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(90, 90));
-        $this->assertColor(0, 255, 0, 255, $image->pickColor(65, 70));
-        $this->assertColor(0, 0, 255, 255, $image->pickColor(70, 52));
-        $this->assertTransparency($image->pickColor(90, 30));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(90, 90));
+        $this->assertColor(0, 255, 0, 255, $image->colorAt(65, 70));
+        $this->assertColor(0, 0, 255, 255, $image->colorAt(70, 52));
+        $this->assertTransparency($image->colorAt(90, 30));
     }
 
     public function testModifyOddSize(): void
@@ -39,12 +39,12 @@ final class CoverModifierTest extends BaseTestCase
     public function testModifyAnimated(): void
     {
         $image = $this->readTestImage('animation.gif');
-        $image = $image->modify(new CoverModifier(15, 15, position: 'center'));
+        $image = $image->modify(new CoverModifier(15, 15, alignment: 'center'));
         $this->assertEquals(15, $image->width());
         $this->assertEquals(15, $image->height());
 
         $this->assertEquals(
-            array_map(fn(Color $color): string => $color->toHex(), $image->pickColors(8, 8)->toArray()),
+            array_map(fn(Color $color): string => $color->toHex(), $image->colorsAt(8, 8)->toArray()),
             ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63']
         );
     }

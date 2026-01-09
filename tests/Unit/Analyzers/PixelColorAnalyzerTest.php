@@ -24,6 +24,35 @@ final class PixelColorAnalyzerTest extends BaseTestCase
         $this->assertEquals('b4e000', $result->toHex());
     }
 
+    public function testAnalyzeTransparency(): void
+    {
+        $image = $this->readTestImage('transparent.png');
+
+        $analyzer = new PixelColorAnalyzer(0, 0);
+        $analyzer->setDriver(new Driver());
+        $result = $analyzer->analyze($image);
+        $this->assertInstanceOf(ColorInterface::class, $result);
+        $this->assertColor(0, 0, 0, 0, $result);
+
+        $analyzer = new PixelColorAnalyzer(20, 5);
+        $analyzer->setDriver(new Driver());
+        $result = $analyzer->analyze($image);
+        $this->assertInstanceOf(ColorInterface::class, $result);
+        $this->assertColor(0, 0, 255, 127, $result, 1);
+
+        $analyzer = new PixelColorAnalyzer(5, 20);
+        $analyzer->setDriver(new Driver());
+        $result = $analyzer->analyze($image);
+        $this->assertInstanceOf(ColorInterface::class, $result);
+        $this->assertColor(255, 0, 0, 127, $result, 1);
+
+        $analyzer = new PixelColorAnalyzer(20, 20);
+        $analyzer->setDriver(new Driver());
+        $result = $analyzer->analyze($image);
+        $this->assertInstanceOf(ColorInterface::class, $result);
+        $this->assertColor(0, 255, 0, 127, $result, 1);
+    }
+
     public function testAnalyzeFloatFormat(): void
     {
         $analyzer = new PixelColorAnalyzer(0, 0);

@@ -5,32 +5,32 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Core;
-use Intervention\Image\Exceptions\RuntimeException;
-use Intervention\Image\Geometry\Rectangle;
+use Intervention\Image\Exceptions\DriverException;
+use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\PointInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
-use Intervention\Image\Modifiers\PlaceModifier as GenericPlaceModifier;
+use Intervention\Image\Modifiers\InsertModifier as GenericInsertModifier;
 use Jcupitt\Vips\BlendMode;
-use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
 
-class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
+class InsertModifier extends GenericInsertModifier implements SpecializedInterface
 {
     /**
      * {@inheritdoc}
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      *
-     * @throws RuntimeException|VipsException
+     * @throws StateException
+     * @throws DriverException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
-        $element = $this->driver()->handleInput($this->element);
-        $elementNative = $element->core()->native();
-        $position = $this->getPosition($image, $element);
+        $watermark = $this->driver()->handleImageInput($this->image);
+        $elementNative = $watermark->core()->native();
+        $position = $this->position($image, $watermark);
 
         if ($this->opacity < 100) {
             if (!$elementNative->hasAlpha()) {
@@ -46,11 +46,19 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
         }
 
         if (!$image->isAnimated()) {
-            $watermarked = $this->placeElement($elementNative, $position, $image->core()->first())->native();
+            $watermarked = $this->placeElement(
+                $elementNative,
+                $position,
+                $image->core()->first(),
+            )->native();
         } else {
             $frames = [];
             foreach ($image as $frame) {
-                $frames[] = $this->placeElement($elementNative, $position, $frame);
+                $frames[] = $this->placeElement(
+                    $elementNative,
+                    $position,
+                    $frame,
+                );
             }
 
             $watermarked = Core::replaceFrames($image->core()->native(), $frames);
@@ -62,23 +70,19 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
     }
 
     /**
-     * @throws RuntimeException
+     * Place element at position on frame.
      */
     private function placeElement(
-        VipsImage $elementNative,
+        VipsImage $element,
         PointInterface $position,
         FrameInterface $frame
     ): FrameInterface {
-        if ($elementNative->hasAlpha()) {
-            /** @var Rectangle $size */
-            $size = $frame->size();
-            $imageSize = $size->align($this->position);
-
-            $elementNative = $elementNative->embed(
+        if ($element->hasAlpha()) {
+            $element = $element->embed(
                 $position->x(),
                 $position->y(),
-                $imageSize->width(),
-                $imageSize->height(),
+                $frame->size()->width(),
+                $frame->size()->height(),
                 [
                     'extend' => Extend::BACKGROUND,
                     'background' => [0, 0, 0, 0],
@@ -87,14 +91,14 @@ class PlaceModifier extends GenericPlaceModifier implements SpecializedInterface
 
             $frame->setNative(
                 $frame->native()->composite2(
-                    $elementNative,
+                    $element,
                     BlendMode::OVER
                 )
             );
         } else {
             $frame->setNative(
                 $frame->native()->insert(
-                    $elementNative->bandjoin_const(255),
+                    $element,
                     $position->x(),
                     $position->y()
                 )

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips;
 
+use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Format;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\FFI;
@@ -25,12 +26,16 @@ class LoaderDetector
     /**
      * Private constructor, use self::create()
      *
-     * @return void
+     * @throws DriverException
      */
     private function __construct()
     {
-        $base = FFI::gobject()->g_type_from_name("VipsForeignLoad"); // @phpstan-ignore-line
-        FFI::vips()->vips_type_map($base, $this->collectLoaders(...), null, null); // @phpstan-ignore-line
+        try {
+            $base = FFI::gobject()->g_type_from_name("VipsForeignLoad"); // @phpstan-ignore-line
+            FFI::vips()->vips_type_map($base, $this->collectLoaders(...), null, null); // @phpstan-ignore-line
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to collect loaders', previous: $e);
+        }
 
         // normalize loader names
         $this->loaders = array_map(function (string $name): ?string {
@@ -47,6 +52,8 @@ class LoaderDetector
 
     /**
      * Create instance via singleton variable
+     *
+     * @throws DriverException
      */
     public static function create(): self
     {
@@ -119,12 +126,16 @@ class LoaderDetector
     /**
      * Collect loaders
      *
-     * @throws VipsException
+     * @throws DriverException
      */
     private function collectLoaders(string $type): void
     {
-        $name = FFI::vips()->vips_nickname_find($type); // @phpstan-ignore-line
-        $this->loaders[] = $name;
-        FFI::vips()->vips_type_map($type, $this->collectLoaders(...), null, null); // @phpstan-ignore-line
+        try {
+            $name = FFI::vips()->vips_nickname_find($type); // @phpstan-ignore-line
+            $this->loaders[] = $name;
+            FFI::vips()->vips_type_map($type, $this->collectLoaders(...), null, null); // @phpstan-ignore-line
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to collect loaders', previous: $e);
+        }
     }
 }

@@ -6,9 +6,10 @@ namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
-use Intervention\Image\Modifiers\GreyscaleModifier as GenericGreyscaleModifier;
+use Intervention\Image\Modifiers\GrayscaleModifier as GenericGrayscaleModifier;
+use Jcupitt\Vips\Interpretation;
 
-class GreyscaleModifier extends GenericGreyscaleModifier implements SpecializedInterface
+class GrayscaleModifier extends GenericGrayscaleModifier implements SpecializedInterface
 {
     /**
      * {@inheritdoc}
@@ -17,14 +18,14 @@ class GreyscaleModifier extends GenericGreyscaleModifier implements SpecializedI
      */
     public function apply(ImageInterface $image): ImageInterface
     {
-        // turn image to black & white
+        // turn image to grayscale
         $image->core()->setNative(
-            $image->core()->native()->colourspace('b-w')
+            $image->core()->native()->colourspace(Interpretation::B_W)
         );
 
-        // return to srgb colorspace with b/w image
+        // return to srgb colorspace with grayscale image
         $image->core()->setNative(
-            $image->core()->native()->colourspace('srgb')
+            $image->core()->native()->colourspace(Interpretation::SRGB)
         );
 
         return $image;

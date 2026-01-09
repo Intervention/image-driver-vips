@@ -6,7 +6,14 @@ namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\FontProcessor;
-use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Exceptions\DirectoryNotFoundException;
+use Intervention\Image\Exceptions\DriverException;
+use Intervention\Image\Exceptions\FileNotFoundException;
+use Intervention\Image\Exceptions\FileNotReadableException;
+use Intervention\Image\Exceptions\FilePointerException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
+use Intervention\Image\Exceptions\ModifierException;
+use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Geometry\Factories\CircleFactory;
 use Intervention\Image\Geometry\Rectangle;
 use Intervention\Image\Interfaces\FrameInterface;
@@ -26,8 +33,14 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      *
-     * @throws RuntimeException
-     * @throws VipsException
+     * @throws InvalidArgumentException
+     * @throws StateException
+     * @throws DirectoryNotFoundException
+     * @throws FileNotFoundException
+     * @throws FileNotReadableException
+     * @throws FilePointerException
+     * @throws DriverException
+     * @throws ModifierException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
@@ -35,7 +48,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
         $fontProcessor = new FontProcessor();
 
         // decode text color
-        $color = $this->driver()->handleInput($this->font->color());
+        $color = $this->driver()->handleColorInput($this->font->color());
 
         // build vips image with text
         $textBlockImage = $fontProcessor->textToVipsImage($this->text, $this->font, $color);
@@ -48,7 +61,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
         $baseline = $capImage->height + $capImage->yoffset;
 
         // adjust block size
-        switch ($this->font->valignment()) {
+        switch ($this->font->verticalAlignment()) {
             case 'top':
                 $blockSize->movePointsY($baseline * -1);
                 $blockSize->movePointsY($textBlockImage->yoffset);
@@ -70,7 +83,14 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
         $blockPosition = clone $blockSize->last();
 
         // apply text rotation if necessary
-        $textBlockImage = $this->maybeRotateText($textBlockImage);
+        try {
+            $textBlockImage = $this->maybeRotateText($textBlockImage);
+        } catch (VipsException $e) {
+            throw new ModifierException(
+                'Failed to apply ' . self::class . ', unable to rotate text block',
+                previous: $e
+            );
+        }
 
         // apply rotation offset to block position
         if ($this->font->angle() != 0) {
@@ -82,13 +102,20 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
 
         if ($this->font->hasStrokeEffect()) {
             // decode stroke color
-            $strokeColor = $this->driver()->handleInput($this->font->strokeColor());
+            $strokeColor = $this->driver()->handleColorInput($this->font->strokeColor());
 
             // build stroke text image if applicable
             $stroke = $fontProcessor->textToVipsImage($this->text, $this->font, $strokeColor);
 
             // apply rotation for stroke effect
-            $stroke = $this->maybeRotateText($stroke);
+            try {
+                $stroke = $this->maybeRotateText($stroke);
+            } catch (VipsException $e) {
+                throw new ModifierException(
+                    'Failed to apply ' . self::class . ', unable to rotate text block',
+                    previous: $e
+                );
+            }
         }
 
         if (!$image->isAnimated()) {
@@ -165,12 +192,18 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
 
     /**
      * Build size from given vips image
+     *
+     * @throws ModifierException
      */
     private function blockSize(VipsImage $blockImage): Rectangle
     {
-        $imageSize = new Rectangle($blockImage->width, $blockImage->height, $this->position);
-        $imageSize->align($this->font->alignment());
-        $imageSize->valign($this->font->valignment());
+        try {
+            $imageSize = new Rectangle($blockImage->width, $blockImage->height, $this->position);
+            $imageSize->alignHorizontally($this->font->horizontalAlignment());
+            $imageSize->alignVertically($this->font->verticalAlignment());
+        } catch (InvalidArgumentException $e) {
+            throw new ModifierException('Failed to build font size', previous: $e);
+        }
 
         return $imageSize;
     }
@@ -195,7 +228,6 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
     private function debugPos(ImageInterface $image, PointInterface $position, Rectangle $size): void
     {
         // draw pos
-        // @phpstan-ignore missingType.checkedException
         $image->drawCircle($position->x(), $position->y(), function (CircleFactory $circle): void {
             $circle->diameter(8);
             $circle->background('red');
@@ -203,7 +235,6 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
 
         // draw points of size
         foreach (array_chunk($size->toArray(), 2) as $point) {
-            // @phpstan-ignore missingType.checkedException
             $image->drawCircle($point[0], $point[1], function (CircleFactory $circle): void {
                 $circle->diameter(12);
                 $circle->border('green');
@@ -211,7 +242,6 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
         }
 
         // draw size's pivot
-        // @phpstan-ignore missingType.checkedException
         $image->drawCircle($size->pivot()->x(), $size->pivot()->y(), function (CircleFactory $circle): void {
             $circle->diameter(20);
             $circle->border('blue');

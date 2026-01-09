@@ -6,7 +6,9 @@ namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Driver;
-use Intervention\Image\Exceptions\RuntimeException;
+use Intervention\Image\Exceptions\DriverException;
+use Intervention\Image\Exceptions\ModifierException;
+use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\DrawRectangleModifier as GenericDrawRectangleModifier;
@@ -20,7 +22,9 @@ class DrawRectangleModifier extends GenericDrawRectangleModifier implements Spec
      *
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      *
-     * @throws VipsException|RuntimeException|\RuntimeException
+     * @throws StateException
+     * @throws ModifierException
+     * @throws DriverException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
@@ -29,8 +33,11 @@ class DrawRectangleModifier extends GenericDrawRectangleModifier implements Spec
             'y' => $this->drawable->position()->y(),
             'width' => $this->drawable->width(),
             'height' => $this->drawable->height(),
-            'fill' => $this->backgroundColor()->toString(),
         ];
+
+        if ($this->drawable->hasBackgroundColor()) {
+            $xmlAttributes['fill'] = $this->backgroundColor()->toString();
+        }
 
         if ($this->drawable->hasBorder()) {
             $xmlAttributes['stroke'] = $this->borderColor()->toString();
@@ -41,9 +48,15 @@ class DrawRectangleModifier extends GenericDrawRectangleModifier implements Spec
 
         $frames = [];
         foreach ($image as $frame) {
-            $frames[] = $frame->setNative(
-                $frame->native()->composite($rectangle, [BlendMode::OVER])
-            );
+            try {
+                $native = $frame->native()->composite($rectangle, [BlendMode::OVER]);
+            } catch (VipsException $e) {
+                throw new ModifierException(
+                    'Failed to apply ' . self::class . ', unable to draw rectangle',
+                    previous: $e
+                );
+            }
+            $frames[] = $frame->setNative($native);
         }
 
         $image->core()->setNative(

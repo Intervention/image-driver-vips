@@ -17,28 +17,28 @@ final class FillModifierTest extends BaseTestCase
     public function testFloodFillColor(): void
     {
         $image = $this->readTestImage('blocks.png');
-        $this->assertEquals('0000ff', $image->pickColor(420, 270)->toHex());
-        $this->assertEquals('ff0000', $image->pickColor(540, 400)->toHex());
+        $this->assertEquals('0000ff', $image->colorAt(420, 270)->toHex());
+        $this->assertEquals('ff0000', $image->colorAt(540, 400)->toHex());
         $image->modify(new FillModifier(new Color(204, 204, 204), new Point(540, 400)));
-        $this->assertEquals('0000ff', $image->pickColor(420, 270)->toHex());
-        $this->assertEquals('cccccc', $image->pickColor(540, 400)->toHex());
+        $this->assertEquals('0000ff', $image->colorAt(420, 270)->toHex());
+        $this->assertEquals('cccccc', $image->colorAt(540, 400)->toHex());
     }
 
     public function testFillAllColor(): void
     {
         $image = $this->readTestImage('blocks.png');
-        $this->assertEquals('0000ff', $image->pickColor(420, 270)->toHex());
-        $this->assertEquals('ff0000', $image->pickColor(540, 400)->toHex());
+        $this->assertEquals('0000ff', $image->colorAt(420, 270)->toHex());
+        $this->assertEquals('ff0000', $image->colorAt(540, 400)->toHex());
         $image->modify(new FillModifier(new Color(204, 204, 204)));
-        $this->assertEquals('cccccc', $image->pickColor(420, 270)->toHex());
-        $this->assertEquals('cccccc', $image->pickColor(540, 400)->toHex());
+        $this->assertEquals('cccccc', $image->colorAt(420, 270)->toHex());
+        $this->assertEquals('cccccc', $image->colorAt(540, 400)->toHex());
     }
 
     public function testFillWithAlpha(): void
     {
         $image = $this->readTestImage('blocks.png');
-        $this->assertColor(0, 0, 0, 0, $image->pickColor(460, 40));
-        $image->modify(new FillModifier(new Color(204, 204, 204, 100)));
-        $this->assertColor(204, 204, 204, 100, $image->pickColor(460, 40));
+        $this->assertColor(0, 0, 0, 0, $image->colorAt(460, 40));
+        $image->modify(new FillModifier(new Color(204, 204, 204, .2)));
+        $this->assertColor(204, 204, 204, 51, $image->colorAt(460, 40));
     }
 }

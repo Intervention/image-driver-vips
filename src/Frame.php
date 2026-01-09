@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips;
 
+use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Geometry\Rectangle;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\DriverInterface;
@@ -53,13 +54,15 @@ class Frame implements FrameInterface
      */
     public function toImage(DriverInterface $driver): ImageInterface
     {
-        return new Image($driver, new Core($this->native()));
+        return Image::usingDriver($driver)->setCore(new Core($this->native()));
     }
 
     /**
      * {@inheritdoc}
      *
      * @see FrameInterface::size()
+     *
+     * @throws InvalidArgumentException
      */
     public function size(): SizeInterface
     {
@@ -96,9 +99,9 @@ class Frame implements FrameInterface
      *
      * Currently not implemented by libvips
      *
-     * @see FrameInterface::dispose()
+     * @see FrameInterface::disposalMethod()
      */
-    public function dispose(): int
+    public function disposalMethod(): int
     {
         return 0;
     }
@@ -108,13 +111,18 @@ class Frame implements FrameInterface
      *
      * Currently not implemented by libvips
      *
-     * @see FrameInterface::dispose()
+     * @see FrameInterface::setDisposalMethod()
      */
-    public function setDispose(int $dispose): FrameInterface
+    public function setDisposalMethod(int $dispose): FrameInterface
     {
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see FrameInterface::setOffset()
+     */
     public function setOffset(int $left, int $top): FrameInterface
     {
         $this->setOffsetLeft($left);

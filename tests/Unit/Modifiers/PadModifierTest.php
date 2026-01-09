@@ -19,22 +19,22 @@ final class PadModifierTest extends BaseTestCase
         $image->modify(new PadModifier(30, 20, 'f00'));
         $this->assertEquals(30, $image->width());
         $this->assertEquals(20, $image->height());
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(0, 0));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(0, 19));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(29, 0));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(29, 19));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(6, 2));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(7, 1));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(6, 17));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(7, 18));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(23, 1));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(23, 2));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(23, 17));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(23, 18));
-        $this->assertColor(100, 100, 255, 255, $image->pickColor(7, 2));
-        $this->assertColor(100, 100, 255, 255, $image->pickColor(22, 2));
-        $this->assertColor(100, 100, 255, 255, $image->pickColor(7, 17));
-        $this->assertColor(100, 100, 255, 255, $image->pickColor(22, 17));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(0, 0));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(0, 19));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(29, 0));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(29, 19));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(6, 2));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(7, 1));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(6, 17));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(7, 18));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(23, 1));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(23, 2));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(23, 17));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(23, 18));
+        $this->assertColor(100, 100, 255, 255, $image->colorAt(7, 2));
+        $this->assertColor(100, 100, 255, 255, $image->colorAt(22, 2));
+        $this->assertColor(100, 100, 255, 255, $image->colorAt(7, 17));
+        $this->assertColor(100, 100, 255, 255, $image->colorAt(22, 17));
     }
 
     public function testModifyGrayscale(): void
@@ -45,10 +45,10 @@ final class PadModifierTest extends BaseTestCase
         $image->modify(new PadModifier(200, 200, 'f00'));
         $this->assertEquals(200, $image->width());
         $this->assertEquals(200, $image->height());
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(0, 0));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(0, 199));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(199, 0));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(199, 199));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(0, 0));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(0, 199));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(199, 0));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(199, 199));
     }
 
     public function testModifyGrayscaleAlpha(): void
@@ -59,9 +59,9 @@ final class PadModifierTest extends BaseTestCase
         $image->modify(new PadModifier(258, 258, 'f00'));
         $this->assertEquals(258, $image->width());
         $this->assertEquals(258, $image->height());
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(0, 0));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(0, 257));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(257, 0));
-        $this->assertColor(255, 0, 0, 255, $image->pickColor(257, 257));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(0, 0));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(0, 257));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(257, 0));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(257, 257));
     }
 }

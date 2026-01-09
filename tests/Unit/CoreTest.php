@@ -8,7 +8,8 @@ use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Frame;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
-use Intervention\Image\Exceptions\AnimationException;
+use Intervention\Image\Exceptions\InvalidArgumentException;
+use Intervention\Image\Image;
 use Intervention\Image\Interfaces\FrameInterface;
 use Jcupitt\Vips\Image as VipsImage;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -61,7 +62,7 @@ class CoreTest extends BaseTestCase
         $this->assertInstanceOf(Frame::class, $this->core->frame(0));
         $this->assertInstanceOf(Frame::class, $this->core->frame(1));
         $this->assertInstanceOf(Frame::class, $this->core->frame(2));
-        $this->expectException(AnimationException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->core->frame(3);
     }
 
@@ -69,7 +70,7 @@ class CoreTest extends BaseTestCase
     {
         $black = VipsImage::black(10, 10);
         $this->assertInstanceOf(Frame::class, (new Core($black))->frame(0));
-        $this->expectException(AnimationException::class);
+        $this->expectException(InvalidArgumentException::class);
         (new Core($black))->frame(1);
     }
 
@@ -109,11 +110,12 @@ class CoreTest extends BaseTestCase
 
     public function testSlice(): void
     {
-        $image = (new Driver())->createAnimation(function ($animation): void {
-            $animation->add($this->getTestResourcePath('red.gif'), 0);
-            $animation->add($this->getTestResourcePath('green.gif'), .25);
-            $animation->add($this->getTestResourcePath('blue.gif'), .50);
-        });
+        $image = Image::usingDriver(Driver::class)
+            ->create(16, 16, function ($animation): void {
+                $animation->add($this->getTestResourcePath('red.gif'), 0);
+                $animation->add($this->getTestResourcePath('green.gif'), .25);
+                $animation->add($this->getTestResourcePath('blue.gif'), .50);
+            });
 
         $this->assertEquals(3, $image->core()->count());
         $result = $image->core()->slice(1, 2);

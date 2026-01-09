@@ -15,8 +15,8 @@ final class DrawPixelModifierTest extends BaseTestCase
     public function testApply(): void
     {
         $image = $this->readTestImage('trim.png');
-        $this->assertEquals('00aef0', $image->pickColor(14, 14)->toHex());
+        $this->assertEquals('00aef0', $image->colorAt(14, 14)->toHex());
         $image->modify(new DrawPixelModifier(new Point(14, 14), 'ff5500'));
-        $this->assertEquals('ff5500', $image->pickColor(14, 14)->toHex());
+        $this->assertEquals('ff5500', $image->colorAt(14, 14)->toHex());
     }
 }
