@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
+use Intervention\Image\Colors\Cmyk\Colorspace as Cmyk;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Modifiers\ResizeModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -31,5 +32,14 @@ final class ResizeModifierTest extends BaseTestCase
         $image->modify(new ResizeModifier(10, 10));
         $this->assertEquals(10, $image->width());
         $this->assertEquals(10, $image->height());
+    }
+
+    public function testResizeModifierKeepsColorspace(): void
+    {
+        $image = $this->readTestImage('cmyk.jpg');
+        $this->assertInstanceOf(Cmyk::class, $image->colorspace());
+        $result = $image->resize(30, 20);
+        $this->assertInstanceOf(Cmyk::class, $result->colorspace());
+        $this->assertInstanceOf(Cmyk::class, $image->colorspace());
     }
 }
