@@ -51,6 +51,7 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
             $cropSize->width(),
             $cropSize->height()
         )->thumbnail_image($resizeSize->width(), [
+            // 'export-profile' => $frame->native()->interpretation,
             'height' => $resizeSize->height(),
             'size' => 'force',
             'no_rotate' => true,

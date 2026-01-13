@@ -9,6 +9,7 @@ use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Intervention\Image\Modifiers\CoverModifier;
+use Intervention\Image\Colors\Cmyk\Colorspace as Cmyk;
 
 #[CoversClass(CoverModifier::class)]
 #[CoversClass(\Intervention\Image\Drivers\Vips\Modifiers\CoverModifier::class)]
@@ -47,5 +48,14 @@ final class CoverModifierTest extends BaseTestCase
             array_map(fn(Color $color): string => $color->toHex(), $image->pickColors(8, 8)->toArray()),
             ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63']
         );
+    }
+
+    public function testResizeModifierKeepsColorspace(): void
+    {
+        $image = $this->readTestImage('cmyk.jpg');
+        $this->assertInstanceOf(Cmyk::class, $image->colorspace());
+        $result = $image->modify(new CoverModifier(20, 10));
+        $this->assertInstanceOf(Cmyk::class, $result->colorspace());
+        $this->assertInstanceOf(Cmyk::class, $image->colorspace());
     }
 }

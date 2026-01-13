@@ -38,7 +38,7 @@ final class ResizeModifierTest extends BaseTestCase
     {
         $image = $this->readTestImage('cmyk.jpg');
         $this->assertInstanceOf(Cmyk::class, $image->colorspace());
-        $result = $image->resize(30, 20);
+        $result = $image->modify(new ResizeModifier(20, 10));
         $this->assertInstanceOf(Cmyk::class, $result->colorspace());
         $this->assertInstanceOf(Cmyk::class, $image->colorspace());
     }

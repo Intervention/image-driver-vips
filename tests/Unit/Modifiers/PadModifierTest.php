@@ -7,6 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 use Intervention\Image\Drivers\Vips\Modifiers\PadModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Intervention\Image\Colors\Cmyk\Colorspace as Cmyk;
 
 #[CoversClass(PadModifier::class)]
 final class PadModifierTest extends BaseTestCase
@@ -63,5 +64,14 @@ final class PadModifierTest extends BaseTestCase
         $this->assertColor(255, 0, 0, 255, $image->pickColor(0, 257));
         $this->assertColor(255, 0, 0, 255, $image->pickColor(257, 0));
         $this->assertColor(255, 0, 0, 255, $image->pickColor(257, 257));
+    }
+
+    public function testResizeModifierKeepsColorspace(): void
+    {
+        $image = $this->readTestImage('cmyk.jpg');
+        $this->assertInstanceOf(Cmyk::class, $image->colorspace());
+        $result = $image->modify(new PadModifier(20, 10, 'f00'));
+        $this->assertInstanceOf(Cmyk::class, $result->colorspace());
+        $this->assertInstanceOf(Cmyk::class, $image->colorspace());
     }
 }

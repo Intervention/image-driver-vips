@@ -8,6 +8,7 @@ use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Modifiers\ContainModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Intervention\Image\Colors\Cmyk\Colorspace as Cmyk;
 
 #[CoversClass(ContainModifier::class)]
 #[CoversClass(\Intervention\Image\Drivers\Vips\Modifiers\ContainModifier::class)]
@@ -88,5 +89,14 @@ final class ContainModifierTest extends BaseTestCase
         $this->assertEquals(256, $image->height());
         $this->assertColor(255, 255, 255, 0, $image->pickColor(0, 0));
         $this->assertColor(0, 0, 0, 128, $image->pickColor(1, 0));
+    }
+
+    public function testResizeModifierKeepsColorspace(): void
+    {
+        $image = $this->readTestImage('cmyk.jpg');
+        $this->assertInstanceOf(Cmyk::class, $image->colorspace());
+        $result = $image->modify(new ContainModifier(20, 10, 'f00'));
+        $this->assertInstanceOf(Cmyk::class, $result->colorspace());
+        $this->assertInstanceOf(Cmyk::class, $image->colorspace());
     }
 }
