@@ -37,15 +37,15 @@ class Base64ImageDecoder extends BinaryImageDecoder
      */
     public function decode(mixed $input): ImageInterface
     {
-        $binary = base64_decode($input);
-
-        if ($binary == false) {
-            throw new ImageDecoderException('Failed to decode Base64-encoded string');
+        try {
+            $data = $this->decodeBase64Data($input);
+        } catch (DecoderException) {
+            throw new ImageDecoderException('Unable to Base64-decode image from string');
         }
 
         try {
-            return parent::decode($binary);
-        } catch (ImageDecoderException) {
+            return parent::decode($data);
+        } catch (DecoderException) {
             throw new ImageDecoderException('Base64-encoded data contains unsupported image type');
         }
     }

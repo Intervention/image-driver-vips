@@ -40,11 +40,11 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
     public function decode(mixed $input): ImageInterface
     {
         if (!is_object($input)) {
-            throw new InvalidArgumentException('Input must be of type ' . VipsImage::class);
+            throw new InvalidArgumentException('Image source must be of type ' . VipsImage::class);
         }
 
         if (!($input instanceof VipsImage)) {
-            throw new InvalidArgumentException('Input must be of type ' . VipsImage::class);
+            throw new InvalidArgumentException('Image source must be of type ' . VipsImage::class);
         }
 
         if (in_array($input->interpretation, [Interpretation::B_W, Interpretation::GREY16])) {

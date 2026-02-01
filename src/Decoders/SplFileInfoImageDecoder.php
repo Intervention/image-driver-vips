@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Decoders;
 
+use Intervention\Image\Exceptions\DecoderException;
 use Intervention\Image\Exceptions\DirectoryNotFoundException;
 use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\FileNotFoundException;
@@ -13,9 +14,12 @@ use Intervention\Image\Exceptions\ImageDecoderException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
+use Intervention\Image\Traits\CanParseFilePath;
 
 class SplFileInfoImageDecoder extends FilePathImageDecoder
 {
+    use CanParseFilePath;
+
     /**
      * {@inheritdoc}
      *
@@ -41,12 +45,14 @@ class SplFileInfoImageDecoder extends FilePathImageDecoder
      */
     public function decode(mixed $input): ImageInterface
     {
-        $path = $input->getRealPath();
-
-        if ($path === false) {
-            throw new FileNotReadableException('Failed to read path from ' . SplFileInfo::class);
+        if (!$input instanceof SplFileInfo) {
+            throw new InvalidArgumentException('Image source must be of type ' . SplFileInfo::class);
         }
 
-        return parent::decode($path);
+        try {
+            return parent::decode($this->filePathFromSplFileInfoOrFail($input));
+        } catch (DecoderException) {
+            throw new ImageDecoderException(SplFileInfo::class . ' contains unsupported image type');
+        }
     }
 }

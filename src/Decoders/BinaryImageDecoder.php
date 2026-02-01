@@ -42,7 +42,9 @@ class BinaryImageDecoder extends NativeObjectDecoder
     public function decode(mixed $input): ImageInterface
     {
         if (!is_string($input) && !$input instanceof Stringable) {
-            throw new InvalidArgumentException('Binary data must be either of type string or instance of Stringable');
+            throw new InvalidArgumentException(
+                'Image source must be binary data of type string or instance of Stringable',
+            );
         }
 
         $input = (string) $input;
@@ -56,7 +58,7 @@ class BinaryImageDecoder extends NativeObjectDecoder
                 'access' => Vips\Access::SEQUENTIAL,
             ]);
         } catch (VipsException $e) {
-            throw new ImageDecoderException('Failed to decode image from binary data', previous: $e);
+            throw new ImageDecoderException('Failed to decode unsupported image format from binary data', previous: $e);
         }
 
         $image = parent::decode($vipsImage);
