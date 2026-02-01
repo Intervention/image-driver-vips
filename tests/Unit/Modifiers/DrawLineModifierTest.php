@@ -10,7 +10,7 @@ use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Intervention\Image\Geometry\Line;
 use Intervention\Image\Geometry\Point;
-use Intervention\Image\Image;
+use Intervention\Image\ImageManager;
 
 #[CoversClass(DrawLineModifier::class)]
 final class DrawLineModifierTest extends BaseTestCase
@@ -28,7 +28,7 @@ final class DrawLineModifierTest extends BaseTestCase
 
     public function testApplyTransparent(): void
     {
-        $image = Image::usingDriver(Driver::class)->create(10, 10)->fill('ff5500');
+        $image = ImageManager::usingDriver(Driver::class)->createImage(10, 10)->fill('ff5500');
         $this->assertColor(255, 85, 0, 255, $image->colorAt(5, 5));
         $line = new Line(new Point(0, 5), new Point(10, 5), 4);
         $line->setBackgroundColor('fff4');

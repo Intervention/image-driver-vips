@@ -63,6 +63,16 @@ class Core implements CoreInterface, Iterator
         return new self($image);
     }
 
+    public function map(callable $callback): CollectionInterface
+    {
+        throw new \Exception('Not implemented');
+    }
+
+    public function filter(callable $callback): CollectionInterface
+    {
+        throw new \Exception('Not implemented');
+    }
+
     public function meta(): CollectionInterface
     {
         return $this->meta;

@@ -6,7 +6,7 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
-use Intervention\Image\Image;
+use Intervention\Image\ImageManager;
 use Intervention\Image\Modifiers\InsertModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
 
@@ -33,7 +33,7 @@ final class InsertModifierTest extends BaseTestCase
 
     public function testColorChangeOpacityJpeg(): void
     {
-        $image = Image::usingDriver(Driver::class)->create(16, 16)->fill('0000ff');
+        $image = ImageManager::usingDriver(Driver::class)->createImage(16, 16)->fill('0000ff');
         $this->assertEquals('0000ff', $image->colorAt(10, 10)->toHex());
         $image->modify(new InsertModifier($this->getTestResourcePath('exif.jpg'), opacity: 50));
         $this->assertColor(127, 83, 127, 255, $image->colorAt(10, 10), tolerance: 1);
@@ -41,7 +41,7 @@ final class InsertModifierTest extends BaseTestCase
 
     public function testColorChangeAnimated(): void
     {
-        $image = Image::usingDriver(Driver::class)->create(320, 240, function ($animation): void {
+        $image = ImageManager::usingDriver(Driver::class)->createImage(320, 240, function ($animation): void {
             $animation->add($this->getTestResourcePath('test.jpg'), .25);
             $animation->add($this->getTestResourcePath('test.jpg'), .25);
         })->setLoops(5);

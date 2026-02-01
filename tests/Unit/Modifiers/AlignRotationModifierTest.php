@@ -6,13 +6,13 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
-use Intervention\Image\Image;
+use Intervention\Image\ImageManager;
 
 class AlignRotationModifierTest extends BaseTestCase
 {
     public function testApply(): void
     {
-        $image = Image::usingDriver(Driver::class, autoOrientation: false)->from(
+        $image = ImageManager::usingDriver(Driver::class, autoOrientation: false)->decodePath(
             $this->getTestResourcePath('orientation.jpg')
         );
 
@@ -31,7 +31,7 @@ class AlignRotationModifierTest extends BaseTestCase
     {
         $tmpFile = sys_get_temp_dir() . '/out.jpg';
 
-        Image::usingDriver(Driver::class, autoOrientation: true)->from(
+        ImageManager::usingDriver(Driver::class, autoOrientation: true)->decodePath(
             $this->getTestResourcePath('orientation.jpg')
         )->save($tmpFile);
 

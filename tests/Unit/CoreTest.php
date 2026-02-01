@@ -9,7 +9,8 @@ use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Frame;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Exceptions\InvalidArgumentException;
-use Intervention\Image\Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Interfaces\AnimationFactoryInterface;
 use Intervention\Image\Interfaces\FrameInterface;
 use Jcupitt\Vips\Image as VipsImage;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -110,8 +111,8 @@ class CoreTest extends BaseTestCase
 
     public function testSlice(): void
     {
-        $image = Image::usingDriver(Driver::class)
-            ->create(16, 16, function ($animation): void {
+        $image = ImageManager::usingDriver(Driver::class)
+            ->createImage(16, 16, function (AnimationFactoryInterface $animation): void {
                 $animation->add($this->getTestResourcePath('red.gif'), 0);
                 $animation->add($this->getTestResourcePath('green.gif'), .25);
                 $animation->add($this->getTestResourcePath('blue.gif'), .50);

@@ -11,7 +11,7 @@ use Intervention\Image\Geometry\Ellipse;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Intervention\Image\Modifiers\DrawEllipseModifier;
 use Intervention\Image\Geometry\Point;
-use Intervention\Image\Image;
+use Intervention\Image\ImageManager;
 
 #[CoversClass(DrawEllipseModifier::class)]
 #[CoversClass(\Intervention\Image\Drivers\Vips\Modifiers\DrawEllipseModifier::class)]
@@ -32,8 +32,8 @@ final class DrawEllipseModifierTest extends BaseTestCase
 
     public function testApplyAnimated(): void
     {
-        $image = Image::usingDriver(Driver::class)
-            ->create(50, 50, function (AnimationFactory $animation): void {
+        $image = ImageManager::usingDriver(Driver::class)
+            ->createImage(50, 50, function (AnimationFactory $animation): void {
                 $animation->add($this->getTestResourcePath('trim.png'), .25);
                 $animation->add($this->getTestResourcePath('radial.png'), .25);
             });

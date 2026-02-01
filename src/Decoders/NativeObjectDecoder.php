@@ -56,7 +56,7 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
         }
 
         // build image instance
-        $image = Image::usingDriver($this->driver())->setCore(new Core($input));
+        $image = new Image($this->driver(), new Core($input));
 
         // auto-rotate
         if ($this->driver()->config()->autoOrientation === true && $this->exifRotation($input) > 1) {

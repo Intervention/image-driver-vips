@@ -53,8 +53,10 @@ abstract class BaseTestCase extends TestCase
      */
     public static function createTestImage(int $width, int $height): Image
     {
-        return Image::usingDriver(new Driver())
-            ->setCore(new Core(self::vipsImage($width, $height, [255, 0, 0, 255])));
+        return new Image(
+            new Driver(),
+            new Core(self::vipsImage($width, $height, [255, 0, 0, 255])),
+        );
     }
 
     /**

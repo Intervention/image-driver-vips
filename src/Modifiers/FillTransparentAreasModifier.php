@@ -12,13 +12,13 @@ use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
-use Intervention\Image\Modifiers\BackgroundModifier as GenericBackgroundModifier;
+use Intervention\Image\Modifiers\FillTransparentAreasModifier as GenericFillTransparentAreasModifier;
 use Jcupitt\Vips\BlendMode;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
 
-class BackgroundModifier extends GenericBackgroundModifier implements SpecializedInterface
+class FillTransparentAreasModifier extends GenericFillTransparentAreasModifier implements SpecializedInterface
 {
     /**
      * {@inheritdoc}
@@ -88,6 +88,6 @@ class BackgroundModifier extends GenericBackgroundModifier implements Specialize
 
         $core = Core::ensureInMemory(new Core($vipsImage));
 
-        return Image::usingDriver($this->driver())->setCore($core);
+        return new Image($this->driver(), $core);
     }
 }

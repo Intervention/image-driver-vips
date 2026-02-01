@@ -34,11 +34,11 @@ use Intervention\Image\Drivers\Vips\Driver as VipsDriver;
 use Intervention\Image\Alignment;
 use Intervention\Image\Format;
 
-// create image with vips driver
-$image = Image::usingDriver(VipsDriver::class);
+// create image manager instance using the desired driver
+$manager = ImageManager::usingDriver(VipsDriver::class);
 
 // read image data from path
-$image->fromPath('images/example.gif');
+$image = $manager->decodePath('images/example.webp');
 
 // scale image by height
 $image->scale(height: 300);

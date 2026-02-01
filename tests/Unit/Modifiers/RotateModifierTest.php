@@ -7,7 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 use Intervention\Image\Colors\Rgb\Color;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
-use Intervention\Image\Image;
+use Intervention\Image\ImageManager;
 use Intervention\Image\Modifiers\RotateModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
 
@@ -33,7 +33,7 @@ final class RotateModifierTest extends BaseTestCase
 
     public function testRotateAnimated(): void
     {
-        $image = Image::usingDriver(Driver::class)->create(320, 240, function ($animation): void {
+        $image = ImageManager::usingDriver(Driver::class)->createImage(320, 240, function ($animation): void {
             $animation->add($this->getTestResourcePath('test.jpg'), .25);
             $animation->add($this->getTestResourcePath('test.jpg'), .25);
         })->setLoops(5);

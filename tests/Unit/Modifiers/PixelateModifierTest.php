@@ -8,7 +8,7 @@ use Intervention\Image\AnimationFactory;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Format;
-use Intervention\Image\Image;
+use Intervention\Image\ImageManager;
 use Intervention\Image\Modifiers\PixelateModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
 
@@ -31,8 +31,8 @@ final class PixelateModifierTest extends BaseTestCase
 
     public function testModifyAnimated(): void
     {
-        $image = Image::usingDriver(Driver::class)
-            ->create(50, 50, function (AnimationFactory $animation): void {
+        $image = ImageManager::usingDriver(Driver::class)
+            ->createImage(50, 50, function (AnimationFactory $animation): void {
                 $animation->add($this->getTestResourcePath('trim.png'), .25);
                 $animation->add($this->getTestResourcePath('radial.png'), .25);
             })->setLoops(5);
@@ -44,8 +44,8 @@ final class PixelateModifierTest extends BaseTestCase
         // encode to gif and read again to verify animation frame count
         $this->assertEquals(
             2,
-            Image::usingDriver(Driver::class)
-                ->from($image->encodeUsingFormat(format: Format::GIF))
+            ImageManager::usingDriver(Driver::class)
+                ->decode($image->encodeUsingFormat(format: Format::GIF))
                 ->count(),
         );
     }
