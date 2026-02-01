@@ -18,7 +18,7 @@ class TextModifierTest extends BaseTestCase
         $font->setColor('b53517');
         $font->setSize(32);
         $font->setWrapWidth(300);
-        $font->setHorizontalAlignment('center');
+        $font->setAlignmentHorizontal('center');
         $font->setLineHeight(2);
         $image->modify(new TextModifier('ABC & D', new Point(150, 150), $font));
     }

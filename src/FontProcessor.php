@@ -74,7 +74,7 @@ class FontProcessor extends AbstractFontProcessor
                 'rgba' => true,
                 'width' => $font->wrapWidth(),
                 'wrap' => TextWrap::WORD,
-                'align' => match ($font->horizontalAlignment()) {
+                'align' => match ($font->alignmentHorizontal()) {
                     Alignment::CENTER,
                     Alignment::RIGHT => Align::HIGH,
                     default => Align::LOW,
