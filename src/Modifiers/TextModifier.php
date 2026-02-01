@@ -61,7 +61,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
         $baseline = $capImage->height + $capImage->yoffset;
 
         // adjust block size
-        switch ($this->font->verticalAlignment()) {
+        switch ($this->font->alignmentVertical()) {
             case 'top':
                 $blockSize->movePointsY($baseline * -1);
                 $blockSize->movePointsY($textBlockImage->yoffset);
@@ -199,8 +199,8 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
     {
         try {
             $imageSize = new Rectangle($blockImage->width, $blockImage->height, $this->position);
-            $imageSize->alignHorizontally($this->font->horizontalAlignment());
-            $imageSize->alignVertically($this->font->verticalAlignment());
+            $imageSize->alignHorizontally($this->font->alignmentHorizontal());
+            $imageSize->alignVertically($this->font->alignmentVertical());
         } catch (InvalidArgumentException $e) {
             throw new ModifierException('Failed to build font size', previous: $e);
         }
