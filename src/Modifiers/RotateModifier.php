@@ -68,7 +68,7 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
         }
 
         return $vipsImage->similarity([
-            'angle' => $this->rotationAngle(),
+            'angle' => $this->rotationAngle(), // TODO: check rotation direction
             'background' => $backgroundColor,
         ]);
     }
