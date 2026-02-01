@@ -112,7 +112,6 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
             'png' => MediaType::IMAGE_PNG,
             'tiff' => MediaType::IMAGE_TIFF,
             'webp' => MediaType::IMAGE_WEBP,
-            // todo: implement ICO format
             default => null
         };
     }
