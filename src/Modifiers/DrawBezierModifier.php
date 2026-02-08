@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
+use Intervention\Image\Colors\Rgb\Colorspace as Rgb;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Exceptions\DriverException;
@@ -75,11 +76,11 @@ class DrawBezierModifier extends GenericDrawBezierModifier implements Specialize
         ];
 
         if ($this->drawable->hasBackgroundColor()) {
-            $shapeAttributes['fill'] = $this->backgroundColor()->toString();
+            $shapeAttributes['fill'] = $this->backgroundColor()->toColorspace(Rgb::class)->toString();
         }
 
         if ($this->drawable->hasBorder()) {
-            $shapeAttributes['stroke'] = $this->borderColor()->toString();
+            $shapeAttributes['stroke'] = $this->borderColor()->toColorspace(Rgb::class)->toString();
             $shapeAttributes['stroke-width'] = $this->drawable()->borderSize();
         }
 

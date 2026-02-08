@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
+use Intervention\Image\Colors\Rgb\Colorspace as Rgb;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Exceptions\DriverException;
@@ -36,11 +37,11 @@ class DrawPolygonModifier extends GenericDrawPolygonModifier implements Speciali
         ];
 
         if ($this->drawable->hasBackgroundColor()) {
-            $xmlAttributes['fill'] = $this->backgroundColor()->toString();
+            $xmlAttributes['fill'] = $this->backgroundColor()->toColorspace(Rgb::class)->toString();
         }
 
         if ($this->drawable->hasBorder()) {
-            $xmlAttributes['stroke'] = $this->borderColor()->toString();
+            $xmlAttributes['stroke'] = $this->borderColor()->toColorspace(Rgb::class)->toString();
             $xmlAttributes['stroke-width'] = $this->drawable->borderSize();
         }
 

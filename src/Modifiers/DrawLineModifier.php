@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
+use Intervention\Image\Colors\Rgb\Colorspace as Rgb;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Exceptions\DriverException;
@@ -36,7 +37,7 @@ class DrawLineModifier extends GenericDrawLineModifier implements SpecializedInt
         ];
 
         if ($this->drawable->hasBackgroundColor()) {
-            $xmlAttributes['stroke'] = $this->backgroundColor()->toString();
+            $xmlAttributes['stroke'] = $this->backgroundColor()->toColorspace(Rgb::class)->toString();
             $xmlAttributes['stroke-width'] = $this->drawable->width();
         }
 
