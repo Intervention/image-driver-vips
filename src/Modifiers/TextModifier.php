@@ -228,23 +228,26 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
     private function debugPos(ImageInterface $image, PointInterface $position, Rectangle $size): void
     {
         // draw pos
-        $image->drawCircle($position->x(), $position->y(), function (CircleFactory $circle): void {
+        $image->drawCircle(function (CircleFactory $circle) use ($position): void {
             $circle->diameter(8);
             $circle->background('red');
+            $circle->at(...$position);
         });
 
         // draw points of size
         foreach (array_chunk($size->toArray(), 2) as $point) {
-            $image->drawCircle($point[0], $point[1], function (CircleFactory $circle): void {
+            $image->drawCircle(function (CircleFactory $circle) use ($point): void {
                 $circle->diameter(12);
                 $circle->border('green');
+                $circle->at(...$point);
             });
         }
 
         // draw size's pivot
-        $image->drawCircle($size->pivot()->x(), $size->pivot()->y(), function (CircleFactory $circle): void {
+        $image->drawCircle(function (CircleFactory $circle) use ($size): void {
             $circle->diameter(20);
             $circle->border('blue');
+            $circle->at(...$size->pivot());
         });
     }
 }
