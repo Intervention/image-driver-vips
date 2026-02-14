@@ -32,7 +32,7 @@ class FlipModifier extends GenericFlipModifier implements SpecializedInterface
             $native = $image->core()->native()->flip($direction);
         } catch (VipsException $e) {
             throw new ModifierException(
-                'Failed to apply ' . self::class . ', unable to flip image vertically',
+                'Failed to apply ' . self::class . ', unable to flip image',
                 previous: $e
             );
         }
