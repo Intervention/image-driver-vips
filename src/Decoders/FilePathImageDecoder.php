@@ -54,9 +54,10 @@ class FilePathImageDecoder extends NativeObjectDecoder
             $vipsImage = Vips\Image::newFromFile($path . '[' . $this->stringOptions() . ']', [
                 'access' => Vips\Access::SEQUENTIAL,
             ]);
-        } catch (VipsException) {
+        } catch (VipsException $e) {
             throw new ImageDecoderException(
-                'File contains unsupported image format'
+                'Failed to decode image',
+                previous: $e
             );
         }
 
