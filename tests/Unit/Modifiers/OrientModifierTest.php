@@ -8,7 +8,7 @@ use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\ImageManager;
 
-class AlignRotationModifierTest extends BaseTestCase
+class OrientModifierTest extends BaseTestCase
 {
     public function testApply(): void
     {

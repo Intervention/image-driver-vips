@@ -22,7 +22,7 @@ class BlurModifier extends GenericBlurModifier implements SpecializedInterface
     public function apply(ImageInterface $image): ImageInterface
     {
         try {
-            $native = $image->core()->native()->gaussblur($this->amount * 0.53);
+            $native = $image->core()->native()->gaussblur($this->level * 0.53);
         } catch (VipsException $e) {
             throw new ModifierException('Failed to apply image blur', previous: $e);
         }

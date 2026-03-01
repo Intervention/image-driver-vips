@@ -6,10 +6,10 @@ namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
-use Intervention\Image\Modifiers\ProfileRemovalModifier as GenericProfileRemovalModifier;
+use Intervention\Image\Modifiers\RemoveProfileModifier as GenericRemoveProfileModifier;
 use Jcupitt\Vips\Exception as VipsException;
 
-class ProfileRemovalModifier extends GenericProfileRemovalModifier implements SpecializedInterface
+class RemoveProfileModifier extends GenericRemoveProfileModifier implements SpecializedInterface
 {
     /**
      * {@inheritdoc}

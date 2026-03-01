@@ -8,10 +8,10 @@ use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Exceptions\ModifierException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
-use Intervention\Image\Modifiers\AlignRotationModifier as GenericAlignRotationModifier;
+use Intervention\Image\Modifiers\OrientModifier as GenericOrientModifier;
 use Jcupitt\Vips\Exception as VipsException;
 
-class AlignRotationModifier extends GenericAlignRotationModifier implements SpecializedInterface
+class OrientModifier extends GenericOrientModifier implements SpecializedInterface
 {
     /**
      * {@inheritdoc}

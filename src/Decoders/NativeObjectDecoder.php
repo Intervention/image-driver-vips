@@ -6,7 +6,7 @@ namespace Intervention\Image\Drivers\Vips\Decoders;
 
 use Intervention\Image\Drivers\SpecializableDecoder;
 use Intervention\Image\Drivers\Vips\Core;
-use Intervention\Image\Drivers\Vips\Modifiers\AlignRotationModifier;
+use Intervention\Image\Drivers\Vips\Modifiers\OrientModifier;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Image;
@@ -60,7 +60,7 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
 
         // auto-rotate
         if ($this->driver()->config()->autoOrientation === true && $this->exifRotation($input) > 1) {
-            $image->modify(new AlignRotationModifier());
+            $image->modify(new OrientModifier());
         }
 
         // set media type on origin
