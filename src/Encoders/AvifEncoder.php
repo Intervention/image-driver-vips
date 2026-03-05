@@ -7,7 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Encoders;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\AvifEncoder as GenericAvifEncoder;
 use Intervention\Image\Exceptions\EncoderException;
-use Intervention\Image\Exceptions\FilePointerException;
+use Intervention\Image\Exceptions\StreamException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
@@ -26,7 +26,7 @@ class AvifEncoder extends GenericAvifEncoder implements SpecializedInterface
      *
      * @throws InvalidArgumentException
      * @throws EncoderException
-     * @throws FilePointerException
+     * @throws StreamException
      * @throws StateException
      */
     public function encode(ImageInterface $image): EncodedImage

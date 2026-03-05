@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Decoders;
 
 use Intervention\Image\Exceptions\DecoderException;
-use Intervention\Image\Exceptions\FilePointerException;
+use Intervention\Image\Exceptions\StreamException;
 use Intervention\Image\Exceptions\ImageDecoderException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
 
-class FilePointerImageDecoder extends BinaryImageDecoder
+class StreamImageDecoder extends BinaryImageDecoder
 {
     /**
      * {@inheritdoc}
@@ -29,7 +29,7 @@ class FilePointerImageDecoder extends BinaryImageDecoder
      * @see Intervention\Image\Interfaces\DecoderInterface::decode()
      *
      * @throws InvalidArgumentException
-     * @throws FilePointerException
+     * @throws StreamException
      * @throws ImageDecoderException
      * @throws StateException
      */
@@ -42,13 +42,13 @@ class FilePointerImageDecoder extends BinaryImageDecoder
         $contents = '';
         $rewind = rewind($input);
         if ($rewind === false) {
-            throw new FilePointerException('Failed to rewind position of file pointer');
+            throw new StreamException('Failed to rewind position of stream');
         }
 
         while (!feof($input)) {
             $chunk = fread($input, 1024);
             if ($chunk === false) {
-                throw new FilePointerException('Failed to read image from file pointer');
+                throw new StreamException('Failed to read image from stream');
             }
 
             $contents .= $chunk;
@@ -58,7 +58,7 @@ class FilePointerImageDecoder extends BinaryImageDecoder
             return parent::decode($contents);
         } catch (DecoderException) {
             throw new ImageDecoderException(
-                'Failed to decode image from file pointer, could be unsupported image format',
+                'Failed to decode image from stream, could be unsupported image format',
             );
         }
     }

@@ -7,7 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Encoders;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\WebpEncoder as GenericWebpEncoder;
 use Intervention\Image\Exceptions\EncoderException;
-use Intervention\Image\Exceptions\FilePointerException;
+use Intervention\Image\Exceptions\StreamException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
@@ -27,7 +27,7 @@ class WebpEncoder extends GenericWebpEncoder implements SpecializedInterface
      * @throws InvalidArgumentException
      * @throws StateException
      * @throws EncoderException
-     * @throws FilePointerException
+     * @throws StreamException
      */
     public function encode(ImageInterface $image): EncodedImage
     {

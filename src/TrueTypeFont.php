@@ -34,17 +34,17 @@ class TrueTypeFont extends File
      */
     private function queryNameTable(int $id): string
     {
-        rewind($this->pointer);
+        rewind($this->stream);
 
         $tableOffset = $this->tableOffset('name');
-        fseek($this->pointer, $tableOffset);
+        fseek($this->stream, $tableOffset);
 
-        $header = fread($this->pointer, 6);
+        $header = fread($this->stream, 6);
         $recordCount = unpack('n', substr($header, 2, 2))[1];
         $stringStorageOffset = unpack('n', substr($header, 4, 2))[1];
 
         for ($i = 0; $i < $recordCount; $i++) {
-            $record = fread($this->pointer, 12);
+            $record = fread($this->stream, 12);
 
             $platformID = unpack('n', substr($record, 0, 2))[1];
             $nameID = unpack('n', substr($record, 6, 2))[1];
@@ -52,10 +52,10 @@ class TrueTypeFont extends File
             $stringOffset = unpack('n', substr($record, 10, 2))[1];
 
             if ($nameID === $id) {
-                $currentPos = ftell($this->pointer);
-                fseek($this->pointer, $tableOffset + $stringStorageOffset + $stringOffset);
-                $value = fread($this->pointer, $stringLength);
-                fseek($this->pointer, $currentPos);
+                $currentPos = ftell($this->stream);
+                fseek($this->stream, $tableOffset + $stringStorageOffset + $stringOffset);
+                $value = fread($this->stream, $stringLength);
+                fseek($this->stream, $currentPos);
 
                 if ($platformID === 0 || $platformID === 3) {
                     $value = mb_convert_encoding($value, 'UTF-8', 'UTF-16BE');
@@ -75,15 +75,15 @@ class TrueTypeFont extends File
      */
     private function tableOffset(string $tableTag): int
     {
-        rewind($this->pointer);
+        rewind($this->stream);
 
-        $header = fread($this->pointer, 12);
+        $header = fread($this->stream, 12);
         $tableCount = unpack('n', substr($header, 4, 2))[1];
-        fseek($this->pointer, 12);
+        fseek($this->stream, 12);
 
         $offsets = [];
         for ($i = 0; $i < $tableCount; $i++) {
-            $record = fread($this->pointer, 16);
+            $record = fread($this->stream, 16);
             $offsets[substr($record, 0, 4)] = unpack('N', substr($record, 8, 4))[1];
         }
         if (!array_key_exists($tableTag, $offsets)) {

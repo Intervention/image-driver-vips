@@ -7,7 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Encoders;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\GifEncoder as GenericGifEncoder;
 use Intervention\Image\Exceptions\EncoderException;
-use Intervention\Image\Exceptions\FilePointerException;
+use Intervention\Image\Exceptions\StreamException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
@@ -23,7 +23,7 @@ class GifEncoder extends GenericGifEncoder implements SpecializedInterface
      *
      * @throws InvalidArgumentException
      * @throws EncoderException
-     * @throws FilePointerException
+     * @throws StreamException
      */
     public function encode(ImageInterface $image): EncodedImage
     {

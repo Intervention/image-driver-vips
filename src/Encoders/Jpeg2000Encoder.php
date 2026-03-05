@@ -7,7 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Encoders;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\Jpeg2000Encoder as GenericJpeg2000Encoder;
 use Intervention\Image\Exceptions\EncoderException;
-use Intervention\Image\Exceptions\FilePointerException;
+use Intervention\Image\Exceptions\StreamException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
@@ -26,7 +26,7 @@ class Jpeg2000Encoder extends GenericJpeg2000Encoder implements SpecializedInter
      *
      * @throws InvalidArgumentException
      * @throws StateException
-     * @throws FilePointerException
+     * @throws StreamException
      * @throws EncoderException
      */
     public function encode(ImageInterface $image): EncodedImage

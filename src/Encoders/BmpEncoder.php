@@ -7,7 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Encoders;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\BmpEncoder as GenericBmpEncoder;
 use Intervention\Image\Exceptions\EncoderException;
-use Intervention\Image\Exceptions\FilePointerException;
+use Intervention\Image\Exceptions\StreamException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\MediaType;
@@ -22,7 +22,7 @@ class BmpEncoder extends GenericBmpEncoder
      *
      * @throws InvalidArgumentException
      * @throws EncoderException
-     * @throws FilePointerException
+     * @throws StreamException
      */
     public function encode(ImageInterface $image): EncodedImage
     {

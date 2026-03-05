@@ -25,3 +25,7 @@ RUN echo "zend.max_allowed_stack_size=-1\nffi.enable=true" > /usr/local/etc/php/
 
 # install composer
 COPY --from=composer /usr/bin/composer /usr/bin/composer
+
+# setup entrypoint
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

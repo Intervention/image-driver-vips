@@ -39,7 +39,7 @@ abstract class BaseTestCase extends TestCase
 
     public static function readTestImage(string $filename = 'test.jpg'): Image
     {
-        return (new Driver())->handleImageInput(
+        return (new Driver())->decodeImage(
             static::getTestResourcePath($filename),
             [FilePathImageDecoder::class],
         );

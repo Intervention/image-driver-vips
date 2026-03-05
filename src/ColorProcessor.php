@@ -57,7 +57,7 @@ class ColorProcessor implements ColorProcessorInterface
     {
         // transform color to current colorspace and extract bands
         $bands = array_map(
-            fn(ColorChannelInterface $channel): float => $channel->normalizedValue() * 255,
+            fn(ColorChannelInterface $channel): float => $channel->normalized() * 255,
             $color->toColorspace($this->colorspace)->channels(),
         );
 

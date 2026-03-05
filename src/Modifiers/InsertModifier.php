@@ -28,7 +28,7 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
      */
     public function apply(ImageInterface $image): ImageInterface
     {
-        $watermark = $this->driver()->handleImageInput($this->image);
+        $watermark = $this->driver()->decodeImage($this->image);
         $elementNative = $watermark->core()->native();
         $position = $this->position($image, $watermark);
 

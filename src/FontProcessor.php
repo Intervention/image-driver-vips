@@ -11,7 +11,7 @@ use Intervention\Image\Exceptions\DirectoryNotFoundException;
 use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\FileNotFoundException;
 use Intervention\Image\Exceptions\FileNotReadableException;
-use Intervention\Image\Exceptions\FilePointerException;
+use Intervention\Image\Exceptions\StreamException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Geometry\Rectangle;
 use Intervention\Image\Interfaces\ColorInterface;
@@ -33,7 +33,7 @@ class FontProcessor extends AbstractFontProcessor
      * @throws DirectoryNotFoundException
      * @throws FileNotFoundException
      * @throws FileNotReadableException
-     * @throws FilePointerException
+     * @throws StreamException
      */
     public function boxSize(string $text, FontInterface $font): SizeInterface
     {
@@ -58,7 +58,7 @@ class FontProcessor extends AbstractFontProcessor
      * @throws DirectoryNotFoundException
      * @throws FileNotFoundException
      * @throws FileNotReadableException
-     * @throws FilePointerException
+     * @throws StreamException
      */
     public function textToVipsImage(
         string $text,

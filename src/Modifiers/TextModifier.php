@@ -10,7 +10,7 @@ use Intervention\Image\Exceptions\DirectoryNotFoundException;
 use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\FileNotFoundException;
 use Intervention\Image\Exceptions\FileNotReadableException;
-use Intervention\Image\Exceptions\FilePointerException;
+use Intervention\Image\Exceptions\StreamException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Exceptions\ModifierException;
 use Intervention\Image\Exceptions\StateException;
@@ -38,7 +38,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
      * @throws DirectoryNotFoundException
      * @throws FileNotFoundException
      * @throws FileNotReadableException
-     * @throws FilePointerException
+     * @throws StreamException
      * @throws DriverException
      * @throws ModifierException
      */
@@ -48,7 +48,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
         $fontProcessor = new FontProcessor();
 
         // decode text color
-        $color = $this->driver()->handleColorInput($this->font->color());
+        $color = $this->driver()->decodeColor($this->font->color());
 
         // build vips image with text
         $textBlockImage = $fontProcessor->textToVipsImage($this->text, $this->font, $color);
@@ -102,7 +102,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
 
         if ($this->font->hasStrokeEffect()) {
             // decode stroke color
-            $strokeColor = $this->driver()->handleColorInput($this->font->strokeColor());
+            $strokeColor = $this->driver()->decodeColor($this->font->strokeColor());
 
             // build stroke text image if applicable
             $stroke = $fontProcessor->textToVipsImage($this->text, $this->font, $strokeColor);
