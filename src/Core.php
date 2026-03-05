@@ -63,16 +63,31 @@ class Core implements CoreInterface, Iterator
         return new self($image);
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see CollectionInterface::map()
+     */
     public function map(callable $callback): CollectionInterface
     {
         throw new \Exception('Not implemented');
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see CollectionInterface::filter()
+     */
     public function filter(callable $callback): CollectionInterface
     {
         throw new \Exception('Not implemented');
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @see CollectionInterface::meta()
+     */
     public function meta(): CollectionInterface
     {
         return $this->meta;
