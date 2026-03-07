@@ -30,7 +30,7 @@ class PadModifier extends ContainModifier
     {
         $targetSize = $this->resizeSize($image);
         $colorspace = $image->colorspace();
-        $bgColor = $this->driver()->colorProcessor($image)->colorToNative(
+        $bgColor = $this->driver()->colorProcessor($image)->export(
             $this->backgroundColor()
         );
 

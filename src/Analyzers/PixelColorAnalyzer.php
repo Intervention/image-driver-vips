@@ -47,7 +47,7 @@ class PixelColorAnalyzer extends GenericPixelColorAnalyzer implements Specialize
         try {
             return $this->driver()
                 ->colorProcessor($image)
-                ->nativeToColor(array_map(
+                ->import(array_map(
                     fn(int|float $value): int => (int) max(min($value, 255), 0),
                     $core->native()->getpoint($x, $y)
                 ));

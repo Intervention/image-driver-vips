@@ -29,7 +29,7 @@ class DrawPixelModifier extends GenericDrawPixelModifier implements SpecializedI
     public function apply(ImageInterface $image): ImageInterface
     {
         // decode pixel color
-        $color = $this->driver()->colorProcessor($image)->colorToNative(
+        $color = $this->driver()->colorProcessor($image)->export(
             $this->color()
         );
 

@@ -29,7 +29,7 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
     {
         $backgroundColor = $this->driver()
             ->colorProcessor($image)
-            ->colorToNative($this->backgroundColor());
+            ->export($this->backgroundColor());
 
         $frames = [];
         foreach ($image as $frame) {

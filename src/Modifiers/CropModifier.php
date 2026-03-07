@@ -86,7 +86,7 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
      */
     private function background(SizeInterface $resizeTo, ImageInterface $image): VipsImage
     {
-        $backgroundColor = $this->driver()->colorProcessor($image)->colorToNative(
+        $backgroundColor = $this->driver()->colorProcessor($image)->export(
             $this->backgroundColor()
         );
 

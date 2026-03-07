@@ -78,7 +78,7 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
      */
     private function backgroundColor(ImageInterface $image): array
     {
-        $bgColor = $this->driver()->colorProcessor($image)->colorToNative(
+        $bgColor = $this->driver()->colorProcessor($image)->export(
             $this->driver()->decodeColor(
                 $this->driver()->config()->backgroundColor
             )

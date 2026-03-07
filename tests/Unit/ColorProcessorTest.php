@@ -25,13 +25,13 @@ final class ColorProcessorTest extends BaseTestCase
     /**
      * @param array<float> $bands
      */
-    #[DataProvider('colorToNativeDataProvider')]
-    public function testColorToNative(ImageInterface $image, ColorInterface $color, array $bands): void
+    #[DataProvider('exportDataProvider')]
+    public function testExport(ImageInterface $image, ColorInterface $color, array $bands): void
     {
-        $this->assertEquals($bands, (new ColorProcessor($image))->colorToNative($color));
+        $this->assertEquals($bands, (new ColorProcessor($image))->export($color));
     }
 
-    public static function colorToNativeDataProvider(): Generator
+    public static function exportDataProvider(): Generator
     {
         yield [static::readTestImage('blue.gif'), new RgbColor(255, 0, 55), [255.0, 0.0, 55.0, 255.0]];
         yield [static::readTestImage('blue.gif'), new RgbColor(255, 0, 55, .2), [255.0, 0.0, 55.0, 51.0]];
@@ -54,13 +54,13 @@ final class ColorProcessorTest extends BaseTestCase
     /**
      * @param array<float> $bands
      */
-    #[DataProvider('nativeToColorDataProvider')]
-    public function testNativeToColor(ImageInterface $image, array $bands, ColorInterface $color): void
+    #[DataProvider('importDataProvider')]
+    public function testImport(ImageInterface $image, array $bands, ColorInterface $color): void
     {
-        $this->assertEquals($color, (new ColorProcessor($image))->nativeToColor($bands));
+        $this->assertEquals($color, (new ColorProcessor($image))->import($bands));
     }
 
-    public static function nativeToColorDataProvider(): Generator
+    public static function importDataProvider(): Generator
     {
         yield [static::readTestImage('blue.gif'), [255.0], new RgbColor(255, 255, 255, 1)];
         yield [static::readTestImage('blue.gif'), [255.0, 51.], new RgbColor(255, 255, 255, .2)];

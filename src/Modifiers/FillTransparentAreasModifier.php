@@ -32,7 +32,7 @@ class FillTransparentAreasModifier extends GenericFillTransparentAreasModifier i
     public function apply(ImageInterface $image): ImageInterface
     {
         // decode background color
-        $bgColor = $this->driver()->colorProcessor($image)->colorToNative(
+        $bgColor = $this->driver()->colorProcessor($image)->export(
             $this->backgroundColor($this->driver())
         );
 

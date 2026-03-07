@@ -51,9 +51,9 @@ class ColorProcessor implements ColorProcessorInterface
     /**
      * {@inheritdoc}
      *
-     * @see ColorProcessorInterface::colorToNative()
+     * @see ColorProcessorInterface::export()
      */
-    public function colorToNative(ColorInterface $color): mixed
+    public function export(ColorInterface $color): mixed
     {
         // transform color to current colorspace and extract bands
         $bands = array_map(
@@ -84,31 +84,31 @@ class ColorProcessor implements ColorProcessorInterface
     /**
      * {@inheritdoc}
      *
-     * @see ColorProcessorInterface::nativeToColor()
+     * @see ColorProcessorInterface::import()
      *
      * @throws InvalidArgumentException
      * @throws NotSupportedException
      * @throws ColorDecoderException
      */
-    public function nativeToColor(mixed $native): ColorInterface
+    public function import(mixed $color): ColorInterface
     {
-        if (!is_array($native)) {
+        if (!is_array($color)) {
             throw new InvalidArgumentException($this::class . ' can only decode colors in array format');
         }
 
-        if (count($native) === 1) {
+        if (count($color) === 1) {
             // normalize single band color
-            $normalized = array_pad($native, count($this->requiredChannels()), $native[0]);
+            $normalized = array_pad($color, count($this->requiredChannels()), $color[0]);
         }
 
-        if (count($native) === 2) {
+        if (count($color) === 2) {
             // normalize single band + alpha
-            $normalized = array_fill(0, count($this->requiredChannels()), $native[0]);
-            $normalized[] = $native[1]; // apend alpha value
+            $normalized = array_fill(0, count($this->requiredChannels()), $color[0]);
+            $normalized[] = $color[1]; // apend alpha value
         }
 
         // "native color" means array of normalized to 0-255 color channel values
-        $normalized = array_map(fn(int $value): float => $value / 255, $normalized ?? $native);
+        $normalized = array_map(fn(int $value): float => $value / 255, $normalized ?? $color);
 
         return match ($this->colorspace::class) {
             Cmyk::class => $this->colorspace->colorFromNormalized($normalized),

@@ -44,7 +44,7 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
         }
 
         $colorspace = $image->colorspace();
-        $bgColor = $this->driver()->colorProcessor($image)->colorToNative(
+        $bgColor = $this->driver()->colorProcessor($image)->export(
             $this->backgroundColor()
         );
 
