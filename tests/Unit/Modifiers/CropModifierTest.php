@@ -51,7 +51,7 @@ final class CropModifierTest extends BaseTestCase
     public function testModifyCropExtendWithAlpha(): void
     {
         $image = $this->readTestImage('blocks.png');
-        $image = $image->modify(new CropModifier(800, 379, background: 'transparent'));
+        $image = $image->modify(new CropModifier(800, 379, background: 'ffffff00'));
         $this->assertEquals(800, $image->width());
         $this->assertEquals(379, $image->height());
 

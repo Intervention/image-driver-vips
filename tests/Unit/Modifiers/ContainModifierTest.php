@@ -44,7 +44,7 @@ final class ContainModifierTest extends BaseTestCase
         $image = $this->readTestImage('test.jpg');
         $this->assertEquals(320, $image->width());
         $this->assertEquals(240, $image->height());
-        $image->modify(new ContainModifier(800, 200, 'transparent', 'right'));
+        $image->modify(new ContainModifier(800, 200, 'ffffff00', 'right'));
         $this->assertEquals(800, $image->width());
         $this->assertEquals(200, $image->height());
         $this->assertColor(255, 255, 255, 0, $image->colorAt(0, 0));
@@ -56,7 +56,7 @@ final class ContainModifierTest extends BaseTestCase
         $image = $this->readTestImage('animation.gif');
         $this->assertEquals(20, $image->width());
         $this->assertEquals(15, $image->height());
-        $image->modify(new ContainModifier(100, 20, 'transparent', 'top'));
+        $image->modify(new ContainModifier(100, 20, 'ffffff00', 'top'));
         $this->assertEquals(100, $image->width());
         $this->assertEquals(20, $image->height());
         $this->assertEquals(8, $image->count());
@@ -71,7 +71,7 @@ final class ContainModifierTest extends BaseTestCase
         $image = $this->readTestImage('grayscale.png');
         $this->assertEquals(150, $image->width());
         $this->assertEquals(200, $image->height());
-        $image->modify(new ContainModifier(200, 200, 'transparent', 'top'));
+        $image->modify(new ContainModifier(200, 200, 'ffffff00', 'top'));
         $this->assertEquals(200, $image->width());
         $this->assertEquals(200, $image->height());
         $this->assertColor(255, 255, 255, 0, $image->colorAt(0, 0));
@@ -83,7 +83,7 @@ final class ContainModifierTest extends BaseTestCase
         $image = $this->readTestImage('grayscale-alpha.png');
         $this->assertEquals(256, $image->width());
         $this->assertEquals(256, $image->height());
-        $image->modify(new ContainModifier(258, 256, 'transparent', 'top'));
+        $image->modify(new ContainModifier(258, 256, 'ffffff00', 'top'));
         $this->assertEquals(258, $image->width());
         $this->assertEquals(256, $image->height());
         $this->assertColor(255, 255, 255, 0, $image->colorAt(0, 0));

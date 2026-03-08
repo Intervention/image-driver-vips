@@ -91,7 +91,7 @@ class FontProcessor extends AbstractFontProcessor
     {
         $pangoAttributes = [
             'line_height' => (string) $font->lineHeight() / 1.62,
-            'foreground' => $color->toHex('#'),
+            'foreground' => $color->toHex(true),
         ];
 
         // format pango attributes
