@@ -22,7 +22,7 @@
     "require": {
         "php": "^8.3",
         "intervention/image": "dev-next",
-        "jcupitt/vips": "^2.4"
+        "jcupitt/vips": "^2.6"
     },
     "require-dev": {
         "ext-fileinfo": "*",
