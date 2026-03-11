@@ -69,7 +69,7 @@ class FontProcessor extends AbstractFontProcessor
             '<span ' . $this->pangoAttributes($font, $color) . '>' . htmlspecialchars($text) . '</span>',
             [
                 'fontfile' => $font->filepath(),
-                'font' => TrueTypeFont::fromPath($font->filepath())->familyName() . ' ' . $font->size(),
+                'font' => TrueTypeFont::createFromPath($font->filepath())->familyName() . ' ' . $font->size(),
                 'dpi' => 72,
                 'rgba' => true,
                 'width' => $font->wrapWidth(),

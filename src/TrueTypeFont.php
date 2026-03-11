@@ -12,7 +12,7 @@ class TrueTypeFont extends File
     /**
      * Create object from path in file system
      */
-    public static function fromPath(string $path): self
+    public static function createFromPath(string $path): self
     {
         return new self(fopen($path, 'r'));
     }
