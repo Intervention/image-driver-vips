@@ -37,7 +37,13 @@ class DataUriImageDecoder extends BinaryImageDecoder
      */
     public function decode(mixed $input): ImageInterface
     {
-        $input = ($input instanceof DataUri) ? (string) $input : $input;
+        if ($input instanceof DataUri) {
+            try {
+                return parent::decode($input->data());
+            } catch (DecoderException) {
+                throw new ImageDecoderException('Data Uri contains unsupported image type');
+            }
+        }
 
         if (!is_string($input)) {
             throw new InvalidArgumentException(
@@ -45,10 +51,8 @@ class DataUriImageDecoder extends BinaryImageDecoder
             );
         }
 
-        $data = DataUri::decode($input)->data();
-
         try {
-            return parent::decode($data);
+            return parent::decode(DataUri::parse($input)->data());
         } catch (DecoderException) {
             throw new ImageDecoderException('Data Uri contains unsupported image type');
         }
