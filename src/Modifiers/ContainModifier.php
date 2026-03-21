@@ -117,7 +117,9 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
      */
     protected function alignmentToGravity(string|Alignment $alignment): string
     {
-        return match (Alignment::tryCreate($alignment)) {
+        $alignment = Alignment::create($alignment); // normalize alignment
+
+        return match ($alignment) {
             Alignment::TOP => CompassDirection::NORTH,
             Alignment::TOP_RIGHT => CompassDirection::NORTH_EAST,
             Alignment::LEFT => CompassDirection::WEST,
