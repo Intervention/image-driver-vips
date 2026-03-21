@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
+use Intervention\Image\Alignment;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
@@ -78,6 +79,27 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
         }
 
         return $image;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @see GenericCropModifier::crop()
+     */
+    protected function crop(ImageInterface $image): SizeInterface
+    {
+        if (is_string($this->alignment) && str_starts_with($this->alignment, self::INTERESTING_PREFIX)) {
+            $originalAlignment = $this->alignment;
+            $this->alignment = Alignment::TOP_LEFT;
+
+            $cropped = parent::crop($image);
+
+            $this->alignment = $originalAlignment;
+
+            return $cropped;
+        }
+
+        return parent::crop($image);
     }
 
     /**
