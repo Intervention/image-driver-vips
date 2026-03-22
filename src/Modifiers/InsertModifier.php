@@ -32,7 +32,7 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
         $elementNative = $watermark->core()->native();
         $position = $this->position($image, $watermark);
 
-        if ($this->opacity < 100) {
+        if ($this->transparency < 1) {
             if (!$elementNative->hasAlpha()) {
                 $elementNative = $elementNative->bandjoin_const(255);
             }
@@ -41,7 +41,7 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
                 1.0,
                 1.0,
                 1.0,
-                $this->opacity / 100,
+                $this->transparency,
             ]);
         }
 
