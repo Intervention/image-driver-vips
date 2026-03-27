@@ -21,7 +21,7 @@
     ],
     "require": {
         "php": "^8.3",
-        "intervention/image": "dev-next",
+        "intervention/image": "^4.0",
         "jcupitt/vips": "^2.6"
     },
     "require-dev": {
@@ -55,6 +55,5 @@
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
         }
-    },
-    "minimum-stability": "beta"
+    }
 }
