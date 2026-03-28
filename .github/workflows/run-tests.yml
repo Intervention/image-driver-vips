@@ -51,12 +51,12 @@ jobs:
             libcfitsio-dev \
             libmatio-dev \
             libopenexr-dev
-          pip3 install meson --break-system-packages
+          sudo pip3 install meson --break-system-packages
           curl -fsSL https://github.com/libvips/libvips/releases/download/v${{ matrix.libvips }}/vips-${{ matrix.libvips }}.tar.xz -o /tmp/vips.tar.xz
           tar xf /tmp/vips.tar.xz -C /tmp
           meson setup /tmp/vips-${{ matrix.libvips }}/build /tmp/vips-${{ matrix.libvips }} --libdir=lib --buildtype=release -Dintrospection=disabled
           meson compile -C /tmp/vips-${{ matrix.libvips }}/build
-          sudo $(which meson) install -C /tmp/vips-${{ matrix.libvips }}/build
+          sudo meson install -C /tmp/vips-${{ matrix.libvips }}/build
           sudo ldconfig
 
       - name: Setup PHP
