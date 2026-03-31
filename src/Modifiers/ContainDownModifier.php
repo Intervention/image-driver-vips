@@ -15,7 +15,7 @@ use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SizeInterface;
 use Jcupitt\Vips\Extend;
 
-class PadModifier extends ContainModifier
+class ContainDownModifier extends ContainModifier
 {
     /**
      * {@inheritdoc}
@@ -35,7 +35,7 @@ class PadModifier extends ContainModifier
         );
 
         if (!$image->isAnimated()) {
-            $contained = $this->pad(
+            $contained = $this->containDown(
                 $image->core()->first(),
                 $targetSize,
                 $bgColor,
@@ -44,7 +44,7 @@ class PadModifier extends ContainModifier
         } else {
             $frames = [];
             foreach ($image as $frame) {
-                $frames[] = $this->pad(
+                $frames[] = $this->containDown(
                     $frame,
                     $targetSize,
                     $bgColor,
@@ -61,11 +61,11 @@ class PadModifier extends ContainModifier
     }
 
     /**
-     * Apply padded image resizing
+     * Apply image resizing to given frame.
      *
      * @param array<float> $background
      */
-    private function pad(
+    private function containDown(
         FrameInterface $frame,
         SizeInterface $targetSize,
         array $background,

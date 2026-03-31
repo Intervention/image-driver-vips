@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
-use Intervention\Image\Drivers\Vips\Modifiers\PadModifier;
+use Intervention\Image\Drivers\Vips\Modifiers\ContainDownModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
-#[CoversClass(PadModifier::class)]
-final class PadModifierTest extends BaseTestCase
+#[CoversClass(ContainDownModifier::class)]
+final class ContainDownModifierTest extends BaseTestCase
 {
     public function testModify(): void
     {
         $image = $this->readTestImage('blue.gif');
         $this->assertEquals(16, $image->width());
         $this->assertEquals(16, $image->height());
-        $image->modify(new PadModifier(30, 20, 'f00'));
+        $image->modify(new ContainDownModifier(30, 20, 'f00'));
         $this->assertEquals(30, $image->width());
         $this->assertEquals(20, $image->height());
         $this->assertColor(255, 0, 0, 255, $image->colorAt(0, 0));
@@ -42,7 +42,7 @@ final class PadModifierTest extends BaseTestCase
         $image = $this->readTestImage('grayscale.png');
         $this->assertEquals(150, $image->width());
         $this->assertEquals(200, $image->height());
-        $image->modify(new PadModifier(200, 200, 'f00'));
+        $image->modify(new ContainDownModifier(200, 200, 'f00'));
         $this->assertEquals(200, $image->width());
         $this->assertEquals(200, $image->height());
         $this->assertColor(255, 0, 0, 255, $image->colorAt(0, 0));
@@ -56,7 +56,7 @@ final class PadModifierTest extends BaseTestCase
         $image = $this->readTestImage('grayscale-alpha.png');
         $this->assertEquals(256, $image->width());
         $this->assertEquals(256, $image->height());
-        $image->modify(new PadModifier(258, 258, 'f00'));
+        $image->modify(new ContainDownModifier(258, 258, 'f00'));
         $this->assertEquals(258, $image->width());
         $this->assertEquals(258, $image->height());
         $this->assertColor(255, 0, 0, 255, $image->colorAt(0, 0));
