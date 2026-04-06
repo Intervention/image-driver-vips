@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips;
 
 use ArrayIterator;
+use Exception;
 use Intervention\Image\Collection;
 use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\ImageException;
@@ -67,6 +68,8 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CollectionInterface::map()
+     *
+     * @throws Exception
      */
     public function map(callable $callback): CollectionInterface
     {
@@ -77,6 +80,8 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CollectionInterface::filter()
+     *
+     * @throws Exception
      */
     public function filter(callable $callback): CollectionInterface
     {
@@ -132,9 +137,17 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CoreInterface::setNative()
+     *
+     * @throws InvalidArgumentException
      */
     public function setNative(mixed $native): CoreInterface
     {
+        if (!$native instanceof VipsImage) {
+            throw new InvalidArgumentException(
+                'Value for argument setNative() "$native" must be instanceof of ' . VipsImage::class,
+            );
+        }
+
         $this->vipsImage = $native;
 
         return $this;
@@ -257,6 +270,7 @@ class Core implements CoreInterface, Iterator
         $frames = $this->toArray();
         $frames[] = $frame;
 
+        // @phpstan-ignore missingType.checkedException
         $this->setNative(self::replaceFrames($this->vipsImage, $frames));
 
         return $this;
@@ -409,8 +423,9 @@ class Core implements CoreInterface, Iterator
     public function slice(int $offset, ?int $length = 0): CollectionInterface
     {
         $frames = $this->toArray();
-
         $frames = array_slice($frames, $offset, $length);
+
+        // @phpstan-ignore missingType.checkedException
         $this->setNative(self::replaceFrames($this->vipsImage, $frames));
 
         return $this;

@@ -91,15 +91,22 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
                 'export-profile' => ColorProcessor::colorspaceToInterpretation($colorspace),
             ]);
 
-            $native = $resized->gravity(
-                $this->alignmentToGravity($this->alignment),
-                $resize->width(),
-                $resize->height(),
-                [
-                    'extend' => Extend::BACKGROUND,
-                    'background' => $bgColor,
-                ]
-            );
+            try {
+                $native = $resized->gravity(
+                    $this->alignmentToGravity($this->alignment),
+                    $resize->width(),
+                    $resize->height(),
+                    [
+                        'extend' => Extend::BACKGROUND,
+                        'background' => $bgColor,
+                    ]
+                );
+            } catch (InvalidArgumentException $e) {
+                throw new ModifierException(
+                    'Failed to apply ' . self::class . ', unable to convert alignment value',
+                    previous: $e
+                );
+            }
         } catch (VipsException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to process resizing',
@@ -114,6 +121,8 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
 
     /**
      * Convert alignment to libvips gravity.
+     *
+     * @throws InvalidArgumentException
      */
     protected function alignmentToGravity(string|Alignment $alignment): string
     {

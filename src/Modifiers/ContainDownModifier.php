@@ -8,6 +8,7 @@ use Intervention\Image\Drivers\Vips\ColorProcessor;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
+use Intervention\Image\Exceptions\ModifierException;
 use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ColorspaceInterface;
 use Intervention\Image\Interfaces\FrameInterface;
@@ -25,6 +26,7 @@ class ContainDownModifier extends ContainModifier
      * @throws InvalidArgumentException
      * @throws StateException
      * @throws DriverException
+     * @throws ModifierException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
@@ -64,6 +66,7 @@ class ContainDownModifier extends ContainModifier
      * Apply image resizing to given frame.
      *
      * @param array<float> $background
+     * @throws ModifierException
      */
     private function containDown(
         FrameInterface $frame,
@@ -80,15 +83,22 @@ class ContainDownModifier extends ContainModifier
             'export-profile' => ColorProcessor::colorspaceToInterpretation($colorspace),
         ]);
 
-        $resized = $resized->gravity(
-            $this->alignmentToGravity($this->alignment),
-            $targetSize->width(),
-            $targetSize->height(),
-            [
-                'extend' => Extend::BACKGROUND,
-                'background' => $background,
-            ]
-        );
+        try {
+            $resized = $resized->gravity(
+                $this->alignmentToGravity($this->alignment),
+                $targetSize->width(),
+                $targetSize->height(),
+                [
+                    'extend' => Extend::BACKGROUND,
+                    'background' => $background,
+                ]
+            );
+        } catch (InvalidArgumentException $e) {
+            throw new ModifierException(
+                'Failed to apply ' . self::class . ', unable to process resizing',
+                previous: $e
+            );
+        }
 
         $frame->setNative($resized);
 

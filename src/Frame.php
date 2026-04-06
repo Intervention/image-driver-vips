@@ -39,9 +39,17 @@ class Frame implements FrameInterface
      * {@inheritdoc}
      *
      * @see FrameInterface::setNative()
+     *
+     * @throws InvalidArgumentException
      */
     public function setNative(mixed $native): FrameInterface
     {
+        if (!$native instanceof VipsImage) {
+            throw new InvalidArgumentException(
+                'Value for argument setNative() "$native" must be instanceof of ' . VipsImage::class,
+            );
+        }
+
         $this->vipsImage = $native;
 
         return $this;
