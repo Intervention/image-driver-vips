@@ -95,7 +95,7 @@ class ContainDownModifier extends ContainModifier
             );
         } catch (InvalidArgumentException $e) {
             throw new ModifierException(
-                'Failed to apply ' . self::class . ', unable to process resizing',
+                'Failed to apply ' . self::class . ', unable to convert alignment value',
                 previous: $e
             );
         }
