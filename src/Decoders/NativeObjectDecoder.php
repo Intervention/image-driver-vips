@@ -7,7 +7,9 @@ namespace Intervention\Image\Drivers\Vips\Decoders;
 use Intervention\Image\Drivers\SpecializableDecoder;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Modifiers\OrientModifier;
+use Intervention\Image\Exceptions\ImageDecoderException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
+use Intervention\Image\Exceptions\ModifierException;
 use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ImageInterface;
@@ -35,6 +37,7 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
      * @see Intervention\Image\Interfaces\DecoderInterface::decode()
      *
      * @throws InvalidArgumentException
+     * @throws ImageDecoderException
      * @throws StateException
      */
     public function decode(mixed $input): ImageInterface
@@ -60,7 +63,11 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
 
         // auto-rotate
         if ($this->driver()->config()->autoOrientation === true && $this->exifRotation($input) > 1) {
-            $image->modify(new OrientModifier());
+            try {
+                $image->modify(new OrientModifier());
+            } catch (ModifierException $e) {
+                throw new ImageDecoderException('Failed to auto-rotate image in decoding process', previous: $e);
+            }
         }
 
         // set media type on origin
