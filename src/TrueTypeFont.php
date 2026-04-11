@@ -10,11 +10,13 @@ use Intervention\Image\File;
 class TrueTypeFont extends File
 {
     /**
-     * Create object from path in file system
+     * {@inheritdoc}
+     *
+     * @see Intervention\Image\Interfaces\FileInterface::fromPath()
      */
-    public static function createFromPath(string $path): self
+    public static function fromPath(string $path): self
     {
-        return new self(fopen($path, 'r'));
+        return new self(parent::fromPath($path)->toStream());
     }
 
     /**

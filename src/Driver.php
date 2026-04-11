@@ -113,6 +113,8 @@ class Driver extends AbstractDriver
      * {@inheritdoc}
      *
      * @see DriverInterface::colorProcessor()
+     *
+     * @throws DriverException
      */
     public function colorProcessor(ImageInterface $image): ColorProcessorInterface
     {

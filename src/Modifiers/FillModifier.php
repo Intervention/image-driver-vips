@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
+use Intervention\Image\Exceptions\ColorDecoderException;
 use Intervention\Image\Exceptions\ModifierException;
 use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
@@ -26,9 +27,14 @@ class FillModifier extends GenericFillModifier implements SpecializedInterface
      */
     public function apply(ImageInterface $image): ImageInterface
     {
-        $color = $this->driver()->colorProcessor($image)->export(
-            $this->color()
-        );
+        try {
+            $color = $this->driver()->colorProcessor($image)->export($this->color());
+        } catch (ColorDecoderException $e) {
+            throw new ModifierException(
+                'Failed to apply ' . self::class . ', unable to convert color to usable format',
+                previous: $e
+            );
+        }
 
         try {
             $overlay = VipsImage::black(1, 1)

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips;
 
+use DivisionByZeroError;
 use Intervention\Image\Colors\Cmyk\Colorspace as Cmyk;
 use Intervention\Image\Colors\Hsl\Colorspace as Hsl;
 use Intervention\Image\Colors\Hsv\Colorspace as Hsv;
@@ -11,6 +12,8 @@ use Intervention\Image\Colors\Oklab\Colorspace as Oklab;
 use Intervention\Image\Colors\Oklch\Colorspace as Oklch;
 use Intervention\Image\Colors\Rgb\Colorspace as Rgb;
 use Intervention\Image\Exceptions\ColorDecoderException;
+use Intervention\Image\Exceptions\ColorException;
+use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Exceptions\NotSupportedException;
 use Intervention\Image\Interfaces\ColorChannelInterface;
@@ -18,8 +21,8 @@ use Intervention\Image\Interfaces\ColorInterface;
 use Intervention\Image\Interfaces\ColorProcessorInterface;
 use Intervention\Image\Interfaces\ColorspaceInterface;
 use Intervention\Image\Interfaces\ImageInterface;
-use Jcupitt\Vips\Interpretation;
 use Jcupitt\Vips\Image as VipsImage;
+use Jcupitt\Vips\Interpretation;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionParameter;
@@ -31,11 +34,21 @@ class ColorProcessor implements ColorProcessorInterface
 
     /**
      * Create new ColorProcessor instance
+     *
+     * @throws DriverException
      */
     public function __construct(ImageInterface $image)
     {
         $this->colorspace = $image->colorspace();
-        $this->baseImage = $image->core()->native();
+
+        $baseImage = $image->core()->native();
+        if (!$baseImage instanceof VipsImage) {
+            throw new DriverException(
+                'Unable to extract color processor base image of type ' . VipsImage::class,
+            );
+        }
+
+        $this->baseImage = $baseImage;
     }
 
     /**
@@ -52,6 +65,8 @@ class ColorProcessor implements ColorProcessorInterface
      * {@inheritdoc}
      *
      * @see ColorProcessorInterface::export()
+     *
+     * @throws ColorException
      */
     public function export(ColorInterface $color): mixed
     {
@@ -61,21 +76,28 @@ class ColorProcessor implements ColorProcessorInterface
             $color->toColorspace($this->colorspace)->channels(),
         );
 
-        // handle grayscale colors
-        if ($this->baseImage->bands === 1 && count($bands) > 1) {
-            $bands = array_slice($bands, 0, 3);
-            return [round(array_sum($bands) / count($bands))];
-        }
+        try {
+            // handle grayscale colors
+            if ($this->baseImage->bands === 1 && count($bands) > 1) {
+                $bands = array_slice($bands, 0, 3);
+                return [round(array_sum($bands) / count($bands))];
+            }
 
-        // handle grayscale colors with alpha
-        if ($this->baseImage->bands === 2 && count($bands) > 2) {
-            $alpha = array_slice($bands, -1)[0];
-            $bands = array_slice($bands, 0, 3);
-            return [round(array_sum($bands) / count($bands)), $alpha];
-        }
+            // handle grayscale colors with alpha
+            if ($this->baseImage->bands === 2 && count($bands) > 2) {
+                $alpha = array_slice($bands, -1)[0];
+                $bands = array_slice($bands, 0, 3);
+                return [round(array_sum($bands) / count($bands)), $alpha];
+            }
 
-        if (count($bands) > $this->baseImage->bands) {
-            return array_slice($bands, 0, $this->baseImage->bands);
+            if (count($bands) > $this->baseImage->bands) {
+                return array_slice($bands, 0, $this->baseImage->bands);
+            }
+        } catch (DivisionByZeroError $e) {
+            throw new ColorException(
+                'Failed to import color ' . $color::class . ' to ' . $this::class,
+                previous: $e,
+            );
         }
 
         return $bands;
