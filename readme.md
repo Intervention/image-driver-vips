@@ -56,6 +56,7 @@ $encoded->save('images/example.jpg');
 ## Requirements
 
 - PHP >= 8.3
+- Foreign Function Interface (FFI) Extension
 
 ## Caveats
 
