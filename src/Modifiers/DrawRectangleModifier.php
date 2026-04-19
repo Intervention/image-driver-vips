@@ -34,6 +34,7 @@ class DrawRectangleModifier extends GenericDrawRectangleModifier implements Spec
             'y' => $this->drawable->position()->y(),
             'width' => $this->drawable->width(),
             'height' => $this->drawable->height(),
+            'fill' => 'rgba(0, 0, 0, 0)',
         ];
 
         if ($this->drawable->hasBackgroundColor()) {

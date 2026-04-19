@@ -34,6 +34,7 @@ class DrawEllipseModifier extends GenericDrawEllipseModifier implements Speciali
             'cy' => $this->drawable->position()->y(),
             'rx' => $this->drawable->width() / 2,
             'ry' => $this->drawable->height() / 2,
+            'fill' => 'rgba(0, 0, 0, 0)',
         ];
 
         if ($this->drawable->hasBackgroundColor()) {
