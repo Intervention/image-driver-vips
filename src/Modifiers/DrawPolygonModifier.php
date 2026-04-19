@@ -30,6 +30,7 @@ class DrawPolygonModifier extends GenericDrawPolygonModifier implements Speciali
     public function apply(ImageInterface $image): ImageInterface
     {
         $xmlAttributes = [
+            'fill' => 'rgba(0, 0, 0, 0)',
             'points' => implode(' ', array_map(
                 fn(array $coordinates): string => implode(',', $coordinates),
                 array_chunk($this->drawable->toArray(), 2),

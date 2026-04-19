@@ -30,6 +30,17 @@ final class DrawEllipseModifierTest extends BaseTestCase
         $this->assertEquals('ffffff', $image->colorAt(10, 10)->toHex());
     }
 
+    public function testApplyWithoutBackground(): void
+    {
+        $image = $this->readTestImage('trim.png');
+        $this->assertEquals('ffa601', $image->colorAt(20, 20)->toHex());
+        $drawable = new Ellipse(30, 30, new Point(14, 14));
+        $drawable->setBorder('fff', 5);
+        $image->modify(new DrawEllipseModifier($drawable));
+        $this->assertEquals('ffffff', $image->colorAt(4, 4)->toHex()); // border of circle
+        $this->assertEquals('ffa601', $image->colorAt(20, 20)->toHex()); // background of circle
+    }
+
     public function testApplyAnimated(): void
     {
         $image = ImageManager::usingDriver(Driver::class)

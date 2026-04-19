@@ -72,6 +72,7 @@ class DrawBezierModifier extends GenericDrawBezierModifier implements Specialize
 
         // setup shape attributes
         $shapeAttributes = [
+            'fill' => 'rgba(0, 0, 0, 0)',
             'd' => $points,
         ];
 
