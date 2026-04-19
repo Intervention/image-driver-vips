@@ -34,12 +34,8 @@ class DrawEllipseModifier extends GenericDrawEllipseModifier implements Speciali
             'cy' => $this->drawable->position()->y(),
             'rx' => $this->drawable->width() / 2,
             'ry' => $this->drawable->height() / 2,
-            'fill' => 'rgba(0, 0, 0, 0)',
+            'fill' => $this->backgroundColor()->toColorspace(Rgb::class)->toString(),
         ];
-
-        if ($this->drawable->hasBackgroundColor()) {
-            $xmlAttributes['fill'] = $this->backgroundColor()->toColorspace(Rgb::class)->toString();
-        }
 
         if ($this->drawable->hasBorder()) {
             $xmlAttributes['stroke'] = $this->borderColor()->toColorspace(Rgb::class)->toString();

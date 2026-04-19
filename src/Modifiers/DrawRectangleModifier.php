@@ -34,12 +34,8 @@ class DrawRectangleModifier extends GenericDrawRectangleModifier implements Spec
             'y' => $this->drawable->position()->y(),
             'width' => $this->drawable->width(),
             'height' => $this->drawable->height(),
-            'fill' => 'rgba(0, 0, 0, 0)',
+            'fill' => $this->backgroundColor()->toColorspace(Rgb::class)->toString(),
         ];
-
-        if ($this->drawable->hasBackgroundColor()) {
-            $xmlAttributes['fill'] = $this->backgroundColor()->toColorspace(Rgb::class)->toString();
-        }
 
         if ($this->drawable->hasBorder()) {
             $xmlAttributes['stroke'] = $this->borderColor()->toColorspace(Rgb::class)->toString();

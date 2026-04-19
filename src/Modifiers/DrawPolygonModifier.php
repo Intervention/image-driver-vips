@@ -30,16 +30,12 @@ class DrawPolygonModifier extends GenericDrawPolygonModifier implements Speciali
     public function apply(ImageInterface $image): ImageInterface
     {
         $xmlAttributes = [
-            'fill' => 'rgba(0, 0, 0, 0)',
+            'fill' => $this->backgroundColor()->toColorspace(Rgb::class)->toString(),
             'points' => implode(' ', array_map(
                 fn(array $coordinates): string => implode(',', $coordinates),
                 array_chunk($this->drawable->toArray(), 2),
             )),
         ];
-
-        if ($this->drawable->hasBackgroundColor()) {
-            $xmlAttributes['fill'] = $this->backgroundColor()->toColorspace(Rgb::class)->toString();
-        }
 
         if ($this->drawable->hasBorder()) {
             $xmlAttributes['stroke'] = $this->borderColor()->toColorspace(Rgb::class)->toString();
