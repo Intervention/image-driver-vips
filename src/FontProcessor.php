@@ -75,7 +75,7 @@ class FontProcessor extends AbstractFontProcessor
                 'width' => $font->wrapWidth(),
                 'wrap' => TextWrap::WORD,
                 'align' => match ($font->alignmentHorizontal()) {
-                    Alignment::CENTER,
+                    Alignment::CENTER => Align::CENTRE,
                     Alignment::RIGHT => Align::HIGH,
                     default => Align::LOW,
                 },
