@@ -72,13 +72,9 @@ class DrawBezierModifier extends GenericDrawBezierModifier implements Specialize
 
         // setup shape attributes
         $shapeAttributes = [
-            'fill' => 'rgba(0, 0, 0, 0)',
+            'fill' => $this->backgroundColor()->toColorspace(Rgb::class)->toString(),
             'd' => $points,
         ];
-
-        if ($this->drawable->hasBackgroundColor()) {
-            $shapeAttributes['fill'] = $this->backgroundColor()->toColorspace(Rgb::class)->toString();
-        }
 
         if ($this->drawable->hasBorder()) {
             $shapeAttributes['stroke'] = $this->borderColor()->toColorspace(Rgb::class)->toString();
