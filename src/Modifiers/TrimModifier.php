@@ -18,7 +18,7 @@ class TrimModifier extends GenericTrimModifier implements SpecializedInterface
 {
     public function __construct(public int $tolerance = 40)
     {
-        //
+        parent::__construct($tolerance);
     }
 
     /**
