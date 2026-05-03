@@ -265,7 +265,7 @@ class Core implements CoreInterface, Iterator
      *
      * @throws DriverException
      */
-    public function add(FrameInterface $frame): self
+    public function add(FrameInterface $frame): CoreInterface
     {
         $frames = $this->toArray();
         $frames[] = $frame;
