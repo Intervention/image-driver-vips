@@ -71,7 +71,8 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
         }
 
         // set media type on origin
-        if ($mediaType = $this->vipsMediaType($input)) {
+        $mediaType = $this->vipsMediaType($input);
+        if ($mediaType !== null) {
             $image->origin()->setMediaType($mediaType);
         }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
+use Intervention\Image\Alignment;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\FontProcessor;
 use Intervention\Image\Exceptions\DirectoryNotFoundException;
@@ -62,13 +63,13 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
 
         // adjust block size
         switch ($this->font->alignmentVertical()) {
-            case 'top':
+            case Alignment::TOP:
                 $blockSize->movePointsY($baseline * -1);
                 $blockSize->movePointsY($textBlockImage->yoffset);
                 $blockSize->movePointsY($capImage->height);
                 break;
 
-            case 'bottom':
+            case Alignment::BOTTOM:
                 $lastLineImage = $fontProcessor->textToVipsImage((string) $textBlock->last(), $this->font);
                 $blockSize->movePointsY($lastLineImage->height);
                 $blockSize->movePointsY($baseline * -1);
@@ -93,7 +94,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
         }
 
         // apply rotation offset to block position
-        if ($this->font->angle() != 0) {
+        if ($this->font->angle() !== 0.0) {
             $blockPosition->move(
                 $textBlockImage->xoffset * -1,
                 $textBlockImage->yoffset * -1
