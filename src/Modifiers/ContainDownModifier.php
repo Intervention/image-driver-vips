@@ -77,11 +77,17 @@ class ContainDownModifier extends ContainModifier
         $cropWidth = min($frame->native()->width, $targetSize->width());
         $cropHeight = min($frame->native()->height, $targetSize->height());
 
-        $resized = $frame->native()->thumbnail_image($cropWidth, [
+        $options = [
             'height' => $cropHeight,
             'no_rotate' => true,
-            'export-profile' => ColorProcessor::colorspaceToInterpretation($colorspace),
-        ]);
+        ];
+
+        $exportProfile = ColorProcessor::thumbnailExportProfile($colorspace);
+        if ($exportProfile !== null) {
+            $options['export-profile'] = $exportProfile;
+        }
+
+        $resized = $frame->native()->thumbnail_image($cropWidth, $options);
 
         try {
             $resized = $resized->gravity(
