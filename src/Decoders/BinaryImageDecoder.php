@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Decoders;
 
+use Intervention\Image\Drivers\Vips\Core;
+use Intervention\Image\Drivers\Vips\Source\BufferSource;
 use Intervention\Image\Exceptions\DecoderException;
 use Intervention\Image\Exceptions\ImageDecoderException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
@@ -13,6 +15,8 @@ use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Traits\CanDetectImageSources;
 use Jcupitt\Vips;
 use Jcupitt\Vips\Exception as VipsException;
+use Jcupitt\Vips\Image as VipsImage;
+use Jcupitt\Vips\Interpretation;
 use Stringable;
 
 class BinaryImageDecoder extends NativeObjectDecoder
@@ -61,7 +65,15 @@ class BinaryImageDecoder extends NativeObjectDecoder
             throw new ImageDecoderException('Failed to decode unsupported image format from binary data', previous: $e);
         }
 
+        $stashable = $this->isStashableSource($vipsImage);
+
         $image = parent::decode($vipsImage);
+
+        // stash the source ref so resize-family modifiers can swap to thumbnail_buffer()
+        $core = $image->core();
+        if ($stashable && $core instanceof Core) {
+            $core->setStashedSource(new BufferSource($input, $this->stringOptions()));
+        }
 
         // get media type enum from string media type
         $format = Format::tryCreate($image->origin()->mediaType());
@@ -72,5 +84,33 @@ class BinaryImageDecoder extends NativeObjectDecoder
         }
 
         return $image;
+    }
+
+    /**
+     * Return true if the source is in a state where we can safely stash
+     * it for the resize-family modifiers' thumbnail* fast path.
+     *
+     * Skip stashing when the parent decoder will mutate the in-memory
+     * VipsImage in a way that makes the stashed source no longer reflect
+     * the resulting image (auto-orient, BW/GREY16 to SRGB icc_transform).
+     * The bandjoin_const(255) for SRGB-3-band sources is OK to stash
+     * because resize modifiers can re-apply the same alpha if needed.
+     *
+     * @throws StateException
+     */
+    private function isStashableSource(VipsImage $vipsImage): bool
+    {
+        if (in_array($vipsImage->interpretation, [Interpretation::B_W, Interpretation::GREY16], true)) {
+            return false;
+        }
+
+        if (
+            $this->driver()->config()->autoOrientation === true
+            && ($this->exifRotation($vipsImage) ?? 1) > 1
+        ) {
+            return false;
+        }
+
+        return true;
     }
 }
