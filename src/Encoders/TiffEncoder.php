@@ -54,7 +54,10 @@ class TiffEncoder extends GenericTiffEncoder implements SpecializedInterface
         $strip = $this->strip || $this->driver()->config()->strip;
 
         if (VipsConfig::atLeast(8, 15)) {
-            $options['keep'] = $strip ? ForeignKeep::ICC : ForeignKeep::ALL;
+            $keepAll = VipsConfig::atLeast(8, 18)
+                ? ForeignKeep::ALL
+                : ForeignKeep::ALL & ~ForeignKeep::GAINMAP;
+            $options['keep'] = $strip ? ForeignKeep::ICC : $keepAll;
         } else {
             $options['strip'] = true;
         }
