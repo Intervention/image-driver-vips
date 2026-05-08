@@ -62,18 +62,24 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
         SizeInterface $resizeSize,
         ColorspaceInterface $colorspace
     ): VipsImage {
+        $options = [
+            'height' => $resizeSize->height(),
+            'size' => 'force',
+            'no_rotate' => true,
+        ];
+
+        $exportProfile = ColorProcessor::thumbnailExportProfile($colorspace);
+        if ($exportProfile !== null) {
+            $options['export-profile'] = $exportProfile;
+        }
+
         try {
             return $frame->native()->crop(
                 $cropSize->pivot()->x(),
                 $cropSize->pivot()->y(),
                 $cropSize->width(),
                 $cropSize->height()
-            )->thumbnail_image($resizeSize->width(), [
-                'height' => $resizeSize->height(),
-                'size' => 'force',
-                'no_rotate' => true,
-                'export-profile' => ColorProcessor::colorspaceToInterpretation($colorspace),
-            ]);
+            )->thumbnail_image($resizeSize->width(), $options);
         } catch (VipsException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to process resizing',
