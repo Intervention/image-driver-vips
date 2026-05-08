@@ -21,13 +21,19 @@ class ResizeModifier extends GenericResizeModifier implements SpecializedInterfa
     {
         $resizeTo = $this->adjustedSize($image);
 
+        $options = [
+            'height' => $resizeTo->height(),
+            'size' => 'force',
+            'no_rotate' => true,
+        ];
+
+        $exportProfile = ColorProcessor::thumbnailExportProfile($image->colorspace());
+        if ($exportProfile !== null) {
+            $options['export-profile'] = $exportProfile;
+        }
+
         $image->core()->setNative(
-            $image->core()->native()->thumbnail_image($resizeTo->width(), [
-                'height' => $resizeTo->height(),
-                'size' => 'force',
-                'no_rotate' => true,
-                'export-profile' => ColorProcessor::colorspaceToInterpretation($image->colorspace()),
-            ])
+            $image->core()->native()->thumbnail_image($resizeTo->width(), $options)
         );
 
         return $image;
