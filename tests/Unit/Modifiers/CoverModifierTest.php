@@ -48,4 +48,14 @@ final class CoverModifierTest extends BaseTestCase
             ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63']
         );
     }
+
+    public function testModifyCmykSourceProducesValidOutput(): void
+    {
+        $image = $this->readTestImage('cmyk.jpg');
+        $image->modify(new CoverModifier(50, 50, 'center'));
+
+        $this->assertEquals(50, $image->width());
+        $this->assertEquals(50, $image->height());
+        $this->assertMediaType('image/jpeg', $image->encode());
+    }
 }
