@@ -6,6 +6,7 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Decoders;
 
 use Intervention\Image\Drivers\Vips\Analyzers\HeightAnalyzer;
 use Intervention\Image\Drivers\Vips\Modifiers\ResizeModifier;
+use Intervention\Image\Drivers\Vips\Source\PathSource;
 use Intervention\Image\Modifiers\BlurModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder;
@@ -61,6 +62,23 @@ final class FilePathImageDecoderTest extends BaseTestCase
         $analyzer->setDriver(new Driver());
         $analyzer->analyze($image);
         $this->assertInstanceOf(Image::class, $image);
+    }
+
+    public function testDecodeStashesPathSourceForCleanSrgbJpeg(): void
+    {
+        $image = $this->decoder->decode(self::getTestResourcePath('test.jpg'));
+
+        $stash = $image->core()->stashedSource();
+
+        $this->assertInstanceOf(PathSource::class, $stash);
+        $this->assertStringEndsWith('test.jpg', $stash->path);
+    }
+
+    public function testDecodeDoesNotStashWhenAutoOriented(): void
+    {
+        $image = $this->decoder->decode(self::getTestResourcePath('orientation.jpg'));
+
+        $this->assertNull($image->core()->stashedSource());
     }
 
     /**
