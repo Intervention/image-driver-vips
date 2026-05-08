@@ -7,6 +7,8 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Frame;
+use Intervention\Image\Drivers\Vips\Source\BufferSource;
+use Intervention\Image\Drivers\Vips\Source\PathSource;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\ImageManager;
@@ -135,5 +137,41 @@ class CoreTest extends BaseTestCase
         foreach ($this->core as $frame) {
             $this->assertInstanceOf(Frame::class, $frame);
         }
+    }
+
+    public function testStashedSourceIsNullByDefault(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+
+        $this->assertNull($core->stashedSource());
+    }
+
+    public function testSetStashedSourcePathThenGet(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+        $stash = new PathSource('/tmp/foo.jpg', 'n=-1');
+        $core->setStashedSource($stash);
+
+        $this->assertSame($stash, $core->stashedSource());
+    }
+
+    public function testSetStashedSourceBufferThenGet(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+        $stash = new BufferSource('binary-bytes-here');
+        $core->setStashedSource($stash);
+
+        $this->assertSame($stash, $core->stashedSource());
+    }
+
+    public function testSetNativeClearsStashedSource(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+        $core->setStashedSource(new PathSource('/tmp/foo.jpg'));
+        $this->assertNotNull($core->stashedSource());
+
+        $core->setNative($this->vipsImage(20, 20, [0, 255, 0]));
+
+        $this->assertNull($core->stashedSource());
     }
 }
