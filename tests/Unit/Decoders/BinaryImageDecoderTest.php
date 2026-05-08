@@ -9,6 +9,7 @@ use Intervention\Image\Colors\Rgb\Colorspace as RgbColorspace;
 use Intervention\Image\Drivers\Vips\Decoders\BinaryImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Modifiers\ResizeModifier;
+use Intervention\Image\Drivers\Vips\Source\BufferSource;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Image;
@@ -86,5 +87,16 @@ final class BinaryImageDecoderTest extends BaseTestCase
         $image->modify(new ResizeModifier(10, 10));
         $image->colorAt(7, 7)->toHex();
         $this->assertInstanceOf(Image::class, $image);
+    }
+
+    public function testDecodeStashesBufferSourceForCleanSrgbJpeg(): void
+    {
+        $bytes = $this->getTestResourceData('test.jpg');
+
+        $image = $this->decoder->decode($bytes);
+
+        $stash = $image->core()->stashedSource();
+        $this->assertInstanceOf(BufferSource::class, $stash);
+        $this->assertSame($bytes, $stash->buffer);
     }
 }
