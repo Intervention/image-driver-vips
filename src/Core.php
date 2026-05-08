@@ -7,6 +7,8 @@ namespace Intervention\Image\Drivers\Vips;
 use ArrayIterator;
 use Exception;
 use Intervention\Image\Collection;
+use Intervention\Image\Drivers\Vips\Source\BufferSource;
+use Intervention\Image\Drivers\Vips\Source\PathSource;
 use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\ImageException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
@@ -26,6 +28,7 @@ class Core implements CoreInterface, Iterator
 {
     protected int $iteratorIndex = 0;
     protected CollectionInterface $meta;
+    protected PathSource|BufferSource|null $stashedSource = null;
 
     /**
      * Create new core instance
@@ -149,6 +152,28 @@ class Core implements CoreInterface, Iterator
         }
 
         $this->vipsImage = $native;
+        $this->stashedSource = null;
+
+        return $this;
+    }
+
+    /**
+     * Return the stashed source ref set by the decoder, or null if none is
+     * stashed (either never set, or cleared by a setNative() call).
+     */
+    public function stashedSource(): PathSource|BufferSource|null
+    {
+        return $this->stashedSource;
+    }
+
+    /**
+     * Stash a source ref on this core. Set by decoders right after a clean
+     * decode so resize-family modifiers can use libvips' combined
+     * load+resize ops. Cleared automatically the next time setNative() runs.
+     */
+    public function setStashedSource(PathSource|BufferSource $source): self
+    {
+        $this->stashedSource = $source;
 
         return $this;
     }
