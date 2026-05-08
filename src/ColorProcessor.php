@@ -191,6 +191,25 @@ class ColorProcessor implements ColorProcessorInterface
     }
 
     /**
+     * Return the libvips interpretation to pass as `export-profile` on a
+     * `thumbnail*` call, or null when no ICC transform is needed.
+     *
+     * sRGB-mapped colorspaces (the common case for web JPEG/PNG/WebP) already
+     * match the working space, so passing them as `export-profile` is a no-op
+     * ICC transform that libvips still pays for. Only CMYK and HSV genuinely
+     * require the conversion at thumbnail time.
+     */
+    public static function thumbnailExportProfile(string|ColorspaceInterface $colorspace): ?string
+    {
+        $interpretation = self::colorspaceToInterpretation($colorspace);
+
+        return match ($interpretation) {
+            Interpretation::CMYK, Interpretation::HSV => $interpretation,
+            default => null,
+        };
+    }
+
+    /**
      * Return classnames of the required color channels of the current colorspace.
      *
      * @throws ColorDecoderException
