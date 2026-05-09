@@ -52,6 +52,12 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
                 $image->core()->first(),
             )->native();
         } else {
+            // Materialise the watermark so every frame composites against an
+            // in-memory image. Without this, the pipeline references the same
+            // lazy source N times, which breaks sequential libvips loaders
+            // (e.g. pngload_buffer) that cannot be re-read out of order.
+            $elementNative = $elementNative->copyMemory();
+
             $frames = [];
             foreach ($image as $frame) {
                 $frames[] = $this->placeElement(

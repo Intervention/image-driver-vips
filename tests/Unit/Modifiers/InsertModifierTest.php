@@ -6,6 +6,7 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
+use Intervention\Image\Encoders\WebpEncoder;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Modifiers\InsertModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -51,5 +52,25 @@ final class InsertModifierTest extends BaseTestCase
         foreach ($image as $frame) {
             $this->assertEquals('32250d', $frame->toImage(new Driver())->colorAt(300, 25)->toHex());
         }
+    }
+
+    public function testApplyAnimatedWithBinaryWatermarkEncodes(): void
+    {
+        // Regression for: animated base + watermark decoded from binary
+        // (sequential libvips loader) caused composite2 to fail with
+        // "pngload_buffer: out of order read" when the pipeline was
+        // evaluated during encode.
+        $image = $this->readTestImage('animation-large.gif');
+        $this->assertTrue($image->isAnimated());
+
+        $image->modify(new InsertModifier(
+            $this->getTestResourceData('circle.png'),
+            0,
+            0,
+            'top-right',
+        ));
+
+        $encoded = $image->encode(new WebpEncoder(quality: 80));
+        $this->assertMediaType('image/webp', $encoded);
     }
 }
