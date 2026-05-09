@@ -48,7 +48,15 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
 
     /**
      * @throws StateException
-     * @return array{Q: int, interlace: bool, optimize_coding: true, background?: array<float>, keep?: 8|63, strip?: bool}
+     * @return array{
+     *     Q: int,
+     *     interlace: bool,
+     *     optimize_coding: true,
+     *     background?: array<float>,
+     *     keep?: 8|63,
+     *     strip?: bool
+     * }
+strip?: bool}
      */
     private function options(ImageInterface $image): array
     {
