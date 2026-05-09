@@ -28,7 +28,7 @@ class Core implements CoreInterface, Iterator
 {
     protected int $iteratorIndex = 0;
     protected CollectionInterface $meta;
-    protected PathSource|BufferSource|null $stashedSource = null;
+    protected null|PathSource|BufferSource $stashedSource = null;
 
     /**
      * Create new core instance
@@ -161,7 +161,7 @@ class Core implements CoreInterface, Iterator
      * Return the stashed source ref set by the decoder, or null if none is
      * stashed (either never set, or cleared by a setNative() call).
      */
-    public function stashedSource(): PathSource|BufferSource|null
+    public function stashedSource(): null|PathSource|BufferSource
     {
         return $this->stashedSource;
     }
