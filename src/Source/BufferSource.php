@@ -16,5 +16,6 @@ final readonly class BufferSource
         public string $buffer,
         public string $optionString = '',
     ) {
+        //
     }
 }

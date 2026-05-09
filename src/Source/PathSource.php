@@ -16,6 +16,7 @@ final readonly class PathSource
         public string $path,
         public string $optionString = '',
     ) {
+        //
     }
 
     /**
