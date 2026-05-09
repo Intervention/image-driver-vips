@@ -141,4 +141,32 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
 
         return is_int($orientation) ? $orientation : null;
     }
+
+    /**
+     * Return true if the source is in a state where we can safely stash
+     * it for the resize-family modifiers' thumbnail* fast path.
+     *
+     * Skip stashing when the parent decoder will mutate the in-memory
+     * VipsImage in a way that makes the stashed source no longer reflect
+     * the resulting image (auto-orient, BW/GREY16 to SRGB icc_transform).
+     * The bandjoin_const(255) for SRGB-3-band sources is OK to stash
+     * because resize modifiers can re-apply the same alpha if needed.
+     *
+     * @throws StateException
+     */
+    protected function isStashableSource(VipsImage $vipsImage): bool
+    {
+        if (in_array($vipsImage->interpretation, [Interpretation::B_W, Interpretation::GREY16], true)) {
+            return false;
+        }
+
+        if (
+            $this->driver()->config()->autoOrientation === true
+            && ($this->exifRotation($vipsImage) ?? 1) > 1
+        ) {
+            return false;
+        }
+
+        return true;
+    }
 }
