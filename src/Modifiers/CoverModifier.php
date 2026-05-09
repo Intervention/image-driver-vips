@@ -9,6 +9,7 @@ use Intervention\Image\Drivers\Vips\ColorProcessor;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Source\BufferSource;
 use Intervention\Image\Drivers\Vips\Source\PathSource;
+use Intervention\Image\Drivers\Vips\Traits\CanNormalizeBands;
 use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Exceptions\ModifierException;
@@ -25,6 +26,8 @@ use Jcupitt\Vips\Interpretation;
 
 class CoverModifier extends GenericCoverModifier implements SpecializedInterface
 {
+    use CanNormalizeBands;
+
     /**
      * {@inheritdoc}
      *
@@ -120,22 +123,6 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
         return $stash instanceof PathSource
             ? VipsImage::thumbnail($stash->path, $resize->width(), $options)
             : VipsImage::thumbnail_buffer($stash->buffer, $resize->width(), $options);
-    }
-
-    /**
-     * Re-apply the SRGB-3-band -> 4-band bandjoin that NativeObjectDecoder
-     * applies on first decode, so the post-thumbnail image's bandcount
-     * matches what the rest of the pipeline expects.
-     *
-     * @throws VipsException
-     */
-    private function normalizeBands(VipsImage $image): VipsImage
-    {
-        if ($image->interpretation === Interpretation::SRGB && $image->bands === 3) {
-            return $image->bandjoin_const(255);
-        }
-
-        return $image;
     }
 
     /**

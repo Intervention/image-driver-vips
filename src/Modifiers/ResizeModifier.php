@@ -8,6 +8,7 @@ use Intervention\Image\Drivers\Vips\ColorProcessor;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Source\BufferSource;
 use Intervention\Image\Drivers\Vips\Source\PathSource;
+use Intervention\Image\Drivers\Vips\Traits\CanNormalizeBands;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Interfaces\ColorspaceInterface;
 use Intervention\Image\Interfaces\ImageInterface;
@@ -20,6 +21,8 @@ use Jcupitt\Vips\Interpretation;
 
 class ResizeModifier extends GenericResizeModifier implements SpecializedInterface
 {
+    use CanNormalizeBands;
+
     /**
      * {@inheritdoc}
      *
@@ -36,7 +39,11 @@ class ResizeModifier extends GenericResizeModifier implements SpecializedInterfa
 
         if ($stash !== null && !$image->isAnimated()) {
             $core->setNative(
-                $this->normalizeBands($this->thumbnailFromStash($stash, $resizeTo, $image->colorspace()))
+                $this->normalizeBands($this->thumbnailFromStash(
+                    $stash,
+                    $resizeTo,
+                    $image->colorspace(),
+                ))
             );
 
             return $image;
@@ -94,21 +101,5 @@ class ResizeModifier extends GenericResizeModifier implements SpecializedInterfa
         return $stash instanceof PathSource
             ? VipsImage::thumbnail($stash->path, $resizeTo->width(), $options)
             : VipsImage::thumbnail_buffer($stash->buffer, $resizeTo->width(), $options);
-    }
-
-    /**
-     * Re-apply the SRGB-3-band -> 4-band bandjoin that NativeObjectDecoder
-     * applies on first decode, so the resized image's bandcount matches
-     * what the rest of the pipeline expects.
-     *
-     * @throws VipsException
-     */
-    private function normalizeBands(VipsImage $image): VipsImage
-    {
-        if ($image->interpretation === Interpretation::SRGB && $image->bands === 3) {
-            return $image->bandjoin_const(255);
-        }
-
-        return $image;
     }
 }
