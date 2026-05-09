@@ -48,7 +48,15 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
 
     /**
      * @throws StateException
-     * @return array{Q: int, interlace: bool, optimize_coding: true, background: array<float>, keep: 8|63}
+     * @return array{
+     *     Q: int,
+     *     interlace: bool,
+     *     optimize_coding: true,
+     *     background?: array<float>,
+     *     keep?: 8|63,
+     *     strip?: bool
+     * }
+strip?: bool}
      */
     private function options(ImageInterface $image): array
     {
@@ -56,8 +64,11 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
             'Q' => $this->quality,
             'interlace' => $this->progressive,
             'optimize_coding' => true,
-            'background' => $this->backgroundColor($image),
         ];
+
+        if ($image->core()->native()->hasAlpha()) {
+            $options['background'] = $this->backgroundColor($image);
+        }
 
         $strip = $this->strip || $this->driver()->config()->strip;
 

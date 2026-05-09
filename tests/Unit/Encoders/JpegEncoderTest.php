@@ -67,4 +67,15 @@ final class JpegEncoderTest extends BaseTestCase
         $image = ImageManager::usingDriver(Driver::class)->decode($result);
         $this->assertNull($image->exif('IFD0.Artist'));
     }
+
+    public function testEncodeTransparentSourceFlattensToOpaqueJpeg(): void
+    {
+        $image = $this->readTestImage('transparent.png');
+        $encoder = new JpegEncoder(75);
+        $encoder->setDriver(new Driver());
+        $result = $encoder->encode($image);
+
+        $this->assertMediaType('image/jpeg', $result);
+        $this->assertEquals('image/jpeg', $result->mimetype());
+    }
 }
