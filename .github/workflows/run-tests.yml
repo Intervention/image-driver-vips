@@ -10,7 +10,7 @@ jobs:
       matrix:
         php: [ '8.3', '8.4', '8.5' ]
         stability: [ prefer-stable ]
-        libvips: [ '8.18.1' ]
+        libvips: [ '8.17.2', '8.18.1' ]
 
     name: PHP ${{ matrix.php }} - ${{ matrix.stability }} - vips ${{ matrix.libvips }}
 
