@@ -84,12 +84,18 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
         array $bgColor,
         ColorspaceInterface $colorspace,
     ): FrameInterface {
+        $options = [
+            'height' => $resize->height(),
+            'no_rotate' => true,
+        ];
+
+        $exportProfile = ColorProcessor::thumbnailExportProfile($colorspace);
+        if ($exportProfile !== null) {
+            $options['export-profile'] = $exportProfile;
+        }
+
         try {
-            $resized = $frame->native()->thumbnail_image($resize->width(), [
-                'height' => $resize->height(),
-                'no_rotate' => true,
-                'export-profile' => ColorProcessor::colorspaceToInterpretation($colorspace),
-            ]);
+            $resized = $frame->native()->thumbnail_image($resize->width(), $options);
 
             try {
                 $native = $resized->gravity(

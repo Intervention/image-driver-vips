@@ -120,4 +120,20 @@ final class ColorProcessorTest extends BaseTestCase
         yield [Oklch::class, Interpretation::SRGB];
         yield [Oklab::class, Interpretation::SRGB];
     }
+
+    #[DataProvider('thumbnailExportProfileProvider')]
+    public function testThumbnailExportProfile(string $colorspace, ?string $expected): void
+    {
+        $this->assertSame($expected, ColorProcessor::thumbnailExportProfile($colorspace));
+    }
+
+    public static function thumbnailExportProfileProvider(): Generator
+    {
+        yield [Rgb::class, null];
+        yield [Hsl::class, null];
+        yield [Oklab::class, null];
+        yield [Oklch::class, null];
+        yield [Cmyk::class, Interpretation::CMYK];
+        yield [Hsv::class, Interpretation::HSV];
+    }
 }
