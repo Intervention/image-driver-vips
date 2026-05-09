@@ -11,7 +11,7 @@ use Intervention\Image\EncodedImage;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(Jpeg2000Encoder::class)]
-final class Jpeg200EncoderTest extends BaseTestCase
+final class Jpeg2000EncoderTest extends BaseTestCase
 {
     public function testEncode(): void
     {
