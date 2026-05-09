@@ -40,9 +40,23 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
             );
         }
 
+        $colorspace = $image->colorspace();
+
+        if (!$image->isAnimated()) {
+            $native = $this->cropResizeFrame(
+                $image->core()->first(),
+                $crop,
+                $resize,
+                $colorspace,
+            );
+            $image->core()->setNative($native);
+
+            return $image;
+        }
+
         $frames = [];
         foreach ($image as $frame) {
-            $native = $this->cropResizeFrame($frame, $crop, $resize, $image->colorspace());
+            $native = $this->cropResizeFrame($frame, $crop, $resize, $colorspace);
             $frames[] = $frame->setNative($native);
         }
 
