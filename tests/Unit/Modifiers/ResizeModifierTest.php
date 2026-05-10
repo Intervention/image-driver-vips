@@ -6,6 +6,7 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Modifiers\ResizeModifier;
+use Intervention\Image\Modifiers\SliceAnimationModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(ResizeModifier::class)]
@@ -31,5 +32,22 @@ final class ResizeModifierTest extends BaseTestCase
         $image->modify(new ResizeModifier(10, 10));
         $this->assertEquals(10, $image->width());
         $this->assertEquals(10, $image->height());
+    }
+
+    /**
+     * Regression: thumbnail_image() carries the input's page-height field
+     * over to the result without updating it. HeightAnalyzer prefers
+     * page-height when set, so the resized image reported the stale value.
+     * Surfaces here via SliceAnimationModifier(0, 1) on an animated source,
+     * which leaves page-height set on the now-single-frame native.
+     */
+    public function testResizeUpdatesPageHeightAfterSliceAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $image->modify(new SliceAnimationModifier(0, 1));
+        $image->modify(new ResizeModifier(40, 30));
+
+        $this->assertSame(40, $image->width());
+        $this->assertSame(30, $image->height());
     }
 }

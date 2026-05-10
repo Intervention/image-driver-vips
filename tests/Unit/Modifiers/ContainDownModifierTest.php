@@ -6,6 +6,7 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Modifiers\ContainDownModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
+use Intervention\Image\Modifiers\SliceAnimationModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(ContainDownModifier::class)]
@@ -63,5 +64,20 @@ final class ContainDownModifierTest extends BaseTestCase
         $this->assertColor(255, 0, 0, 255, $image->colorAt(0, 257));
         $this->assertColor(255, 0, 0, 255, $image->colorAt(257, 0));
         $this->assertColor(255, 0, 0, 255, $image->colorAt(257, 257));
+    }
+
+    /**
+     * Regression: thumbnail_image() carries the input's stale page-height
+     * field over to the result. Surfaces after SliceAnimationModifier reduces
+     * an animated source to a single frame but leaves page-height set.
+     */
+    public function testModifyUpdatesPageHeightAfterSliceAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $image->modify(new SliceAnimationModifier(0, 1));
+        $image->modify(new ContainDownModifier(40, 30, 'f00'));
+
+        $this->assertSame(40, $image->width());
+        $this->assertSame(30, $image->height());
     }
 }

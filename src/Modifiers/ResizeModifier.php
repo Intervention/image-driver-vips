@@ -9,6 +9,7 @@ use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Source\BufferSource;
 use Intervention\Image\Drivers\Vips\Source\PathSource;
 use Intervention\Image\Drivers\Vips\Traits\CanNormalizeBands;
+use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Interfaces\ColorspaceInterface;
 use Intervention\Image\Interfaces\ImageInterface;
@@ -30,6 +31,7 @@ class ResizeModifier extends GenericResizeModifier implements SpecializedInterfa
      *
      * @throws InvalidArgumentException
      * @throws VipsException
+     * @throws DriverException
      */
     public function apply(ImageInterface $image): ImageInterface
     {
@@ -60,9 +62,9 @@ class ResizeModifier extends GenericResizeModifier implements SpecializedInterfa
             $options['export-profile'] = $exportProfile;
         }
 
-        $image->core()->setNative(
+        $image->core()->setNative(Core::syncPageHeight(
             $image->core()->native()->thumbnail_image($resizeTo->width(), $options)
-        );
+        ));
 
         return $image;
     }

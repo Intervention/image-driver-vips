@@ -7,6 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 use Intervention\Image\Colors\Rgb\Color;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
+use Intervention\Image\Modifiers\SliceAnimationModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Intervention\Image\Modifiers\CoverModifier;
 
@@ -57,5 +58,20 @@ final class CoverModifierTest extends BaseTestCase
         $this->assertEquals(50, $image->width());
         $this->assertEquals(50, $image->height());
         $this->assertMediaType('image/jpeg', $image->encode());
+    }
+
+    /**
+     * Regression: thumbnail_image() carries the input's stale page-height
+     * field over to the result. Surfaces after SliceAnimationModifier reduces
+     * an animated source to a single frame but leaves page-height set.
+     */
+    public function testModifyUpdatesPageHeightAfterSliceAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $image->modify(new SliceAnimationModifier(0, 1));
+        $image->modify(new CoverModifier(40, 30, 'center'));
+
+        $this->assertSame(40, $image->width());
+        $this->assertSame(30, $image->height());
     }
 }

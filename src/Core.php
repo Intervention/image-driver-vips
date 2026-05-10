@@ -198,6 +198,38 @@ class Core implements CoreInterface, Iterator
     }
 
     /**
+     * Sync the page-height field to the actual native height for single-frame
+     * results.
+     *
+     * thumbnail_image()/embed()/etc. produce a new VipsImage that carries the
+     * input's page-height field. For multi-frame inputs (n-pages > 1) libvips
+     * scales page-height itself; for single-frame inputs the field is left
+     * stale, and HeightAnalyzer then reports the wrong height.
+     *
+     * @throws DriverException
+     */
+    public static function syncPageHeight(VipsImage $native): VipsImage
+    {
+        try {
+            $fields = $native->getFields();
+
+            if (!in_array('page-height', $fields, true)) {
+                return $native;
+            }
+
+            if (in_array('n-pages', $fields, true) && (int) $native->get('n-pages') > 1) {
+                return $native;
+            }
+
+            $native->set('page-height', $native->height);
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to sync page-height field', previous: $e);
+        }
+
+        return $native;
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @see CoreInterface::count()

@@ -49,12 +49,12 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
         );
 
         if (!$image->isAnimated()) {
-            $contained = $this->contain(
+            $contained = Core::syncPageHeight($this->contain(
                 $image->core()->first(),
                 $targetSize,
                 $bgColor,
                 $colorspace,
-            )->native();
+            )->native());
         } else {
             $frames = [];
             foreach ($image as $frame) {

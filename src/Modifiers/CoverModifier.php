@@ -67,7 +67,7 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
                 );
             }
 
-            $core->setNative($native);
+            $core->setNative(Core::syncPageHeight($native));
 
             return $image;
         }
@@ -80,7 +80,7 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
                 $resize,
                 $colorspace,
             );
-            $core->setNative($native);
+            $core->setNative(Core::syncPageHeight($native));
 
             return $image;
         }

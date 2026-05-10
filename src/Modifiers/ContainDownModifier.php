@@ -37,12 +37,12 @@ class ContainDownModifier extends ContainModifier
         );
 
         if (!$image->isAnimated()) {
-            $contained = $this->containDown(
+            $contained = Core::syncPageHeight($this->containDown(
                 $image->core()->first(),
                 $targetSize,
                 $bgColor,
                 $colorspace,
-            )->native();
+            )->native());
         } else {
             $frames = [];
             foreach ($image as $frame) {
