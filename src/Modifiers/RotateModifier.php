@@ -31,6 +31,11 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
             ->colorProcessor($image)
             ->export($this->backgroundColor());
 
+        // rot90/rot180/rot270/similarity require non-sequential reads of the
+        // source. Sequentially-decoded sources fail with `out of order read`
+        // when the encoder later walks the pipeline.
+        Core::ensureInMemory($image->core());
+
         $frames = [];
         foreach ($image as $frame) {
             try {

@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
 use Intervention\Image\Colors\Rgb\Color;
+use Intervention\Image\Drivers\Vips\Decoders\BinaryImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
+use Intervention\Image\Encoders\JpegEncoder;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Modifiers\RotateModifier;
+use Jcupitt\Vips\Image as VipsImage;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(RotateModifier::class)]
@@ -67,5 +70,36 @@ final class RotateModifierTest extends BaseTestCase
             array_map(fn(Color $color): string => $color->toHex(), $image->colorsAt(12, 12)->toArray()),
             ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63']
         );
+    }
+
+    /**
+     * Regression: rotation chained after a sequentially-decoded source threw
+     * `pngload_buffer: out of order read` when the encoder finally walked the
+     * pipeline. Peer modifiers (Orient, Flip, Trim) call Core::ensureInMemory()
+     * before their rotation; this one did not. Reproduces with content large
+     * enough to span multiple sequential read chunks - flat fills are read in
+     * a single chunk and bypass the constraint.
+     */
+    public function testRot90AfterSequentialDecodeAllowsEncoding(): void
+    {
+        $png = VipsImage::gaussnoise(1200, 1200, ['seed' => 42])->writeToBuffer('.png');
+
+        $image = (new Driver())->decodeImage($png, [BinaryImageDecoder::class]);
+        $image->modify(new RotateModifier(90, 'fff'));
+
+        $bytes = $image->encode(new JpegEncoder(quality: 75))->toString();
+        $this->assertNotEmpty($bytes);
+    }
+
+    public function testRotateArbitraryAngleAfterSequentialDecodeAllowsEncoding(): void
+    {
+        $png = VipsImage::gaussnoise(1200, 1200, ['seed' => 42])->writeToBuffer('.png');
+
+        $image = (new Driver())->decodeImage($png, [BinaryImageDecoder::class]);
+        // 45° goes through similarity() rather than rot90; same root cause.
+        $image->modify(new RotateModifier(45, 'fff'));
+
+        $bytes = $image->encode(new JpegEncoder(quality: 75))->toString();
+        $this->assertNotEmpty($bytes);
     }
 }
