@@ -6,6 +6,8 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
 use Intervention\Image\Colors\Rgb\Color;
 use Intervention\Image\Drivers\Vips\Driver;
+use Intervention\Image\Drivers\Vips\Modifiers\RemoveAnimationModifier;
+use Intervention\Image\Drivers\Vips\Modifiers\SliceAnimationModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Modifiers\CropModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -111,5 +113,27 @@ final class CropModifierTest extends BaseTestCase
 
         // Ensure the image is encodable
         $image->encode();
+    }
+
+    public function testModifyCropRemovedAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $this->assertEquals(20, $image->width());
+        $this->assertEquals(15, $image->height());
+        $image->modify(new RemoveAnimationModifier());
+        $image->modify(new CropModifier(10, 8));
+        $this->assertEquals(10, $image->width());
+        $this->assertEquals(8, $image->height());
+    }
+
+    public function testModifyCropSlicedAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $this->assertEquals(20, $image->width());
+        $this->assertEquals(15, $image->height());
+        $image->modify(new SliceAnimationModifier(0, 1));
+        $image->modify(new CropModifier(10, 8));
+        $this->assertEquals(10, $image->width());
+        $this->assertEquals(8, $image->height());
     }
 }

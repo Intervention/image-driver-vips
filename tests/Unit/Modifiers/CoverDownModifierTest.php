@@ -6,6 +6,8 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
 use Intervention\Image\Colors\Rgb\Color;
 use Intervention\Image\Drivers\Vips\Driver;
+use Intervention\Image\Drivers\Vips\Modifiers\RemoveAnimationModifier;
+use Intervention\Image\Drivers\Vips\Modifiers\SliceAnimationModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Intervention\Image\Modifiers\CoverDownModifier;
@@ -47,5 +49,27 @@ final class CoverDownModifierTest extends BaseTestCase
             array_map(fn(Color $color): string => $color->toHex(), $image->colorsAt(8, 8)->toArray()),
             ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63']
         );
+    }
+
+    public function testModifyRemovedAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $this->assertEquals(20, $image->width());
+        $this->assertEquals(15, $image->height());
+        $image->modify(new RemoveAnimationModifier());
+        $image->modify(new CoverDownModifier(10, 8, 'center'));
+        $this->assertEquals(10, $image->width());
+        $this->assertEquals(8, $image->height());
+    }
+
+    public function testModifySlicedAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $this->assertEquals(20, $image->width());
+        $this->assertEquals(15, $image->height());
+        $image->modify(new SliceAnimationModifier(0, 1));
+        $image->modify(new CoverDownModifier(10, 8, 'center'));
+        $this->assertEquals(10, $image->width());
+        $this->assertEquals(8, $image->height());
     }
 }

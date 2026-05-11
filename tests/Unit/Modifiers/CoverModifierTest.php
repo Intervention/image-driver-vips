@@ -6,6 +6,8 @@ namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
 use Intervention\Image\Colors\Rgb\Color;
 use Intervention\Image\Drivers\Vips\Driver;
+use Intervention\Image\Drivers\Vips\Modifiers\RemoveAnimationModifier;
+use Intervention\Image\Drivers\Vips\Modifiers\SliceAnimationModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Intervention\Image\Modifiers\CoverModifier;
@@ -57,5 +59,27 @@ final class CoverModifierTest extends BaseTestCase
         $this->assertEquals(50, $image->width());
         $this->assertEquals(50, $image->height());
         $this->assertMediaType('image/jpeg', $image->encode());
+    }
+
+    public function testModifyCoverRemovedAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $this->assertEquals(20, $image->width());
+        $this->assertEquals(15, $image->height());
+        $image->modify(new RemoveAnimationModifier());
+        $image->modify(new CoverModifier(200, 100, 'center'));
+        $this->assertEquals(200, $image->width());
+        $this->assertEquals(100, $image->height());
+    }
+
+    public function testModifyCoverSlicedAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $this->assertEquals(20, $image->width());
+        $this->assertEquals(15, $image->height());
+        $image->modify(new SliceAnimationModifier(0, 1));
+        $image->modify(new CoverModifier(200, 100, 'center'));
+        $this->assertEquals(200, $image->width());
+        $this->assertEquals(100, $image->height());
     }
 }
