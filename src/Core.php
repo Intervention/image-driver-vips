@@ -55,16 +55,21 @@ class Core implements CoreInterface, Iterator
         }
 
         try {
-            $image = VipsImage::arrayjoin($natives, ['across' => 1]);
-            $image->set('delay', $delay);
-            $image->set('loop', $loops);
-            $image->set('page-height', $natives[0]->height);
-            $image->set('n-pages', count($frames));
+            $vipsImage = VipsImage::arrayjoin($natives, ['across' => 1]);
+            $vipsImage->set('delay', $delay);
+            $vipsImage->set('loop', $loops);
+            $vipsImage->set('n-pages', count($frames));
+
+            if (count($frames) > 1) {
+                $vipsImage->set('page-height', $natives[0]->height);
+            } elseif (in_array('page-height', $vipsImage->getFields())) {
+                $vipsImage->remove('page-height');
+            }
         } catch (VipsException $e) {
             throw new DriverException('Failed to create image core from frames', previous: $e);
         }
 
-        return new self($image);
+        return new self($vipsImage);
     }
 
     /**
