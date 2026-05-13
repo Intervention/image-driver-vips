@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
+use Intervention\Image\Drivers\Vips\Modifiers\RemoveAnimationModifier;
 use Intervention\Image\Drivers\Vips\Modifiers\ResizeCanvasRelativeModifier;
+use Intervention\Image\Drivers\Vips\Modifiers\SliceAnimationModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
@@ -37,5 +39,27 @@ final class ResizeCanvasRelativeModifierTest extends BaseTestCase
         $this->assertColor(180, 224, 0, 255, $image->colorAt(2, 2));
         $this->assertColor(255, 255, 0, 255, $image->colorAt(17, 17));
         $this->assertTransparency($image->colorAt(12, 1));
+    }
+
+    public function testModifyRemovedAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $this->assertEquals(20, $image->width());
+        $this->assertEquals(15, $image->height());
+        $image->modify(new RemoveAnimationModifier());
+        $image->modify(new ResizeCanvasRelativeModifier(10, 5, 'ff0', 'center'));
+        $this->assertEquals(30, $image->width());
+        $this->assertEquals(20, $image->height());
+    }
+
+    public function testModifySlicedAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $this->assertEquals(20, $image->width());
+        $this->assertEquals(15, $image->height());
+        $image->modify(new SliceAnimationModifier(0, 1));
+        $image->modify(new ResizeCanvasRelativeModifier(10, 5, 'ff0', 'center'));
+        $this->assertEquals(30, $image->width());
+        $this->assertEquals(20, $image->height());
     }
 }

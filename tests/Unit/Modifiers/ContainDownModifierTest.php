@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
 use Intervention\Image\Drivers\Vips\Modifiers\ContainDownModifier;
+use Intervention\Image\Drivers\Vips\Modifiers\RemoveAnimationModifier;
+use Intervention\Image\Drivers\Vips\Modifiers\SliceAnimationModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 
@@ -63,5 +65,27 @@ final class ContainDownModifierTest extends BaseTestCase
         $this->assertColor(255, 0, 0, 255, $image->colorAt(0, 257));
         $this->assertColor(255, 0, 0, 255, $image->colorAt(257, 0));
         $this->assertColor(255, 0, 0, 255, $image->colorAt(257, 257));
+    }
+
+    public function testModifyContainDownRemovedAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $this->assertEquals(20, $image->width());
+        $this->assertEquals(15, $image->height());
+        $image->modify(new RemoveAnimationModifier());
+        $image->modify(new ContainDownModifier(200, 100, 'ffffff00'));
+        $this->assertEquals(200, $image->width());
+        $this->assertEquals(100, $image->height());
+    }
+
+    public function testModifyContainDownSlicedAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $this->assertEquals(20, $image->width());
+        $this->assertEquals(15, $image->height());
+        $image->modify(new SliceAnimationModifier(0, 1));
+        $image->modify(new ContainDownModifier(200, 100, 'ffffff00'));
+        $this->assertEquals(200, $image->width());
+        $this->assertEquals(100, $image->height());
     }
 }

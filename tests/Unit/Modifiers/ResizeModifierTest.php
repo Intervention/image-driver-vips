@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
+use Intervention\Image\Drivers\Vips\Modifiers\RemoveAnimationModifier;
+use Intervention\Image\Drivers\Vips\Modifiers\SliceAnimationModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Modifiers\ResizeModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -31,5 +33,27 @@ final class ResizeModifierTest extends BaseTestCase
         $image->modify(new ResizeModifier(10, 10));
         $this->assertEquals(10, $image->width());
         $this->assertEquals(10, $image->height());
+    }
+
+    public function testResizeRemovedAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $this->assertEquals(20, $image->width());
+        $this->assertEquals(15, $image->height());
+        $image->modify(new RemoveAnimationModifier());
+        $image->modify(new ResizeModifier(200, 100));
+        $this->assertEquals(200, $image->width());
+        $this->assertEquals(100, $image->height());
+    }
+
+    public function testResizeSlicedAnimation(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $this->assertEquals(20, $image->width());
+        $this->assertEquals(15, $image->height());
+        $image->modify(new SliceAnimationModifier(0, 1));
+        $image->modify(new ResizeModifier(200, 100));
+        $this->assertEquals(200, $image->width());
+        $this->assertEquals(100, $image->height());
     }
 }
