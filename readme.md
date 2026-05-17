@@ -29,7 +29,7 @@ used unchanged. The only [configuration](https://image.intervention.io/v4/basics
 ## Code Examples
 
 ```php
-use Intervention\Image\Image;
+use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Vips\Driver as VipsDriver;
 use Intervention\Image\Alignment;
 use Intervention\Image\Format;
