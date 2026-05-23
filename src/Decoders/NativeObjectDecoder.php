@@ -80,7 +80,7 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
     }
 
     /**
-     * Get options for vips library according to current configuration
+     * Get decoder options for vips library according to current configuration
      *
      * @throws StateException
      */

@@ -51,9 +51,10 @@ class FilePathImageDecoder extends NativeObjectDecoder
     public function decode(mixed $input): ImageInterface
     {
         $path = $this->readableFilePathOrFail($input);
+        $options = $this->stringOptions() === '' ? '' : '[' . $this->stringOptions() . ']';
 
         try {
-            $vipsImage = Vips\Image::newFromFile($path . '[' . $this->stringOptions() . ']', [
+            $vipsImage = Vips\Image::newFromFile($path . $options, [
                 'access' => Vips\Access::SEQUENTIAL,
             ]);
         } catch (VipsException $e) {
