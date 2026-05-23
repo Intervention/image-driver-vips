@@ -168,7 +168,6 @@ class ColorProcessor implements ColorProcessorInterface
             Interpretation::SRGB => new Rgb(),
             Interpretation::HSV => new Hsv(),
             Interpretation::SCRGB => new Rgb(),
-            Interpretation::XYZ => new Rgb(),
             Interpretation::RGB16 => new Rgb(),
             Interpretation::GREY16 => new Rgb(),
             Interpretation::MATRIX => new Rgb(),
