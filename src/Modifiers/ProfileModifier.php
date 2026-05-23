@@ -30,13 +30,12 @@ class ProfileModifier extends GenericProfileModifier implements SpecializedInter
             $vipsImage = $image->core()->native()->icc_transform($tempFile);
         } catch (VipsException $e) {
             throw new ModifierException('Failed to modify image profile', previous: $e);
+        } finally {
+            unlink($tempFile);
         }
 
         // set transformed image
         $image->core()->setNative($vipsImage);
-
-        // remove temporary file
-        unlink($tempFile);
 
         return $image;
     }
