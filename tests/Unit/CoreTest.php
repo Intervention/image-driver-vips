@@ -132,6 +132,13 @@ class CoreTest extends BaseTestCase
         }
     }
 
+    public function testFrameDelay(): void
+    {
+        $this->assertEquals(0.3, $this->core->frame(0)->delay());
+        $this->assertEquals(0.3, $this->core->frame(1)->delay());
+        $this->assertEquals(0.3, $this->core->frame(2)->delay());
+    }
+
     public function testIteratorAggregate(): void
     {
         foreach ($this->core as $frame) {
