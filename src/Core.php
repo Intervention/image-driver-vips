@@ -246,7 +246,7 @@ class Core implements CoreInterface, Iterator
         $count = $this->count();
 
         if ($position > ($count - 1)) {
-            throw new InvalidArgumentException('Frame #' . $position . ' could not be found in the image.');
+            throw new InvalidArgumentException('Frame #' . $position . ' could not be found in the image');
         }
 
         if ($count === 1) {
@@ -277,15 +277,15 @@ class Core implements CoreInterface, Iterator
 
             $vipsImage->set('n-pages', 1);
             if (!is_null($delay)) {
-                $vipsImage->set('delay', $delay);
+                $vipsImage->set('delay', [$delay]);
 
                 return new Frame($vipsImage, $delay / 1000);
             }
+
+            return new Frame($vipsImage);
         } catch (VipsException $e) {
             throw new DriverException('Failed to extract frame from image core', previous: $e);
         }
-
-        return new Frame($vipsImage);
     }
 
     /**
