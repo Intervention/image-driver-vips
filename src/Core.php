@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips;
 
 use ArrayIterator;
-use Exception;
 use Intervention\Image\Collection;
 use Intervention\Image\Drivers\Vips\Source\BufferSource;
 use Intervention\Image\Drivers\Vips\Source\PathSource;
@@ -77,11 +76,11 @@ class Core implements CoreInterface, Iterator
      *
      * @see CollectionInterface::map()
      *
-     * @throws Exception
+     * @throws NotSupportedException
      */
     public function map(callable $callback): CollectionInterface
     {
-        throw new \Exception('Not implemented');
+        throw new NotSupportedException('Not implemented');
     }
 
     /**
@@ -89,11 +88,11 @@ class Core implements CoreInterface, Iterator
      *
      * @see CollectionInterface::filter()
      *
-     * @throws Exception
+     * @throws NotSupportedException
      */
     public function filter(callable $callback): CollectionInterface
     {
-        throw new \Exception('Not implemented');
+        throw new NotSupportedException('Not implemented');
     }
 
     /**
