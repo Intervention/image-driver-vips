@@ -450,7 +450,7 @@ class Core implements CoreInterface, Iterator
      *
      * @throws DriverException
      */
-    public function slice(int $offset, ?int $length = 0): CollectionInterface
+    public function slice(int $offset, ?int $length = null): CollectionInterface
     {
         $frames = $this->toArray();
         $frames = array_slice($frames, $offset, $length);
