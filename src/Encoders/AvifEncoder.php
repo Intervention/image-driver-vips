@@ -42,13 +42,16 @@ class AvifEncoder extends GenericAvifEncoder implements SpecializedInterface
 
     /**
      * @throws StateException
-     * @return array{lossless: bool, Q: int, keep?: int, strip?: bool}
+     * @return array{lossless: bool, Q: int, effort: int, keep?: int, strip?: bool}
      */
     private function options(): array
     {
         $options = [
             'lossless' => $this->quality === 100,
             'Q' => $this->quality,
+            // libvips' heifsave defaults to effort=4; 1 encodes ~2-3x faster
+            // with near-identical bytes on typical web sources (range 0..9).
+            'effort' => 1,
         ];
 
         $strip = $this->strip || $this->driver()->config()->strip;
