@@ -130,7 +130,7 @@ class ColorProcessor implements ColorProcessorInterface
         }
 
         // "native color" means array of normalized to 0-255 color channel values
-        $normalized = array_map(fn(int $value): float => $value / 255, $normalized ?? $color);
+        $normalized = array_map(fn(int|float $value): float => $value / 255, $normalized ?? $color);
 
         return match ($this->colorspace::class) {
             Cmyk::class => $this->colorspace->colorFromNormalized($normalized),
