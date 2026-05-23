@@ -135,7 +135,7 @@ class ColorProcessor implements ColorProcessorInterface
         return match ($this->colorspace::class) {
             Cmyk::class => $this->colorspace->colorFromNormalized($normalized),
             Rgb::class => $this->colorspace->colorFromNormalized($normalized),
-            Hsl::class => Rgb::class::colorFromNormalized($normalized)->toColorspace(Hsl::class),
+            Hsl::class => Rgb::colorFromNormalized($normalized)->toColorspace(Hsl::class),
             Hsv::class => Rgb::colorFromNormalized($normalized)->toColorspace(Hsv::class),
             Oklab::class => Rgb::colorFromNormalized($normalized)->toColorspace(Oklab::class),
             Oklch::class => Rgb::colorFromNormalized($normalized)->toColorspace(Oklch::class),
