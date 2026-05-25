@@ -5,7 +5,7 @@
 [![Monthly Downloads](https://img.shields.io/packagist/dm/intervention/image-driver-vips.svg)](https://packagist.org/packages/intervention/image-driver-vips/stats)
 [![Support me on Ko-fi](https://raw.githubusercontent.com/Intervention/image-driver-vips/develop/.github/images/support.svg)](https://ko-fi.com/interventionphp)
 
-Intervention Image's official driver to use [Intervention Image](https://github.com/Intervention/image) with
+[Intervention Image's](https://github.com/Intervention/image) official driver to use the library with
 [libvips](https://github.com/libvips/libvips). libvips is a fast, low-memory
 image processing library that outperforms the standard PHP image extensions GD
 and Imagick. This package makes it easy to utilize the power of libvips in your
