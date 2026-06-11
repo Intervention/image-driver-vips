@@ -81,7 +81,7 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
     private function placeElement(
         VipsImage $element,
         PointInterface $position,
-        FrameInterface $frame
+        FrameInterface $frame,
     ): FrameInterface {
         if ($element->hasAlpha()) {
             $element = $element->embed(
@@ -92,22 +92,22 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
                 [
                     'extend' => Extend::BACKGROUND,
                     'background' => [0, 0, 0, 0],
-                ]
+                ],
             );
 
             $frame->setNative(
                 $frame->native()->composite2(
                     $element,
-                    BlendMode::OVER
-                )
+                    BlendMode::OVER,
+                ),
             );
         } else {
             $frame->setNative(
                 $frame->native()->insert(
                     $element,
                     $position->x(),
-                    $position->y()
-                )
+                    $position->y(),
+                ),
             );
         }
 

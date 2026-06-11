@@ -49,7 +49,7 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
             } catch (VipsException $e) {
                 throw new ModifierException(
                     'Failed to apply ' . self::class . ', unable to rotate image',
-                    previous: $e
+                    previous: $e,
                 );
             }
 
@@ -57,7 +57,7 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
         }
 
         $image->core()->setNative(
-            Core::replaceFrames($image->core()->native(), $frames)
+            Core::replaceFrames($image->core()->native(), $frames),
         );
 
         return $image;

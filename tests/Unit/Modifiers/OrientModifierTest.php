@@ -13,7 +13,7 @@ class OrientModifierTest extends BaseTestCase
     public function testApply(): void
     {
         $image = ImageManager::usingDriver(Driver::class, autoOrientation: false)->decodePath(
-            $this->getTestResourcePath('orientation.jpg')
+            $this->getTestResourcePath('orientation.jpg'),
         );
 
         $this->assertColor(250, 2, 3, 255, $image->colorAt(3, 3));
@@ -32,7 +32,7 @@ class OrientModifierTest extends BaseTestCase
         $tmpFile = sys_get_temp_dir() . '/out.jpg';
 
         ImageManager::usingDriver(Driver::class, autoOrientation: true)->decodePath(
-            $this->getTestResourcePath('orientation.jpg')
+            $this->getTestResourcePath('orientation.jpg'),
         )->save($tmpFile);
 
         $this->assertFileExists($tmpFile);

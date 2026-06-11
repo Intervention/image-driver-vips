@@ -51,7 +51,7 @@ class DrawEllipseModifier extends GenericDrawEllipseModifier implements Speciali
             } catch (VipsException $e) {
                 throw new ModifierException(
                     'Failed to apply ' . self::class . ', unable to draw ellipse',
-                    previous: $e
+                    previous: $e,
                 );
             }
 
@@ -59,7 +59,7 @@ class DrawEllipseModifier extends GenericDrawEllipseModifier implements Speciali
         }
 
         $image->core()->setNative(
-            Core::replaceFrames($image->core()->native(), $frames)
+            Core::replaceFrames($image->core()->native(), $frames),
         );
 
         return $image;

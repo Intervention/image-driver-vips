@@ -64,11 +64,11 @@ final class RotateModifierTest extends BaseTestCase
 
         $this->assertEquals(
             array_map(fn(Color $color): string => $color->toHex(), $image->colorsAt(1, 1)->toArray()),
-            ['ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000']
+            ['ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000', 'ff0000'],
         );
         $this->assertEquals(
             array_map(fn(Color $color): string => $color->toHex(), $image->colorsAt(12, 12)->toArray()),
-            ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63']
+            ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63'],
         );
     }
 

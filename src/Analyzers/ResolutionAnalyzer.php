@@ -27,7 +27,7 @@ class ResolutionAnalyzer extends GenericResolutionAnalyzer implements Specialize
         try {
             return new Resolution(
                 round($vipsImage->xres * 25.4),
-                round($vipsImage->yres * 25.4)
+                round($vipsImage->yres * 25.4),
             );
         } catch (InvalidArgumentException $e) {
             throw new AnalyzerException('Invalid image resolution', previous: $e);

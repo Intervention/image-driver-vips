@@ -35,7 +35,7 @@ class StripMetaModifier implements ModifierInterface, SpecializedInterface
             $buf = $image->core()->native()->tiffsave_buffer($options);
             $image->setExif(new Collection());
             $image->core()->setNative(
-                VipsImage::newFromBuffer($buf)
+                VipsImage::newFromBuffer($buf),
             );
         } catch (VipsException $e) {
             throw new ModifierException('Failed to strip meta data from image', previous: $e);

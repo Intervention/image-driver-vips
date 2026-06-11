@@ -39,13 +39,13 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
         } catch (InvalidArgumentException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to calculate target size',
-                previous: $e
+                previous: $e,
             );
         }
 
         $colorspace = $image->colorspace();
         $bgColor = $this->driver()->colorProcessor($image)->export(
-            $this->backgroundColor()
+            $this->backgroundColor(),
         );
 
         if (!$image->isAnimated()) {
@@ -105,18 +105,18 @@ class ContainModifier extends GenericContainModifier implements SpecializedInter
                     [
                         'extend' => Extend::BACKGROUND,
                         'background' => $bgColor,
-                    ]
+                    ],
                 );
             } catch (InvalidArgumentException $e) {
                 throw new ModifierException(
                     'Failed to apply ' . self::class . ', unable to convert alignment value',
-                    previous: $e
+                    previous: $e,
                 );
             }
         } catch (VipsException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to process resizing',
-                previous: $e
+                previous: $e,
             );
         }
 

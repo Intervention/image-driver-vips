@@ -36,7 +36,7 @@ final class Jpeg2000EncoderTest extends BaseTestCase
     {
         return 1 === preg_match(
             "/^0000000C6A5020200D0A870A|FF4FFF51/",
-            strtoupper(substr(bin2hex((string) $input), 0, 24))
+            strtoupper(substr(bin2hex((string) $input), 0, 24)),
         );
     }
 }

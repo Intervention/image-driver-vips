@@ -27,8 +27,8 @@ class ProfileModifierTest extends BaseTestCase
         // add profile
         $image->modify(new ProfileModifier(
             new Profile(
-                file_get_contents($this->getTestResourcePath('profile.icc'))
-            )
+                file_get_contents($this->getTestResourcePath('profile.icc')),
+            ),
         ));
 
         $this->assertInstanceOf(Profile::class, $image->profile());

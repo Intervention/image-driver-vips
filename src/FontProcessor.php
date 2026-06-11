@@ -79,8 +79,8 @@ class FontProcessor extends AbstractFontProcessor
                     Alignment::RIGHT => Align::HIGH,
                     default => Align::LOW,
                 },
-                'spacing' => 0
-            ]
+                'spacing' => 0,
+            ],
         );
     }
 

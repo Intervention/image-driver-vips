@@ -51,14 +51,14 @@ class DrawRectangleModifier extends GenericDrawRectangleModifier implements Spec
             } catch (VipsException $e) {
                 throw new ModifierException(
                     'Failed to apply ' . self::class . ', unable to draw rectangle',
-                    previous: $e
+                    previous: $e,
                 );
             }
             $frames[] = $frame->setNative($native);
         }
 
         $image->core()->setNative(
-            Core::replaceFrames($image->core()->native(), $frames)
+            Core::replaceFrames($image->core()->native(), $frames),
         );
 
         return $image;

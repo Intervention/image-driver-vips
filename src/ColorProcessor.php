@@ -140,7 +140,7 @@ class ColorProcessor implements ColorProcessorInterface
             Oklab::class => Rgb::colorFromNormalized($normalized)->toColorspace(Oklab::class),
             Oklch::class => Rgb::colorFromNormalized($normalized)->toColorspace(Oklch::class),
             default => throw new NotSupportedException(
-                'Colorspace ' . $this->colorspace::class . ' is not supported by driver'
+                'Colorspace ' . $this->colorspace::class . ' is not supported by driver',
             )
         };
     }
@@ -228,7 +228,7 @@ class ColorProcessor implements ColorProcessorInterface
                         }
 
                         return false;
-                    }
+                    },
                 );
 
                 return count($requredParams) > 0;

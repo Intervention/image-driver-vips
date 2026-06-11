@@ -50,7 +50,7 @@ class DrawLineModifier extends GenericDrawLineModifier implements SpecializedInt
             } catch (VipsException $e) {
                 throw new ModifierException(
                     'Failed to apply ' . self::class . ', unable to draw line',
-                    previous: $e
+                    previous: $e,
                 );
             }
 
@@ -58,7 +58,7 @@ class DrawLineModifier extends GenericDrawLineModifier implements SpecializedInt
         }
 
         $image->core()->setNative(
-            Core::replaceFrames($image->core()->native(), $frames)
+            Core::replaceFrames($image->core()->native(), $frames),
         );
 
         return $image;

@@ -271,7 +271,7 @@ class Core implements CoreInterface, Iterator
                 0,
                 $height * $position,
                 $this->vipsImage->width,
-                $height
+                $height,
             );
 
             $vipsImage->set('n-pages', 1);

@@ -27,8 +27,8 @@ class ColorspaceModifier extends GenericColorspaceModifier implements Specialize
         try {
             $native = $image->core()->native()->copy([
                 'interpretation' => ColorProcessor::colorspaceToInterpretation(
-                    $this->targetColorspace()
-                )
+                    $this->targetColorspace(),
+                ),
             ]);
         } catch (VipsException $e) {
             throw new ModifierException('Failed to modify image colorspace', previous: $e);

@@ -33,7 +33,7 @@ class ContainDownModifier extends ContainModifier
         $targetSize = $this->resizeSize($image);
         $colorspace = $image->colorspace();
         $bgColor = $this->driver()->colorProcessor($image)->export(
-            $this->backgroundColor()
+            $this->backgroundColor(),
         );
 
         if (!$image->isAnimated()) {
@@ -97,12 +97,12 @@ class ContainDownModifier extends ContainModifier
                 [
                     'extend' => Extend::BACKGROUND,
                     'background' => $background,
-                ]
+                ],
             );
         } catch (InvalidArgumentException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to convert alignment value',
-                previous: $e
+                previous: $e,
             );
         }
 

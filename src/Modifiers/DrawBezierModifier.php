@@ -39,14 +39,14 @@ class DrawBezierModifier extends GenericDrawBezierModifier implements Specialize
             } catch (VipsException $e) {
                 throw new ModifierException(
                     'Failed to apply ' . self::class . ', unable to draw bezier curve',
-                    previous: $e
+                    previous: $e,
                 );
             }
             $frames[] = $frame->setNative($native);
         }
 
         $image->core()->setNative(
-            Core::replaceFrames($image->core()->native(), $frames)
+            Core::replaceFrames($image->core()->native(), $frames),
         );
 
         return $image;

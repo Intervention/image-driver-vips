@@ -43,7 +43,7 @@ class ResizeModifier extends GenericResizeModifier implements SpecializedInterfa
                     $stash,
                     $resizeTo,
                     $image->colorspace(),
-                ))
+                )),
             );
 
             return $image;
@@ -61,7 +61,7 @@ class ResizeModifier extends GenericResizeModifier implements SpecializedInterfa
         }
 
         $image->core()->setNative(
-            $image->core()->native()->thumbnail_image($resizeTo->width(), $options)
+            $image->core()->native()->thumbnail_image($resizeTo->width(), $options),
         );
 
         return $image;

@@ -33,7 +33,7 @@ class FlipModifier extends GenericFlipModifier implements SpecializedInterface
         } catch (VipsException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to flip image',
-                previous: $e
+                previous: $e,
             );
         }
 

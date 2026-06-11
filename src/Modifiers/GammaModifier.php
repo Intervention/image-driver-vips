@@ -23,12 +23,12 @@ class GammaModifier extends GenericGammaModifier implements SpecializedInterface
     {
         try {
             $native = $image->core()->native()->gamma([
-                'exponent' => $this->gamma
+                'exponent' => $this->gamma,
             ]);
         } catch (VipsException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to adjust image gamma value',
-                previous: $e
+                previous: $e,
             );
         }
 

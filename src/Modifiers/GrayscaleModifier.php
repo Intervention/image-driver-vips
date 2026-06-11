@@ -20,12 +20,12 @@ class GrayscaleModifier extends GenericGrayscaleModifier implements SpecializedI
     {
         // turn image to grayscale
         $image->core()->setNative(
-            $image->core()->native()->colourspace(Interpretation::B_W)
+            $image->core()->native()->colourspace(Interpretation::B_W),
         );
 
         // return to srgb colorspace with grayscale image
         $image->core()->setNative(
-            $image->core()->native()->colourspace(Interpretation::SRGB)
+            $image->core()->native()->colourspace(Interpretation::SRGB),
         );
 
         return $image;

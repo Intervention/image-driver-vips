@@ -30,7 +30,7 @@ class ColorizeModifier extends GenericColorizeModifier implements SpecializedInt
                     $this->red,
                     $this->green,
                     $this->blue,
-                ]), $bands, 0)
+                ]), $bands, 0),
             );
         } catch (VipsException $e) {
             throw new ModifierException('Failed to modify image colors', previous: $e);

@@ -49,7 +49,7 @@ class PixelColorAnalyzer extends GenericPixelColorAnalyzer implements Specialize
                 ->colorProcessor($image)
                 ->import(array_map(
                     fn(int|float $value): int => (int) max(min($value, 255), 0),
-                    $core->native()->getpoint($x, $y)
+                    $core->native()->getpoint($x, $y),
                 ));
         } catch (VipsException $e) {
             throw new AnalyzerException('Failed to read pixel color at position ' . $x . ', ' . $y, previous: $e);

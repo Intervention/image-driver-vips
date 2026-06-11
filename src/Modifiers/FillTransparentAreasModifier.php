@@ -33,7 +33,7 @@ class FillTransparentAreasModifier extends GenericFillTransparentAreasModifier i
     {
         // decode background color
         $bgColor = $this->driver()->colorProcessor($image)->export(
-            $this->backgroundColor($this->driver())
+            $this->backgroundColor($this->driver()),
         );
 
         // create new canvas with background color as background
@@ -45,7 +45,7 @@ class FillTransparentAreasModifier extends GenericFillTransparentAreasModifier i
                 try {
                     $frames[] = new Frame(
                         $canvas->core()->native()->composite2($frame->native(), BlendMode::OVER),
-                        $frame->delay()
+                        $frame->delay(),
                     );
                 } catch (VipsException $e) {
                     throw new ModifierException('Failed to blend background color', previous: $e);
@@ -53,14 +53,14 @@ class FillTransparentAreasModifier extends GenericFillTransparentAreasModifier i
             }
 
             $image->core()->setNative(
-                Core::replaceFrames($image->core()->native(), $frames)
+                Core::replaceFrames($image->core()->native(), $frames),
             );
 
             return $image;
         }
 
         $image->core()->setNative(
-            $canvas->core()->native()->composite2($image->core()->native(), BlendMode::OVER)
+            $canvas->core()->native()->composite2($image->core()->native(), BlendMode::OVER),
         );
 
         return $image;

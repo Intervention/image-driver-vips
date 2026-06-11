@@ -94,8 +94,8 @@ strip?: bool}
     {
         $bgColor = $this->driver()->colorProcessor($image)->export(
             $this->driver()->decodeColor(
-                $this->driver()->config()->backgroundColor
-            )
+                $this->driver()->config()->backgroundColor,
+            ),
         );
 
         // remove alpha channel to make sure only 1 or 3 bands are returned for resulting JPEG

@@ -32,7 +32,7 @@ class FillModifier extends GenericFillModifier implements SpecializedInterface
         } catch (ColorDecoderException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to convert color to usable format',
-                previous: $e
+                previous: $e,
             );
         }
 
@@ -52,7 +52,7 @@ class FillModifier extends GenericFillModifier implements SpecializedInterface
         } catch (VipsException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to fill image with color',
-                previous: $e
+                previous: $e,
             );
         }
 
@@ -67,13 +67,13 @@ class FillModifier extends GenericFillModifier implements SpecializedInterface
                     [
                         'equal' => true,
                         'test' => $image->core()->native(),
-                    ]
+                    ],
                 );
 
                 if ($overlay->hasAlpha()) {
                     $mask = $mask->composite2(
                         $overlay->extract_band($overlay->bands - 1, ['n' => 1]),
-                        BlendMode::DARKEN
+                        BlendMode::DARKEN,
                     );
                     $overlay = $overlay->extract_band(0, ['n' => $overlay->bands - 1]);
                 }
@@ -82,7 +82,7 @@ class FillModifier extends GenericFillModifier implements SpecializedInterface
             } catch (VipsException $e) {
                 throw new ModifierException(
                     'Failed to apply ' . self::class . ', unable to fill image with color',
-                    previous: $e
+                    previous: $e,
                 );
             }
         }
@@ -92,7 +92,7 @@ class FillModifier extends GenericFillModifier implements SpecializedInterface
         } catch (VipsException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to fill image with color',
-                previous: $e
+                previous: $e,
             );
         }
 

@@ -94,7 +94,7 @@ abstract class BaseTestCase extends TestCase
                 'Failed asserting that color',
                 $color,
                 'equals',
-                'rgba(' . $r . ', ' . $g . ', ' . $b . ', ' . $a . ')'
+                'rgba(' . $r . ', ' . $g . ', ' . $b . ', ' . $a . ')',
             ]);
         };
 
@@ -103,9 +103,9 @@ abstract class BaseTestCase extends TestCase
                 $color->channel($channel)->value(),
                 $this->logicalAnd(
                     $this->greaterThanOrEqual(max($channel::min(), $value - $tolerance)),
-                    $this->lessThanOrEqual(min($channel::max(), $value + $tolerance))
+                    $this->lessThanOrEqual(min($channel::max(), $value + $tolerance)),
                 ),
-                message: $errorMessage($r, $g, $b, $a, $color)
+                message: $errorMessage($r, $g, $b, $a, $color),
             );
         }
     }
@@ -116,7 +116,7 @@ abstract class BaseTestCase extends TestCase
         $allowed = is_string($allowed) ? [$allowed] : $allowed;
         $this->assertTrue(
             in_array($detected, $allowed),
-            'Detected media type ' . $detected . ' is not in allowed types [' . implode(', ', $allowed) . ']'
+            'Detected media type ' . $detected . ' is not in allowed types [' . implode(', ', $allowed) . ']',
         );
     }
 

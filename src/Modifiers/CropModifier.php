@@ -41,7 +41,7 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
         } catch (InvalidArgumentException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to calculate target size',
-                previous: $e
+                previous: $e,
             );
         }
 
@@ -58,12 +58,12 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
                 $cropped = $image->core()->native()->smartcrop(
                     $crop->width(),
                     $crop->height(),
-                    ['interesting' => str_replace(self::INTERESTING_PREFIX, '', $this->alignment)]
+                    ['interesting' => str_replace(self::INTERESTING_PREFIX, '', $this->alignment)],
                 );
             } catch (VipsException $e) {
                 throw new ModifierException(
                     'Failed to apply ' . self::class . ', unable to process resizing',
-                    previous: $e
+                    previous: $e,
                 );
             }
             $image->core()->setNative($cropped);
@@ -74,7 +74,7 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
             }
 
             $image->core()->setNative(
-                Core::replaceFrames($image->core()->native(), $frames)
+                Core::replaceFrames($image->core()->native(), $frames),
             );
         }
 
@@ -109,7 +109,7 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
     private function background(SizeInterface $resizeTo, ImageInterface $image): VipsImage
     {
         $backgroundColor = $this->driver()->colorProcessor($image)->export(
-            $this->backgroundColor()
+            $this->backgroundColor(),
         );
 
         try {
@@ -122,7 +122,7 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
         } catch (VipsException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to build background color',
-                previous: $e
+                previous: $e,
             );
         }
     }
@@ -131,7 +131,7 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
         FrameInterface $frame,
         SizeInterface $crop,
         SizeInterface $originalSize,
-        VipsImage $background
+        VipsImage $background,
     ): VipsImage {
         $offsetX = $crop->pivot()->x() + $this->x;
         $offsetY = $crop->pivot()->y() + $this->y;
@@ -146,14 +146,14 @@ class CropModifier extends GenericCropModifier implements SpecializedInterface
             max($offsetX, 0),
             max($offsetY, 0),
             $targetWidth,
-            $targetHeight
+            $targetHeight,
         );
 
         if ($crop->width() > $originalSize->width() || $cropped->height < $crop->height()) {
             $cropped = $background->insert(
                 $cropped,
                 max($offsetX * -1, 0),
-                max($offsetY * -1, 0)
+                max($offsetY * -1, 0),
             );
         }
 

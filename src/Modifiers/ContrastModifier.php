@@ -37,7 +37,7 @@ class ContrastModifier extends GenericContrastModifier implements SpecializedInt
             } catch (VipsException $e) {
                 throw new ModifierException(
                     'Failed to apply ' . self::class . ', unable to process contrast adjustment',
-                    previous: $e
+                    previous: $e,
                 );
             }
         } else {
@@ -48,7 +48,7 @@ class ContrastModifier extends GenericContrastModifier implements SpecializedInt
             } catch (VipsException $e) {
                 throw new ModifierException(
                     'Failed to apply ' . self::class . ', unable to process contrast adjustment',
-                    previous: $e
+                    previous: $e,
                 );
             }
         }

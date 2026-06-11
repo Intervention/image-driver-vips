@@ -47,7 +47,7 @@ final class CoverModifierTest extends BaseTestCase
 
         $this->assertEquals(
             array_map(fn(Color $color): string => $color->toHex(), $image->colorsAt(8, 8)->toArray()),
-            ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63']
+            ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63'],
         );
     }
 

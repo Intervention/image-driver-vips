@@ -94,8 +94,8 @@ class Driver extends AbstractDriver
             array_map(
                 fn($key, $value) => sprintf('%s="%s"', $key, htmlspecialchars((string) $value)),
                 array_keys($attributes),
-                $attributes
-            )
+                $attributes,
+            ),
         );
 
         $svg = '<svg viewBox="0 0 ' . $width . ' ' . $height . '" xmlns="http://www.w3.org/2000/svg">' .
@@ -162,7 +162,7 @@ class Driver extends AbstractDriver
         } catch (VipsException $e) {
             throw new MissingDependencyException(
                 'libvips does not seem to be installed correctly',
-                previous: $e
+                previous: $e,
             );
         }
     }

@@ -60,7 +60,7 @@ class FilePathImageDecoder extends NativeObjectDecoder
         } catch (VipsException $e) {
             throw new ImageDecoderException(
                 'Failed to decode image',
-                previous: $e
+                previous: $e,
             );
         }
 

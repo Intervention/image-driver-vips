@@ -45,7 +45,7 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
         } catch (InvalidArgumentException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to calculate target size',
-                previous: $e
+                previous: $e,
             );
         }
 
@@ -58,12 +58,12 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
         if ($stash !== null && $isCenter && !$image->isAnimated()) {
             try {
                 $native = $this->normalizeBands(
-                    $this->coverFromStash($stash, $resize, $colorspace)
+                    $this->coverFromStash($stash, $resize, $colorspace),
                 );
             } catch (VipsException $e) {
                 throw new ModifierException(
                     'Failed to apply ' . self::class . ', unable to process resizing',
-                    previous: $e
+                    previous: $e,
                 );
             }
 
@@ -93,7 +93,7 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
         }
 
         $core->setNative(
-            Core::replaceFrames($core->native(), $frames)
+            Core::replaceFrames($core->native(), $frames),
         );
 
         return $image;
@@ -132,7 +132,7 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
         FrameInterface $frame,
         SizeInterface $cropSize,
         SizeInterface $resizeSize,
-        ColorspaceInterface $colorspace
+        ColorspaceInterface $colorspace,
     ): VipsImage {
         $options = [
             'height' => $resizeSize->height(),
@@ -150,12 +150,12 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
                 $cropSize->pivot()->x(),
                 $cropSize->pivot()->y(),
                 $cropSize->width(),
-                $cropSize->height()
+                $cropSize->height(),
             )->thumbnail_image($resizeSize->width(), $options);
         } catch (VipsException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to process resizing',
-                previous: $e
+                previous: $e,
             );
         }
     }

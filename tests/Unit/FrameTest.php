@@ -24,7 +24,7 @@ final class FrameTest extends TestCase
     private function testFrame(): FrameInterface
     {
         return new Frame(
-            VipsImage::black(3, 2)
+            VipsImage::black(3, 2),
         );
     }
 

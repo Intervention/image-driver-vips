@@ -89,7 +89,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
         } catch (VipsException $e) {
             throw new ModifierException(
                 'Failed to apply ' . self::class . ', unable to rotate text block',
-                previous: $e
+                previous: $e,
             );
         }
 
@@ -97,7 +97,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
         if ($this->font->angle() !== 0.0) {
             $blockPosition->move(
                 $textBlockImage->xoffset * -1,
-                $textBlockImage->yoffset * -1
+                $textBlockImage->yoffset * -1,
             );
         }
 
@@ -114,7 +114,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
             } catch (VipsException $e) {
                 throw new ModifierException(
                     'Failed to apply ' . self::class . ', unable to rotate text block',
-                    previous: $e
+                    previous: $e,
                 );
             }
         }
@@ -129,7 +129,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
                         $stroke,
                         $modified,
                         $blockPosition->x() - $offset->x(),
-                        $blockPosition->y() - $offset->y()
+                        $blockPosition->y() - $offset->y(),
                     );
                 }
             }
@@ -139,7 +139,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
                 $textBlockImage,
                 $modified,
                 $blockPosition->x(),
-                $blockPosition->y()
+                $blockPosition->y(),
             );
 
             $modified = $modified->native();
@@ -155,7 +155,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
                             $stroke,
                             $modifiedFrame,
                             $blockPosition->x() - $offset->x(),
-                            $blockPosition->y() - $offset->y()
+                            $blockPosition->y() - $offset->y(),
                         );
                     }
                 }
@@ -165,7 +165,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
                     $textBlockImage,
                     $modifiedFrame,
                     $blockPosition->x(),
-                    $blockPosition->y()
+                    $blockPosition->y(),
                 );
 
                 $frames[] = $modifiedFrame;
@@ -185,7 +185,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
     private function placeTextOnFrame(VipsImage $text, FrameInterface $frame, int $x, int $y): FrameInterface
     {
         $frame->setNative(
-            $frame->native()->composite($text, BlendMode::OVER, ['x' => $x, 'y' => $y])
+            $frame->native()->composite($text, BlendMode::OVER, ['x' => $x, 'y' => $y]),
         );
 
         return $frame;

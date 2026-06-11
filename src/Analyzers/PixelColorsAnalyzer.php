@@ -31,8 +31,8 @@ class PixelColorsAnalyzer extends PixelColorAnalyzer implements SpecializedInter
                     $image,
                     $image->core(),
                     $this->x,
-                    $this->y + $i * $height
-                )
+                    $this->y + $i * $height,
+                ),
             );
         }
 

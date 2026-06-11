@@ -47,7 +47,7 @@ class PixelateModifier extends GenericPixelateModifier implements SpecializedInt
             $frame->native()
                 ->resize(1 / $this->size) // @phpstan-ignore missingType.checkedException
                 ->resize($this->size, ['kernel' => Kernel::NEAREST])
-                ->embed(0, 0, $frame->size()->width(), $frame->size()->height(), ['extend' => Extend::COPY])
+                ->embed(0, 0, $frame->size()->width(), $frame->size()->height(), ['extend' => Extend::COPY]),
         );
 
         return $frame;

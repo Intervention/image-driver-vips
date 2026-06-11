@@ -21,7 +21,7 @@ class ResolutionModifier extends GenericResolutionModifier implements Specialize
             $image->core()->native()->copy([
                 'xres' => $this->x / 25.4,
                 'yres' => $this->y / 25.4,
-            ])
+            ]),
         );
 
         return $image;
