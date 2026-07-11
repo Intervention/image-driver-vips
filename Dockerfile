@@ -21,6 +21,7 @@ RUN apt update \
             libheif-dev \
             libheif-plugin-aomenc \
             libheif-plugin-x265 \
+            libjxl-dev \
             libcgif-dev \
             libimagequant-dev \
             libopenjp2-7-dev \

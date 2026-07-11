@@ -117,6 +117,10 @@ class LoaderDetector
                 case 'jp2k':
                     $formats[] = Format::JP2;
                     break;
+
+                case 'jxl':
+                    $formats[] = Format::JXL;
+                    break;
             }
         }
 
