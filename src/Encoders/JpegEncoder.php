@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Encoders;
 
+use Intervention\Image\Colors\Cmyk\Colorspace as CmykColorspace;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\JpegEncoder as GenericJpegEncoder;
 use Intervention\Image\Exceptions\EncoderException;
@@ -16,6 +17,7 @@ use Intervention\Image\MediaType;
 use Jcupitt\Vips\Config as VipsConfig;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\ForeignKeep;
+
 
 class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
 {
@@ -98,7 +100,13 @@ strip?: bool}
             ),
         );
 
-        // remove alpha channel to make sure only 1 or 3 bands are returned for resulting JPEG
-        return count($bgColor) === 4 ? array_slice($bgColor, 0, 3) : $bgColor;
+        $cs = $image->colorspace();
+
+        return match ($cs::class) {
+            // If the colorspace is CMYK, remove the alpha channel to make sure only 4 bands are returned.
+            CmykColorspace::class => count($bgColor) === 5 ? array_slice($bgColor, 0, 4) : $bgColor,
+            // remove alpha channel to make sure only 1 or 3 bands are returned for resulting JPEG
+            default => count($bgColor) === 4 ? array_slice($bgColor, 0, 3) : $bgColor,
+        };
     }
 }
