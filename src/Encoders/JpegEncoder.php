@@ -18,7 +18,6 @@ use Jcupitt\Vips\Config as VipsConfig;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\ForeignKeep;
 
-
 class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
 {
     /**
@@ -100,12 +99,10 @@ strip?: bool}
             ),
         );
 
-        $cs = $image->colorspace();
-
-        return match ($cs::class) {
-            // If the colorspace is CMYK, remove the alpha channel to make sure only 4 bands are returned.
+        return match ($image->colorspace()::class) {
+             // If the colorspace is CMYK, remove the alpha channel to make sure only 4 bands are returned.
             CmykColorspace::class => count($bgColor) === 5 ? array_slice($bgColor, 0, 4) : $bgColor,
-            // remove alpha channel to make sure only 1 or 3 bands are returned for resulting JPEG
+             // remove alpha channel to make sure only 1 or 3 bands are returned for resulting JPEG
             default => count($bgColor) === 4 ? array_slice($bgColor, 0, 3) : $bgColor,
         };
     }
