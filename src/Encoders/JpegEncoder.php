@@ -57,7 +57,6 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
      *     keep?: 8|63,
      *     strip?: bool
      * }
-strip?: bool}
      */
     private function options(ImageInterface $image): array
     {
