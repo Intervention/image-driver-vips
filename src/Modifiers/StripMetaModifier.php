@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Collection;
+use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\ModifierException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\ModifierInterface;
@@ -22,6 +23,7 @@ class StripMetaModifier implements ModifierInterface, SpecializedInterface
      * @see ModifierInterface::apply()
      *
      * @throws ModifierException
+     * @throws DriverException
      */
     public function apply(ImageInterface $image): ImageInterface
     {

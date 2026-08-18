@@ -6,6 +6,7 @@ namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Direction;
 use Intervention\Image\Drivers\Vips\Core;
+use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\ModifierException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
@@ -21,6 +22,7 @@ class FlipModifier extends GenericFlipModifier implements SpecializedInterface
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      *
      * @throws ModifierException
+     * @throws DriverException
      */
     public function apply(ImageInterface $image): ImageInterface
     {

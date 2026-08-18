@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
+use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Encoders\PngEncoder;
@@ -91,5 +92,23 @@ final class InsertModifierTest extends BaseTestCase
         $second = (string) $image->encode(new PngEncoder());
 
         $this->assertSame($first, $second);
+    }
+
+    public function testApplyDecodedWatermarkPastThePipelineRenderLimitEncodes(): void
+    {
+        // Rendering the pipeline to memory mid-chain is another evaluation of
+        // the watermark's sequential source, on top of the one at encode time.
+        // Regression for the render limit and the element materialisation
+        // pulling against each other.
+        $manager = ImageManager::usingDriver(Driver::class);
+
+        $image = $manager->createImage(64, 64)->fill('0000ff');
+        $watermark = $manager->decodePath($this->getTestResourcePath('circle.png'));
+
+        for ($i = 0; $i <= Core::MAX_CHAINED_OPERATIONS; $i++) {
+            $image->insert($watermark);
+        }
+
+        $this->assertMediaType('image/png', $image->encode(new PngEncoder()));
     }
 }
