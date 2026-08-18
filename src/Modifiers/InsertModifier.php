@@ -29,6 +29,17 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
     public function apply(ImageInterface $image): ImageInterface
     {
         $watermark = $this->driver()->decodeImage($this->image);
+
+        // A libvips sequential source may only be read once, in order. The
+        // element is folded into the target's pipeline by reference, so it is
+        // read again every time that pipeline is evaluated: inserting the same
+        // decoded image twice, or encoding the result twice, fails with "out
+        // of order read". Materialising the element on its own core spends
+        // that single read here, and leaves every later evaluation reading
+        // from memory. Decoded images are shared by reference, so an image
+        // inserted many times only pays for this once.
+        Core::ensureInMemory($watermark->core());
+
         $elementNative = $watermark->core()->native();
         $position = $this->position($image, $watermark);
 
