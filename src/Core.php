@@ -25,7 +25,34 @@ use Traversable;
  */
 class Core implements CoreInterface, Iterator
 {
+    /**
+     * Number of operations that may be chained onto the image before its
+     * pipeline is rendered into memory.
+     *
+     * libvips evaluates a pipeline by recursing once per node, on a worker
+     * thread whose stack is fixed when the thread is created. A long enough
+     * chain overruns that stack and takes the process down with SIGBUS or
+     * SIGSEGV, with no catchable error and nothing on stderr. The ceiling is
+     * the platform's default thread stack size, measured on a chain of
+     * composites at 198 nodes on macOS arm64, 1843 on musl and 2009 on glibc.
+     * Callers that build an image in a loop, tiling a watermark or drawing
+     * many shapes, reach it with ordinary inputs.
+     *
+     * Rendering to memory every N operations keeps the depth well under the
+     * lowest of those ceilings. Chains shorter than N, which is every normal
+     * use of the driver, never pay for it. Past N there is a cost: a rendered
+     * image is a whole image, so an operation that later narrows the region of
+     * interest, a crop after the chain say, no longer gets to narrow what the
+     * chain computes.
+     *
+     * This counts calls, not libvips nodes, so it is a bound rather than a
+     * measurement. A modifier that chains several nodes per call spends the
+     * budget faster than one node per call.
+     */
+    public const MAX_CHAINED_OPERATIONS = 32;
+
     protected int $iteratorIndex = 0;
+    protected int $chainedOperations = 0;
     protected CollectionInterface $meta;
     protected null|PathSource|BufferSource $stashedSource = null;
 
@@ -146,6 +173,7 @@ class Core implements CoreInterface, Iterator
      * @see CoreInterface::setNative()
      *
      * @throws InvalidArgumentException
+     * @throws DriverException
      */
     public function setNative(mixed $native): CoreInterface
     {
@@ -157,6 +185,16 @@ class Core implements CoreInterface, Iterator
 
         $this->vipsImage = $native;
         $this->stashedSource = null;
+
+        if (++$this->chainedOperations >= static::MAX_CHAINED_OPERATIONS) {
+            try {
+                $this->vipsImage = $this->vipsImage->copyMemory();
+            } catch (VipsException $e) {
+                throw new DriverException('Failed to render image pipeline into memory', previous: $e);
+            }
+
+            $this->chainedOperations = 0;
+        }
 
         return $this;
     }
@@ -185,6 +223,8 @@ class Core implements CoreInterface, Iterator
     /**
      * Renders vips image of given core into memory and serves any downstream
      * requests from the memory area
+     *
+     * @throws DriverException
      */
     public static function ensureInMemory(CoreInterface $core): CoreInterface
     {

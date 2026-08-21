@@ -6,6 +6,7 @@ namespace Intervention\Image\Drivers\Vips\Analyzers;
 
 use Intervention\Image\Collection;
 use Intervention\Image\Exceptions\AnalyzerException;
+use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
@@ -19,6 +20,7 @@ class PixelColorsAnalyzer extends PixelColorAnalyzer implements SpecializedInter
      *
      * @throws StateException
      * @throws AnalyzerException
+     * @throws DriverException
      */
     public function analyze(ImageInterface $image): mixed
     {

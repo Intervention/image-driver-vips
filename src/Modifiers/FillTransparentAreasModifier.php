@@ -72,6 +72,7 @@ class FillTransparentAreasModifier extends GenericFillTransparentAreasModifier i
      * @param array<float> $color
      * @throws StateException
      * @throws ModifierException
+     * @throws DriverException
      */
     private function canvas(ImageInterface $image, array $color): ImageInterface
     {
