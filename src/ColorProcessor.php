@@ -136,7 +136,11 @@ class ColorProcessor implements ColorProcessorInterface
             Cmyk::class => $this->colorspace->colorFromNormalized($normalized),
             Rgb::class => $this->colorspace->colorFromNormalized($normalized),
             Hsl::class => Rgb::colorFromNormalized($normalized)->toColorspace(Hsl::class),
-            Hsv::class => Rgb::colorFromNormalized($normalized)->toColorspace(Hsv::class),
+            // hsv is the only one of these with a vips interpretation of its
+            // own, so the bands already hold h/s/v and reading them as rgb
+            // would convert a second time. The others are mapped to srgb by
+            // colorspaceToInterpretation() and do need the conversion.
+            Hsv::class => $this->colorspace->colorFromNormalized($normalized),
             Oklab::class => Rgb::colorFromNormalized($normalized)->toColorspace(Oklab::class),
             Oklch::class => Rgb::colorFromNormalized($normalized)->toColorspace(Oklch::class),
             default => throw new NotSupportedException(
