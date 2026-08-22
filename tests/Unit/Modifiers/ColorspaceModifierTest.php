@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
 use Intervention\Image\Colors\Cmyk\Colorspace as CmykColorspace;
+use Intervention\Image\Colors\Hsv\Colorspace as HsvColorspace;
 use Intervention\Image\Colors\Rgb\Channels\Alpha;
 use Intervention\Image\Colors\Rgb\Colorspace as RgbColorspace;
 use Intervention\Image\Drivers\Vips\Core;
@@ -54,12 +55,31 @@ final class ColorspaceModifierTest extends BaseTestCase
 
     public function testColorChangeToCmyk(): void
     {
+        // createTestImage() is opaque red with an alpha band
         $image = $this->createTestImage(8, 8);
         $this->assertEquals(RgbColorspace::class, $image->colorspace()::class);
+        $this->assertEquals('rgb(255 0 0)', $image->colorAt(0, 0)->toString());
 
         $image->modify(new ColorspaceModifier(CmykColorspace::class));
 
         $this->assertEquals(CmykColorspace::class, $image->colorspace()::class);
         $this->assertEquals(Interpretation::CMYK, $image->core()->native()->interpretation);
+
+        // the ink bands have to hold the converted values rather than the
+        // original rgb ones, and the alpha band of the source is kept
+        $this->assertEquals('cmyk(0 100 100 0)', $image->colorAt(0, 0)->toString());
+        $this->assertEquals(5, $image->core()->native()->bands);
+    }
+
+    public function testColorChangeToHsvIsReadBackInHsv(): void
+    {
+        $image = $this->createTestImage(8, 8);
+
+        $image->modify(new ColorspaceModifier(HsvColorspace::class));
+
+        // the bands hold h/s/v after the conversion, so reading them back must
+        // not run the rgb to hsv conversion a second time
+        $this->assertEquals(Interpretation::HSV, $image->core()->native()->interpretation);
+        $this->assertEquals('hsv(0 100% 100%)', $image->colorAt(0, 0)->toString());
     }
 }
