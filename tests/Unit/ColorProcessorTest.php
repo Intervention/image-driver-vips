@@ -103,6 +103,8 @@ final class ColorProcessorTest extends BaseTestCase
         yield [Interpretation::RGB16, Rgb::class];
         yield [Interpretation::GREY16, Rgb::class];
         yield [Interpretation::MATRIX, Rgb::class];
+        yield [Interpretation::OKLAB, Oklab::class];
+        yield [Interpretation::OKLCH, Oklch::class];
     }
 
     #[DataProvider('colorspaceToInterpretationProvider')]

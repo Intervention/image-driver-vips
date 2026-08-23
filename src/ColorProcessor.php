@@ -171,6 +171,8 @@ class ColorProcessor implements ColorProcessorInterface
             Interpretation::RGB16 => new Rgb(),
             Interpretation::GREY16 => new Rgb(),
             Interpretation::MATRIX => new Rgb(),
+            Interpretation::OKLAB => new Oklab(),
+            Interpretation::OKLCH => new Oklch(),
             default => throw new ColorDecoderException(
                 'Unable to transform interpretation "' . $interpretation . '" to colorspace.',
             ),
