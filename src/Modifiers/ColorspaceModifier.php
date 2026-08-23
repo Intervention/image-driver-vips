@@ -32,13 +32,6 @@ class ColorspaceModifier extends GenericColorspaceModifier implements Specialize
         $interpretation = ColorProcessor::colorspaceToInterpretation($this->targetColorspace());
 
         try {
-            // colourspace() converts the pixel data, unlike copy() with a new
-            // interpretation, which only re-labels the bands and leaves the
-            // image itself untouched. A cmyk source has no alpha band, its
-            // fourth band is k, so converting it to rgb gives three bands and
-            // the opaque alpha the rest of the pipeline expects is added back.
-            // Sources that do carry alpha keep it, colourspace() passes the
-            // bands beyond the source interpretation through untouched.
             $native = $this->normalizeBands(
                 $image->core()->native()->colourspace($interpretation),
             );
