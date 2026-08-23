@@ -39,6 +39,8 @@ class TrimModifier extends GenericTrimModifier implements SpecializedInterface
 
         $core = Core::ensureInMemory($image->core());
         $native = $core->native();
+        $width = $native->width;
+        $height = $native->height;
         $maxThreshold = match ($image->core()->native()->format) {
             BandFormat::USHORT => 65535,
             BandFormat::FLOAT => 1,
@@ -52,16 +54,23 @@ class TrimModifier extends GenericTrimModifier implements SpecializedInterface
                     'background' => $point,
                 ]);
 
-                $native = $native->crop(
-                    min($trim['left'], $image->width() - 1),
-                    min($trim['top'], $image->height() - 1),
-                    max($trim['width'], 1),
-                    max($trim['height'], 1),
-                );
-
+                // An empty box means the whole remaining image matches the background color of
+                // the current corner. The corner colors are read from the original image, so a
+                // later corner may well match an area that an earlier corner has already
+                // isolated. That area is content and must be kept.
                 if ($trim['width'] === 0 || $trim['height'] === 0) {
+                    if ($native->width < $width || $native->height < $height) {
+                        continue;
+                    }
+
+                    // Nothing but background left. Return a single pixel, which is what the
+                    // other drivers do in this case.
+                    $native = $native->crop(0, 0, 1, 1);
+
                     break;
                 }
+
+                $native = $native->crop($trim['left'], $trim['top'], $trim['width'], $trim['height']);
             } catch (VipsException $e) {
                 throw new ModifierException('Failed to trim image', previous: $e);
             }
