@@ -182,6 +182,43 @@ class CoreTest extends BaseTestCase
         $this->assertNull($core->stashedSource());
     }
 
+    public function testMetaStrippedIsFalseByDefault(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+
+        $this->assertFalse($core->metaStripped());
+    }
+
+    public function testSetMetaStrippedThenGet(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+
+        $this->assertTrue($core->setMetaStripped()->metaStripped());
+        $this->assertFalse($core->setMetaStripped(false)->metaStripped());
+    }
+
+    /**
+     * Unlike the stashed source, the flag has to survive setNative() so it
+     * still reaches the encoder after any modifier that runs after the strip.
+     */
+    public function testSetNativeKeepsMetaStripped(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+        $core->setMetaStripped();
+
+        $core->setNative($this->vipsImage(20, 20, [0, 255, 0]));
+
+        $this->assertTrue($core->metaStripped());
+    }
+
+    public function testCloneKeepsMetaStripped(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+        $core->setMetaStripped();
+
+        $this->assertTrue((clone $core)->metaStripped());
+    }
+
     public function testSetNativeLeavesThePipelineLazyBelowTheOperationLimit(): void
     {
         $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));

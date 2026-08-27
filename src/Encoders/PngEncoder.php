@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Encoders;
 
+use Intervention\Image\Drivers\Vips\Traits\CanStripMeta;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\PngEncoder as GenericPngEncoder;
 use Intervention\Image\Exceptions\EncoderException;
@@ -17,6 +18,8 @@ use Jcupitt\Vips\Exception as VipsException;
 
 class PngEncoder extends GenericPngEncoder implements SpecializedInterface
 {
+    use CanStripMeta;
+
     /**
      * {@inheritdoc}
      *
@@ -36,10 +39,10 @@ class PngEncoder extends GenericPngEncoder implements SpecializedInterface
         }
 
         try {
-            $result = $vipsImage->writeToBuffer('.png', [
+            $result = $vipsImage->writeToBuffer('.png', array_merge([
                 'interlace' => $this->interlaced,
                 'palette' => $this->indexed,
-            ]);
+            ], $this->metaOptions($image)));
         } catch (VipsException $e) {
             throw new EncoderException('Failed to encode PNG image format', previous: $e);
         }

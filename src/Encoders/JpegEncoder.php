@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Encoders;
 
 use Intervention\Image\Colors\Cmyk\Colorspace as CmykColorspace;
+use Intervention\Image\Drivers\Vips\Traits\CanStripMeta;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\JpegEncoder as GenericJpegEncoder;
 use Intervention\Image\Exceptions\EncoderException;
@@ -14,12 +15,12 @@ use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\MediaType;
-use Jcupitt\Vips\Config as VipsConfig;
 use Jcupitt\Vips\Exception as VipsException;
-use Jcupitt\Vips\ForeignKeep;
 
 class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
 {
+    use CanStripMeta;
+
     /**
      * {@inheritdoc}
      *
@@ -54,7 +55,7 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
      *     interlace: bool,
      *     optimize_coding: true,
      *     background?: array<float>,
-     *     keep?: 8|63,
+     *     keep?: int,
      *     strip?: bool
      * }
      */
@@ -70,18 +71,7 @@ class JpegEncoder extends GenericJpegEncoder implements SpecializedInterface
             $options['background'] = $this->backgroundColor($image);
         }
 
-        $strip = $this->strip || $this->driver()->config()->strip;
-
-        if (VipsConfig::atLeast(8, 15)) {
-            $keepAll = VipsConfig::atLeast(8, 18)
-                ? ForeignKeep::ALL
-                : ForeignKeep::ALL & ~ForeignKeep::GAINMAP;
-            $options['keep'] = $strip ? ForeignKeep::ICC : $keepAll;
-        } else {
-            $options['strip'] = $strip;
-        }
-
-        return $options;
+        return array_merge($options, $this->metaOptions($image, $this->strip));
     }
 
     /**
