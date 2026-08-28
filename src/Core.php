@@ -53,6 +53,7 @@ class Core implements CoreInterface, Iterator
 
     protected int $iteratorIndex = 0;
     protected int $chainedOperations = 0;
+    protected bool $metaStripped = false;
     protected CollectionInterface $meta;
     protected null|PathSource|BufferSource $stashedSource = null;
 
@@ -216,6 +217,36 @@ class Core implements CoreInterface, Iterator
     public function setStashedSource(PathSource|BufferSource $source): self
     {
         $this->stashedSource = $source;
+
+        return $this;
+    }
+
+    /**
+     * Whether the meta data of this core has been stripped.
+     *
+     * libvips builds an EXIF block from the image's core fields at save time,
+     * whether or not the image carries one, so removing the fields from the
+     * image cannot keep meta data out of the encoded result on its own. The
+     * encoders read this flag to pass the matching keep option to the save.
+     */
+    public function metaStripped(): bool
+    {
+        return $this->metaStripped;
+    }
+
+    /**
+     * Mark the meta data of this core as stripped. Set by StripMetaModifier
+     * and, unlike the stashed source, kept across setNative() so the flag
+     * survives any modifier that runs between the strip and the encoding.
+     *
+     * It does not survive a new core built around the same vips image, as
+     * Frame::toImage() and createFromFrames() do. Such an image carries no
+     * meta data, its fields were removed, but libvips synthesises an EXIF
+     * block for it again at save time.
+     */
+    public function setMetaStripped(bool $stripped = true): self
+    {
+        $this->metaStripped = $stripped;
 
         return $this;
     }
