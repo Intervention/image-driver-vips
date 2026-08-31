@@ -124,14 +124,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
 
             if (isset($stroke)) {
                 // draw stroke effect with offsets
-                foreach ($this->strokeOffsets($this->font) as $offset) {
-                    $modified = $this->placeTextOnFrame(
-                        $stroke,
-                        $modified,
-                        $blockPosition->x() - $offset->x(),
-                        $blockPosition->y() - $offset->y(),
-                    );
-                }
+                $modified = $this->placeStrokeOnFrame($stroke, $modified, $blockPosition);
             }
 
             // place text image on original image
@@ -150,14 +143,7 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
 
                 if (isset($stroke)) {
                     // draw stroke effect with offsets
-                    foreach ($this->strokeOffsets($this->font) as $offset) {
-                        $modifiedFrame = $this->placeTextOnFrame(
-                            $stroke,
-                            $modifiedFrame,
-                            $blockPosition->x() - $offset->x(),
-                            $blockPosition->y() - $offset->y(),
-                        );
-                    }
+                    $modifiedFrame = $this->placeStrokeOnFrame($stroke, $modifiedFrame, $blockPosition);
                 }
 
                 // place text image on original image
@@ -177,6 +163,44 @@ class TextModifier extends GenericTextModifier implements SpecializedInterface
         $image->core()->setNative($modified);
 
         return $image;
+    }
+
+    /**
+     * Stamp the stroke image around the given position on the given frame.
+     *
+     * A stroke of width w is (2w + 1)^2 stamps. Chaining one composite per
+     * stamp builds that many libvips pipeline nodes, and libvips recurses once
+     * per node when it evaluates, so a stroke of 6 or more overruns the worker
+     * thread stack on macOS and kills the process. libvips composites any
+     * number of overlays in a single operation, which is one node whatever the
+     * width, and a good deal faster.
+     */
+    private function placeStrokeOnFrame(
+        VipsImage $stroke,
+        FrameInterface $frame,
+        PointInterface $blockPosition,
+    ): FrameInterface {
+        $x = [];
+        $y = [];
+
+        foreach ($this->strokeOffsets($this->font) as $offset) {
+            $x[] = $blockPosition->x() - $offset->x();
+            $y[] = $blockPosition->y() - $offset->y();
+        }
+
+        if ($x === []) {
+            return $frame;
+        }
+
+        $frame->setNative(
+            $frame->native()->composite(
+                array_fill(0, count($x), $stroke),
+                array_fill(0, count($x), BlendMode::OVER),
+                ['x' => $x, 'y' => $y],
+            ),
+        );
+
+        return $frame;
     }
 
     /**

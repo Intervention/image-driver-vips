@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Encoders;
 
+use Intervention\Image\Drivers\Vips\Traits\CanStripMeta;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\Encoders\WebpEncoder as GenericWebpEncoder;
 use Intervention\Image\Exceptions\EncoderException;
@@ -13,12 +14,12 @@ use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\MediaType;
-use Jcupitt\Vips\Config as VipsConfig;
-use Jcupitt\Vips\ForeignKeep;
 use Jcupitt\Vips\Exception as VipsException;
 
 class WebpEncoder extends GenericWebpEncoder implements SpecializedInterface
 {
+    use CanStripMeta;
+
     /**
      * {@inheritdoc}
      *
@@ -32,7 +33,7 @@ class WebpEncoder extends GenericWebpEncoder implements SpecializedInterface
     public function encode(ImageInterface $image): EncodedImage
     {
         try {
-            $result = $image->core()->native()->writeToBuffer('.webp', $this->options());
+            $result = $image->core()->native()->writeToBuffer('.webp', $this->options($image));
         } catch (VipsException $e) {
             throw new EncoderException('Failed to encode WEBP image format ', previous: $e);
         }
@@ -44,28 +45,15 @@ class WebpEncoder extends GenericWebpEncoder implements SpecializedInterface
      * @throws StateException
      * @return array{lossless: bool, Q: int, effort: int, keep?: int, strip?: bool}
      */
-    private function options(): array
+    private function options(ImageInterface $image): array
     {
-        $options = [
+        return array_merge([
             'lossless' => $this->quality === 100,
             'Q' => $this->quality,
             // libvips' webpsave defaults to effort=4; 2 roughly halves encode
             // time while staying within ~3% bytes (effort=1 costs +10-19%;
             // range 0..6).
             'effort' => 2,
-        ];
-
-        $strip = $this->strip || $this->driver()->config()->strip;
-
-        if (VipsConfig::atLeast(8, 15)) {
-            $keepAll = VipsConfig::atLeast(8, 18)
-                ? ForeignKeep::ALL
-                : ForeignKeep::ALL & ~ForeignKeep::GAINMAP;
-            $options['keep'] = $strip ? ForeignKeep::ICC : $keepAll;
-        } else {
-            $options['strip'] = $strip;
-        }
-
-        return $options;
+        ], $this->metaOptions($image, $this->strip));
     }
 }

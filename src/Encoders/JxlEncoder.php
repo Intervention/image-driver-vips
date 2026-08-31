@@ -6,7 +6,7 @@ namespace Intervention\Image\Drivers\Vips\Encoders;
 
 use Intervention\Image\Drivers\Vips\Traits\CanStripMeta;
 use Intervention\Image\EncodedImage;
-use Intervention\Image\Encoders\HeicEncoder as GenericHeicEncoder;
+use Intervention\Image\Encoders\JxlEncoder as GenericJxlEncoder;
 use Intervention\Image\Exceptions\EncoderException;
 use Intervention\Image\Exceptions\StreamException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
@@ -16,7 +16,7 @@ use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\MediaType;
 use Jcupitt\Vips\Exception as VipsException;
 
-class HeicEncoder extends GenericHeicEncoder implements SpecializedInterface
+class JxlEncoder extends GenericJxlEncoder implements SpecializedInterface
 {
     use CanStripMeta;
 
@@ -33,26 +33,27 @@ class HeicEncoder extends GenericHeicEncoder implements SpecializedInterface
     public function encode(ImageInterface $image): EncodedImage
     {
         try {
-            $result = $image->core()->native()->writeToBuffer('.heic', $this->options($image));
+            $result = $image->core()->native()->writeToBuffer('.jxl', $this->options($image));
         } catch (VipsException $e) {
-            throw new EncoderException('Failed to encode HEIC image format', previous: $e);
+            throw new EncoderException('Failed to encode JXL image format', previous: $e);
         }
 
-        return new EncodedImage($result, MediaType::IMAGE_HEIC->value);
+        return new EncodedImage($result, MediaType::IMAGE_JXL->value);
     }
 
     /**
+     * libvips' jxlsave has a native lossless flag. JXL has no separate lossless
+     * setting beyond maximum quality, so it is enabled at Q 100, matching the
+     * AVIF and HEIC encoders of this driver.
+     *
      * @throws StateException
-     * @return array{lossless: bool, Q: int, effort: int, keep?: int, strip?: bool}
+     * @return array{lossless: bool, Q: int, keep?: int, strip?: bool}
      */
     private function options(ImageInterface $image): array
     {
         return array_merge([
             'lossless' => $this->quality === 100,
             'Q' => $this->quality,
-            // libvips' heifsave defaults to effort=4; 1 encodes ~2-3x faster
-            // with near-identical bytes on typical web sources (range 0..9).
-            'effort' => 1,
         ], $this->metaOptions($image, $this->strip));
     }
 }

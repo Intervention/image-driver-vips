@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout project
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install vips ${{ matrix.libvips }} from source
         run: |
@@ -41,6 +41,7 @@ jobs:
             libheif-dev \
             libheif-plugin-aomenc \
             libheif-plugin-x265 \
+            libjxl-dev \
             libcgif-dev \
             libimagequant-dev \
             libopenjp2-7-dev \
@@ -76,7 +77,7 @@ jobs:
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache composer dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ matrix.stability }}-vips-${{ matrix.libvips }}-${{ hashFiles('**/composer.json') }}

@@ -168,6 +168,14 @@ class DriverTest extends BaseTestCase
         yield [true, 'image/heic'];
         yield [true, 'image/heif'];
 
+        yield [true, Format::JXL];
+        yield [true, MediaType::IMAGE_JXL];
+        yield [true, MediaType::IMAGE_X_JXL];
+        yield [true, FileExtension::JXL];
+        yield [true, 'jxl'];
+        yield [true, 'image/jxl'];
+        yield [true, 'image/x-jxl'];
+
         yield [false, 'tga'];
         yield [false, 'image/tga'];
         yield [false, 'image/x-targa'];

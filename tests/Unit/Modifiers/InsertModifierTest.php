@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
+use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
+use Intervention\Image\Encoders\PngEncoder;
 use Intervention\Image\Encoders\WebpEncoder;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Modifiers\InsertModifier;
@@ -72,5 +74,41 @@ final class InsertModifierTest extends BaseTestCase
 
         $encoded = $image->encode(new WebpEncoder(quality: 80));
         $this->assertMediaType('image/webp', $encoded);
+    }
+
+    public function testApplyThenEncodeTwiceKeepsTheSameResult(): void
+    {
+        // Regression for: a watermark decoded from a file opens a sequential
+        // libvips source, which may only be read once, in order. It stays in
+        // the target's pipeline by reference, so encoding the result a second
+        // time read that source a second time and failed with "pngload: out
+        // of order read".
+        $manager = ImageManager::usingDriver(Driver::class);
+
+        $image = $manager->createImage(64, 64)->fill('0000ff');
+        $image->insert($manager->decodePath($this->getTestResourcePath('circle.png')));
+
+        $first = (string) $image->encode(new PngEncoder());
+        $second = (string) $image->encode(new PngEncoder());
+
+        $this->assertSame($first, $second);
+    }
+
+    public function testApplyDecodedWatermarkPastThePipelineRenderLimitEncodes(): void
+    {
+        // Rendering the pipeline to memory mid-chain is another evaluation of
+        // the watermark's sequential source, on top of the one at encode time.
+        // Regression for the render limit and the element materialisation
+        // pulling against each other.
+        $manager = ImageManager::usingDriver(Driver::class);
+
+        $image = $manager->createImage(64, 64)->fill('0000ff');
+        $watermark = $manager->decodePath($this->getTestResourcePath('circle.png'));
+
+        for ($i = 0; $i <= Core::MAX_CHAINED_OPERATIONS; $i++) {
+            $image->insert($watermark);
+        }
+
+        $this->assertMediaType('image/png', $image->encode(new PngEncoder()));
     }
 }

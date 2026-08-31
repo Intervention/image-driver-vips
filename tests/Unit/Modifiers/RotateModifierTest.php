@@ -9,9 +9,13 @@ use Intervention\Image\Drivers\Vips\Decoders\BinaryImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Encoders\JpegEncoder;
+use Intervention\Image\Encoders\PngEncoder;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Modifiers\RotateModifier;
+use Jcupitt\Vips\BandFormat;
+use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Image as VipsImage;
+use Jcupitt\Vips\Interpretation;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(RotateModifier::class)]
@@ -101,5 +105,75 @@ final class RotateModifierTest extends BaseTestCase
 
         $bytes = $image->encode(new JpegEncoder(quality: 75))->toString();
         $this->assertNotEmpty($bytes);
+    }
+
+    /**
+     * Regression: sources that decode to three bands without an alpha channel
+     * threw `linear: vector must have 1 or 4 elements`. The background color is
+     * exported against the three-band image, but the rotation then adds an
+     * alpha band and hands the stale three-element vector to similarity().
+     *
+     * 16-bit PNG/TIFF sources are the practical way to get there: the decoder
+     * only normalizes to four bands when the interpretation is SRGB, and a
+     * 16-bit source loads as RGB16.
+     */
+    public function testRotateSixteenBitSource(): void
+    {
+        $image = (new Driver())->decodeImage(self::sixteenBitPng(), [BinaryImageDecoder::class]);
+        $image->modify(new RotateModifier(45, 'fff'));
+
+        $rotated = VipsImage::newFromBuffer($image->encode(new PngEncoder())->toString());
+
+        $this->assertEquals(BandFormat::USHORT, $rotated->format);
+        $this->assertTrue($rotated->hasAlpha());
+
+        // the exposed corner has to be opaque white on the 16-bit scale, not
+        // the 255 that ColorProcessor::export() hands out
+        $this->assertEquals([65535, 65535, 65535, 65535], $rotated->getpoint(0, 0));
+    }
+
+    /**
+     * The alpha channel of the background color survives the rotation of a
+     * three-band source, instead of being dropped when the vector is sized to
+     * the bandcount of the image before the alpha band is added.
+     */
+    public function testRotateSixteenBitSourceKeepsBackgroundAlpha(): void
+    {
+        $image = (new Driver())->decodeImage(self::sixteenBitPng(), [BinaryImageDecoder::class]);
+        $image->modify(new RotateModifier(45, 'ffffff00'));
+
+        $rotated = VipsImage::newFromBuffer($image->encode(new PngEncoder())->toString());
+
+        $this->assertEquals(0, $rotated->getpoint(0, 0)[3]);
+    }
+
+    /**
+     * Quarter turns take the rot90/rot180/rot270 path, which paints no
+     * background and must not gain an alpha band.
+     */
+    public function testRotateSixteenBitSourceQuarterTurn(): void
+    {
+        $image = (new Driver())->decodeImage(self::sixteenBitPng(), [BinaryImageDecoder::class]);
+        $image->modify(new RotateModifier(90, 'fff'));
+
+        $rotated = VipsImage::newFromBuffer($image->encode(new PngEncoder())->toString());
+
+        $this->assertEquals(BandFormat::USHORT, $rotated->format);
+        $this->assertFalse($rotated->hasAlpha());
+    }
+
+    /**
+     * 16-bit RGB PNG, the source shape reported in the issue: three bands,
+     * ushort, RGB16 interpretation.
+     *
+     * @throws VipsException
+     */
+    private static function sixteenBitPng(): string
+    {
+        return VipsImage::black(32, 32, ['bands' => 3])
+            ->add(30000)
+            ->cast(BandFormat::USHORT)
+            ->copy(['interpretation' => Interpretation::RGB16])
+            ->writeToBuffer('.png', ['bitdepth' => 16]);
     }
 }

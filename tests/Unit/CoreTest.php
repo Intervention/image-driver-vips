@@ -181,4 +181,107 @@ class CoreTest extends BaseTestCase
 
         $this->assertNull($core->stashedSource());
     }
+
+    public function testMetaStrippedIsFalseByDefault(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+
+        $this->assertFalse($core->metaStripped());
+    }
+
+    public function testSetMetaStrippedThenGet(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+
+        $this->assertTrue($core->setMetaStripped()->metaStripped());
+        $this->assertFalse($core->setMetaStripped(false)->metaStripped());
+    }
+
+    /**
+     * Unlike the stashed source, the flag has to survive setNative() so it
+     * still reaches the encoder after any modifier that runs after the strip.
+     */
+    public function testSetNativeKeepsMetaStripped(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+        $core->setMetaStripped();
+
+        $core->setNative($this->vipsImage(20, 20, [0, 255, 0]));
+
+        $this->assertTrue($core->metaStripped());
+    }
+
+    public function testCloneKeepsMetaStripped(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+        $core->setMetaStripped();
+
+        $this->assertTrue((clone $core)->metaStripped());
+    }
+
+    public function testSetNativeLeavesThePipelineLazyBelowTheOperationLimit(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+
+        $native = null;
+        for ($i = 1; $i < Core::MAX_CHAINED_OPERATIONS; $i++) {
+            $native = $this->vipsImage(10, 10, [$i, 0, 0]);
+            $core->setNative($native);
+        }
+
+        // untouched: the image handed over is the one that comes back
+        $this->assertSame($native, $core->native());
+    }
+
+    public function testSetNativeRendersThePipelineToMemoryAtTheOperationLimit(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+
+        $native = null;
+        for ($i = 1; $i <= Core::MAX_CHAINED_OPERATIONS; $i++) {
+            $native = $this->vipsImage(10, 10, [$i, 0, 0]);
+            $core->setNative($native);
+        }
+
+        // rendered: a different instance, holding the last image handed over
+        $this->assertNotSame($native, $core->native());
+        $this->assertSame($native->writeToBuffer('.png'), $core->native()->writeToBuffer('.png'));
+    }
+
+    public function testSetNativeStartsANewBudgetAfterRenderingToMemory(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+
+        // spend the whole budget, which renders on the last call
+        for ($i = 1; $i <= Core::MAX_CHAINED_OPERATIONS; $i++) {
+            $core->setNative($this->vipsImage(10, 10, [$i, 0, 0]));
+        }
+
+        // the budget is a period, not a threshold: the next call is lazy again
+        $native = $this->vipsImage(10, 10, [1, 0, 0]);
+        $core->setNative($native);
+
+        $this->assertSame($native, $core->native());
+    }
+
+    public function testChainedModificationsPastTheOperationLimitStillRender(): void
+    {
+        // Without the render-to-memory guard this chain overruns the libvips
+        // worker thread stack and kills the process. Where that happens
+        // depends on the platform's thread stack size: 1000 inserts is well
+        // past the ceiling measured on macOS, between 150 and 200, and well
+        // short of the one on glibc, over 6000. So on Linux CI this asserts
+        // only that rendering mid-chain leaves the result alone.
+        $manager = ImageManager::usingDriver(Driver::class);
+
+        $image = $manager->createImage(16, 16)->fill('0000ff');
+        $watermark = $manager->createImage(4, 4)->fill('ff0000');
+
+        for ($i = 0; $i < 1000; $i++) {
+            $image->insert($watermark);
+        }
+
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(2, 2));
+        $this->assertColor(0, 0, 255, 255, $image->colorAt(10, 10));
+    }
 }

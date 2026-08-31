@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
+use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\ModifierException;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
@@ -18,6 +19,7 @@ class ProfileModifier extends GenericProfileModifier implements SpecializedInter
      * @see Intervention\Image\Interfaces\ModifierInterface::apply()
      *
      * @throws ModifierException
+     * @throws DriverException
      */
     public function apply(ImageInterface $image): ImageInterface
     {

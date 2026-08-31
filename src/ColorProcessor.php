@@ -136,7 +136,7 @@ class ColorProcessor implements ColorProcessorInterface
             Cmyk::class => $this->colorspace->colorFromNormalized($normalized),
             Rgb::class => $this->colorspace->colorFromNormalized($normalized),
             Hsl::class => Rgb::colorFromNormalized($normalized)->toColorspace(Hsl::class),
-            Hsv::class => Rgb::colorFromNormalized($normalized)->toColorspace(Hsv::class),
+            Hsv::class => $this->colorspace->colorFromNormalized($normalized),
             Oklab::class => Rgb::colorFromNormalized($normalized)->toColorspace(Oklab::class),
             Oklch::class => Rgb::colorFromNormalized($normalized)->toColorspace(Oklch::class),
             default => throw new NotSupportedException(
@@ -171,6 +171,8 @@ class ColorProcessor implements ColorProcessorInterface
             Interpretation::RGB16 => new Rgb(),
             Interpretation::GREY16 => new Rgb(),
             Interpretation::MATRIX => new Rgb(),
+            Interpretation::OKLAB => new Oklab(),
+            Interpretation::OKLCH => new Oklch(),
             default => throw new ColorDecoderException(
                 'Unable to transform interpretation "' . $interpretation . '" to colorspace.',
             ),
