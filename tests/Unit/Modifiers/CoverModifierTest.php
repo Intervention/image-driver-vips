@@ -9,6 +9,7 @@ use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Modifiers\RemoveAnimationModifier;
 use Intervention\Image\Drivers\Vips\Modifiers\SliceAnimationModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
+use Jcupitt\Vips\Interpretation;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Intervention\Image\Modifiers\CoverModifier;
 
@@ -49,6 +50,23 @@ final class CoverModifierTest extends BaseTestCase
             array_map(fn(Color $color): string => $color->toHex(), $image->colorsAt(8, 8)->toArray()),
             ['ffa601', 'ffa601', 'ffa601', 'ffa601', '394b63', '394b63', '394b63', '394b63'],
         );
+    }
+
+    /**
+     * A grayscale source goes through the stash like any other. The result
+     * has to be the sRGB image the decoder produced, not the grayscale
+     * thumbnail libvips makes of the source.
+     */
+    public function testModifyGrayscaleKeepsTheDecodedColorspace(): void
+    {
+        $image = $this->readTestImage('grayscale.jpg');
+        $this->assertNotNull($image->core()->stashedSource());
+
+        $image->modify(new CoverModifier(10, 10, 'center'));
+
+        $this->assertSame(Interpretation::SRGB, $image->core()->native()->interpretation);
+        $this->assertSame(4, $image->core()->native()->bands);
+        $this->assertColor(114, 114, 114, 255, $image->colorAt(5, 5), 1);
     }
 
     public function testModifyCmykSourceProducesValidOutput(): void

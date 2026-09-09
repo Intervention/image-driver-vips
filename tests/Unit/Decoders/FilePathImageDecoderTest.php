@@ -74,6 +74,17 @@ final class FilePathImageDecoderTest extends BaseTestCase
         $this->assertStringEndsWith('test.jpg', $stash->path);
     }
 
+    /**
+     * The decoder converts a grayscale source to sRGB. It is stashed all the
+     * same, whoever reopens the stash replays the conversion.
+     */
+    public function testDecodeStashesPathSourceForGrayscale(): void
+    {
+        $image = $this->decoder->decode(self::getTestResourcePath('grayscale.jpg'));
+
+        $this->assertInstanceOf(PathSource::class, $image->core()->stashedSource());
+    }
+
     public function testDecodeDoesNotStashWhenAutoOriented(): void
     {
         $image = $this->decoder->decode(self::getTestResourcePath('orientation.jpg'));

@@ -7,6 +7,7 @@ namespace Intervention\Image\Drivers\Vips\Decoders;
 use Intervention\Image\Drivers\SpecializableDecoder;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Modifiers\OrientModifier;
+use Intervention\Image\Drivers\Vips\Traits\CanNormalizeSource;
 use Intervention\Image\Exceptions\ImageDecoderException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Exceptions\ModifierException;
@@ -17,10 +18,11 @@ use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\MediaType;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Image as VipsImage;
-use Jcupitt\Vips\Interpretation;
 
 class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInterface
 {
+    use CanNormalizeSource;
+
     /**
      * {@inheritdoc}
      *
@@ -50,12 +52,10 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
             throw new InvalidArgumentException('Image source must be of type ' . VipsImage::class);
         }
 
-        if (in_array($input->interpretation, [Interpretation::B_W, Interpretation::GREY16])) {
-            $input = $input->icc_transform(Interpretation::SRGB); // normalize to srgb
-        }
-
-        if ($input->interpretation === Interpretation::SRGB && $input->bands === 3) {
-            $input = $input->bandjoin_const(255); // add alpha channel
+        try {
+            $input = $this->normalizeSource($input);
+        } catch (VipsException $e) {
+            throw new ImageDecoderException('Failed to normalize decoded image', previous: $e);
         }
 
         // build image instance
@@ -146,20 +146,15 @@ class NativeObjectDecoder extends SpecializableDecoder implements SpecializedInt
      * Return true if the source is in a state where we can safely stash
      * it for the resize-family modifiers' thumbnail* fast path.
      *
-     * Skip stashing when the parent decoder will mutate the in-memory
-     * VipsImage in a way that makes the stashed source no longer reflect
-     * the resulting image (auto-orient, BW/GREY16 to SRGB icc_transform).
-     * The bandjoin_const(255) for SRGB-3-band sources is OK to stash
-     * because resize modifiers can re-apply the same alpha if needed.
+     * Skip stashing when the decoder auto-orients the image, a reopened
+     * source would come back unrotated. The colour normalisation the decoder
+     * applies (grayscale to sRGB, alpha band) is no obstacle, whoever reopens
+     * the stash replays it, see CanNormalizeSource.
      *
      * @throws StateException
      */
     protected function isStashableSource(VipsImage $vipsImage): bool
     {
-        if (in_array($vipsImage->interpretation, [Interpretation::B_W, Interpretation::GREY16], true)) {
-            return false;
-        }
-
         if (
             $this->driver()->config()->autoOrientation === true
             && ($this->exifRotation($vipsImage) ?? 1) > 1

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Modifiers;
 
 use Intervention\Image\Drivers\Vips\ColorProcessor;
-use Intervention\Image\Drivers\Vips\Traits\CanNormalizeBands;
+use Intervention\Image\Drivers\Vips\Traits\CanNormalizeSource;
 use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\ModifierException;
 use Intervention\Image\Exceptions\NotSupportedException;
@@ -16,7 +16,7 @@ use Jcupitt\Vips\Exception as VipsException;
 
 class ColorspaceModifier extends GenericColorspaceModifier implements SpecializedInterface
 {
-    use CanNormalizeBands;
+    use CanNormalizeSource;
 
     /**
      * {@inheritdoc}
@@ -32,7 +32,7 @@ class ColorspaceModifier extends GenericColorspaceModifier implements Specialize
         $interpretation = ColorProcessor::colorspaceToInterpretation($this->targetColorspace());
 
         try {
-            $native = $this->normalizeBands(
+            $native = $this->normalizeSource(
                 $image->core()->native()->colourspace($interpretation),
             );
         } catch (VipsException $e) {

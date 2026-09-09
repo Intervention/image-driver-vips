@@ -5,17 +5,24 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Vips\Tests\Unit;
 
 use Intervention\Image\Drivers\Vips\Core;
+use Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Frame;
 use Intervention\Image\Drivers\Vips\Source\BufferSource;
 use Intervention\Image\Drivers\Vips\Source\PathSource;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
+use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Interfaces\AnimationFactoryInterface;
+use Intervention\Image\Interfaces\CoreInterface;
 use Intervention\Image\Interfaces\FrameInterface;
+use Jcupitt\Vips\Config;
+use Jcupitt\Vips\BandFormat;
 use Jcupitt\Vips\Image as VipsImage;
+use Jcupitt\Vips\Interpretation;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 #[CoversClass(Core::class)]
 class CoreTest extends BaseTestCase
@@ -94,6 +101,34 @@ class CoreTest extends BaseTestCase
         $this->assertInstanceOf(Core::class, $result);
     }
 
+    /**
+     * A still image carries no loop field. GD and Imagick report 0 there,
+     * so does this core.
+     */
+    public function testLoopsIsZeroForAStillImage(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+
+        $this->assertSame(0, $core->loops());
+    }
+
+    public function testImageLoopsIsZeroForAStillImage(): void
+    {
+        $this->assertSame(0, $this->readTestImage('test.jpg')->loops());
+        $this->assertSame(0, ImageManager::usingDriver(Driver::class)->createImage(10, 10)->loops());
+    }
+
+    /**
+     * The field is absent until set, the guard must not shadow the value
+     * once it is there.
+     */
+    public function testSetLoopsOnAStillImageThenGet(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+
+        $this->assertSame(7, $core->setLoops(7)->loops());
+    }
+
     public function testHas(): void
     {
         $this->assertTrue($this->core->has(0));
@@ -130,6 +165,17 @@ class CoreTest extends BaseTestCase
             $this->assertInstanceOf(FrameInterface::class, $frame);
             $this->assertEquals(($i + 1) * .25, $frame->delay());
         }
+    }
+
+    /**
+     * frame() extracts with extract_area(), which records the extract origin
+     * in the vips image's yoffset. That is not the frame's offset, GD and
+     * Imagick report 0 here.
+     */
+    public function testFrameOffsetIsZero(): void
+    {
+        $this->assertSame(0, $this->core->frame(1)->offsetLeft());
+        $this->assertSame(0, $this->core->frame(1)->offsetTop());
     }
 
     public function testFrameDelay(): void
@@ -182,6 +228,30 @@ class CoreTest extends BaseTestCase
         $this->assertNull($core->stashedSource());
     }
 
+    public function testEmptyClearsTheStashedSource(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+        $core->setStashedSource(new PathSource($this->getTestResourcePath('test.jpg')));
+
+        $core->empty();
+
+        $this->assertNull($core->stashedSource());
+    }
+
+    /**
+     * Left in place, the stash would let a clone bring the emptied source back.
+     */
+    public function testCloneOfEmptiedCoreIsEmpty(): void
+    {
+        $image = $this->readTestImage('test.jpg');
+        $image->core()->empty();
+
+        $clone = clone $image;
+
+        $this->assertSame(1, $clone->core()->native()->width);
+        $this->assertSame(1, $clone->core()->native()->height);
+    }
+
     public function testMetaStrippedIsFalseByDefault(): void
     {
         $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
@@ -217,6 +287,201 @@ class CoreTest extends BaseTestCase
         $core->setMetaStripped();
 
         $this->assertTrue((clone $core)->metaStripped());
+    }
+
+    public function testCloneGetsItsOwnMetaCollection(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+        $clone = clone $core;
+
+        $clone->meta()->set('foo', 'bar');
+
+        $this->assertFalse($core->meta()->has('foo'));
+    }
+
+    /**
+     * The decoders open the source for a single sequential pass. A clone that
+     * shared that pipeline would leave only one of the two images encodable,
+     * the other fails with an out of order read.
+     */
+    public function testCloneOfDecodedImageEncodesAlongsideTheOriginal(): void
+    {
+        $image = ImageManager::usingDriver(Driver::class)->decodeBinary($this->getTestResourceData('test.jpg'));
+        $clone = clone $image;
+
+        $encodedClone = $clone->encodeUsingFileExtension('jpg');
+        $encodedImage = $image->encodeUsingFileExtension('jpg');
+
+        $this->assertSame((string) $encodedClone, (string) $encodedImage);
+    }
+
+    public function testCloneOfImageDecodedFromPathEncodesAlongsideTheOriginal(): void
+    {
+        $image = $this->readTestImage('test.jpg');
+        $clone = clone $image;
+
+        $encodedClone = $clone->encodeUsingFileExtension('jpg');
+        $encodedImage = $image->encodeUsingFileExtension('jpg');
+
+        $this->assertSame((string) $encodedClone, (string) $encodedImage);
+    }
+
+    /**
+     * The decoder adds an alpha band to a 3-band sRGB source, the clone has
+     * to carry it too.
+     */
+    public function testCloneOfDecodedImageKeepsTheAlphaBand(): void
+    {
+        $image = $this->readTestImage('test.jpg');
+        $clone = clone $image;
+
+        $this->assertSame(4, $image->core()->native()->bands);
+        $this->assertSame(4, $clone->core()->native()->bands);
+    }
+
+    /**
+     * The decoder converts a grayscale source to sRGB. The clone has to come
+     * back the same way, and encodable alongside the original.
+     */
+    #[DataProvider('grayscaleSourcesProvider')]
+    public function testCloneOfDecodedGrayscaleImageEncodesAlongsideTheOriginal(string $filename): void
+    {
+        $image = $this->readTestImage($filename);
+        $clone = clone $image;
+
+        $this->assertSame(Interpretation::SRGB, $clone->core()->native()->interpretation);
+        $this->assertSame(4, $clone->core()->native()->bands);
+
+        $encodedClone = $clone->encodeUsingFileExtension('png');
+        $encodedImage = $image->encodeUsingFileExtension('png');
+
+        $this->assertSame((string) $encodedClone, (string) $encodedImage);
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function grayscaleSourcesProvider(): array
+    {
+        return [
+            'jpeg' => ['grayscale.jpg'],
+            'png' => ['grayscale.png'],
+            'png with alpha' => ['grayscale-alpha.png'],
+        ];
+    }
+
+    public function testCloneOfDecodedGrey16ImageEncodesAlongsideTheOriginal(): void
+    {
+        $bytes = VipsImage::black(8, 8)
+            ->add(30000)
+            ->cast(BandFormat::USHORT)
+            ->copy(['interpretation' => Interpretation::GREY16])
+            ->writeToBuffer('.png');
+        $this->assertSame(Interpretation::GREY16, VipsImage::newFromBuffer($bytes)->interpretation);
+
+        $image = ImageManager::usingDriver(Driver::class)->decodeBinary($bytes);
+        $clone = clone $image;
+
+        $this->assertSame($image->core()->native()->interpretation, $clone->core()->native()->interpretation);
+        $this->assertSame($image->core()->native()->bands, $clone->core()->native()->bands);
+
+        $encodedClone = $clone->encodeUsingFileExtension('png');
+        $encodedImage = $image->encodeUsingFileExtension('png');
+
+        $this->assertSame((string) $encodedClone, (string) $encodedImage);
+    }
+
+    public function testCloneOfDecodedAnimationKeepsItsFrames(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $clone = clone $image;
+
+        $this->assertSame(8, $image->count());
+        $this->assertSame(8, $clone->count());
+        // n-pages counts the pages of the file whether they were loaded or
+        // not, the height is what tells the frames apart
+        $this->assertSame($image->core()->native()->height, $clone->core()->native()->height);
+    }
+
+    public function testCloneOfAnimationDecodedFromBinaryKeepsItsFrames(): void
+    {
+        $image = ImageManager::usingDriver(Driver::class)->decodeBinary($this->getTestResourceData('animation.gif'));
+        $clone = clone $image;
+
+        $this->assertSame(8, $clone->count());
+        $this->assertSame($image->core()->native()->height, $clone->core()->native()->height);
+    }
+
+    public function testModifyingTheCloneLeavesTheOriginalUntouched(): void
+    {
+        $image = $this->readTestImage('test.jpg');
+        $clone = clone $image;
+
+        $clone->flip();
+
+        $original = (string) $image->encodeUsingFileExtension('png');
+        $this->assertSame((string) $this->readTestImage('test.jpg')->encodeUsingFileExtension('png'), $original);
+        $this->assertNotSame((string) $clone->encodeUsingFileExtension('png'), $original);
+    }
+
+    public function testCloneThrowsWhenTheSourceFileIsGone(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'vips');
+        $this->assertNotFalse($path);
+        copy($this->getTestResourcePath('test.jpg'), $path);
+        $image = (new Driver())->decodeImage($path, [FilePathImageDecoder::class]);
+        unlink($path);
+
+        $this->expectException(DriverException::class);
+        clone $image;
+    }
+
+    /**
+     * The clone keeps the stash so the resize modifiers still get their
+     * shrink on load path.
+     */
+    public function testCloneKeepsTheStashedSource(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+        $stash = new PathSource($this->getTestResourcePath('test.jpg'));
+        $core->setStashedSource($stash);
+
+        $this->assertSame($stash, (clone $core)->stashedSource());
+    }
+
+    /**
+     * Without a stash the clone shares the vips image, which is fine once it
+     * has been rendered into memory.
+     */
+    public function testCloneOfImageRenderedInMemoryEncodesAlongsideTheOriginal(): void
+    {
+        $image = $this->readTestImage('test.jpg')->flip();
+        $this->assertNull($image->core()->stashedSource());
+        $clone = clone $image;
+
+        $encodedClone = $clone->encodeUsingFileExtension('jpg');
+        $encodedImage = $image->encodeUsingFileExtension('jpg');
+
+        $this->assertSame((string) $encodedClone, (string) $encodedImage);
+    }
+
+    public function testSetLoopsOnCloneLeavesTheOriginalUntouched(): void
+    {
+        $this->assertSame(0, $this->core->loops());
+        $clone = clone $this->core;
+
+        $clone->setLoops(7);
+
+        $this->assertSame(7, $clone->loops());
+        $this->assertSame(0, $this->core->loops());
+    }
+
+    public function testCloneOfDecodedAnimationKeepsTheLoopCountSetOnTheOriginal(): void
+    {
+        $image = $this->readTestImage('animation.gif');
+        $image->setLoops(5);
+
+        $this->assertSame(5, (clone $image)->loops());
     }
 
     public function testSetNativeLeavesThePipelineLazyBelowTheOperationLimit(): void
@@ -283,5 +548,136 @@ class CoreTest extends BaseTestCase
 
         $this->assertColor(255, 0, 0, 255, $image->colorAt(2, 2));
         $this->assertColor(0, 0, 255, 255, $image->colorAt(10, 10));
+    }
+
+    /**
+     * arrayjoin() comes out of the libvips operation cache: the same frames
+     * give the same image again, and the fields set on it would reach every
+     * core built from them.
+     */
+    public function testCreateFromFramesLeavesAnEarlierCoreAlone(): void
+    {
+        $this->pinOperationCache();
+        $frames = [
+            new Frame($this->vipsImage(10, 10, [255, 0, 0]), 0.1),
+            new Frame($this->vipsImage(10, 10, [0, 255, 0]), 0.1),
+        ];
+        $core = Core::createFromFrames($frames, 3);
+
+        $other = Core::createFromFrames($frames, 9);
+
+        $this->assertSame(9, $other->loops());
+        $this->assertSame(3, $core->loops());
+    }
+
+    /**
+     * Same natives, other delays: the frames differ, the arrayjoin() call
+     * does not.
+     */
+    public function testCreateFromFramesWithOtherDelaysLeavesAnEarlierCoreAlone(): void
+    {
+        $this->pinOperationCache();
+        $red = $this->vipsImage(10, 10, [255, 0, 0]);
+        $green = $this->vipsImage(10, 10, [0, 255, 0]);
+        $core = Core::createFromFrames([new Frame($red, 0.1), new Frame($green, 0.1)]);
+
+        $other = Core::createFromFrames([new Frame($red, 0.5), new Frame($green, 0.5)]);
+
+        $this->assertEquals(0.5, $other->frame(0)->delay());
+        $this->assertEquals(0.1, $core->frame(0)->delay());
+    }
+
+    /**
+     * The extracted area comes out of the operation cache too, a later
+     * extraction of the same area would get the fields frame() sets.
+     */
+    public function testFrameLeavesTheExtractedAreaAlone(): void
+    {
+        $this->pinOperationCache();
+        $native = $this->core->native();
+        $height = $native->get('page-height');
+        $this->core->frame(1);
+
+        $area = $native->extract_area(0, $height, $native->width, $height);
+
+        $this->assertSame(3, $area->get('n-pages'));
+        $this->assertSame([300, 300, 300], $area->get('delay'));
+    }
+
+    /**
+     * The rendered image inherits the sequential claim of its source. Left
+     * there, the next check renders the image all over again.
+     */
+    public function testEnsureInMemoryDropsTheSequentialClaimOnceRendered(): void
+    {
+        $core = $this->readTestImage('test.jpg')->core();
+        $this->assertInstanceOf(Core::class, $core);
+        $this->assertNotSame(0, $core->native()->getType('vips-sequential'));
+
+        Core::ensureInMemory($core);
+        $rendered = $core->native();
+
+        $this->assertSame(0, $rendered->getType('vips-sequential'));
+        Core::ensureInMemory($core);
+        $this->assertSame($rendered, $core->native());
+    }
+
+    /**
+     * An operation chained on a rendered image inherits its fields. With the
+     * claim gone, the chain is left lazy instead of being rendered again.
+     */
+    public function testEnsureInMemoryDoesNotRenderAgainAfterAnOperation(): void
+    {
+        $core = $this->readTestImage('test.jpg')->core();
+        $this->assertInstanceOf(Core::class, $core);
+        Core::ensureInMemory($core);
+
+        $core->setNative($core->native()->flip('horizontal'));
+        $flipped = $core->native();
+        Core::ensureInMemory($core);
+
+        $this->assertSame(0, $flipped->getType('vips-sequential'));
+        $this->assertSame($flipped, $core->native());
+    }
+
+    public function testEnsureInMemoryLeavesAnImageWithoutSequentialClaimAlone(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+        $native = $core->native();
+
+        Core::ensureInMemory($core);
+
+        $this->assertSame($native, $core->native());
+    }
+
+    public function testEnsureInMemoryRejectsACoreWithoutVipsImage(): void
+    {
+        $core = $this->createStub(CoreInterface::class);
+        $core->method('native')->willReturn('not a vips image');
+
+        $this->expectException(DriverException::class);
+        Core::ensureInMemory($core);
+    }
+
+    public function testFrameDropsTheSequentialClaimOnceRendered(): void
+    {
+        $core = $this->readTestImage('animation.gif')->core();
+        $this->assertInstanceOf(Core::class, $core);
+        $this->assertNotSame(0, $core->native()->getType('vips-sequential'));
+
+        $core->frame(0);
+
+        $this->assertSame(0, $core->native()->getType('vips-sequential'));
+    }
+
+    /**
+     * The tests on the operation cache rely on libvips handing the same
+     * image back for the same call. With the cache switched off they would
+     * pass on the very code they guard. 1000 operations is the libvips
+     * default.
+     */
+    private function pinOperationCache(): void
+    {
+        Config::cacheSetMax(1000);
     }
 }

@@ -63,4 +63,36 @@ final class FrameTest extends TestCase
     {
         $this->assertEquals(12, $this->testFrame()->setDelay(12)->delay());
     }
+
+    public function testOffsetIsZeroByDefault(): void
+    {
+        $frame = $this->testFrame();
+
+        $this->assertSame(0, $frame->offsetLeft());
+        $this->assertSame(0, $frame->offsetTop());
+    }
+
+    public function testSetOffsetThenGet(): void
+    {
+        $frame = $this->testFrame()->setOffset(11, 22);
+
+        $this->assertSame(11, $frame->offsetLeft());
+        $this->assertSame(22, $frame->offsetTop());
+    }
+
+    /**
+     * The offset lives on the frame. The vips image is left alone, for a
+     * single-frame core it is the core's own. Distinct dimensions on purpose,
+     * libvips hands the same image back for identical black() calls.
+     */
+    public function testSetOffsetLeavesTheVipsImageUntouched(): void
+    {
+        $vipsImage = VipsImage::black(5, 4);
+        $frame = new Frame($vipsImage);
+        $fields = $vipsImage->getFields();
+
+        $frame->setOffset(11, 22);
+
+        $this->assertSame($fields, $vipsImage->getFields());
+    }
 }

@@ -99,4 +99,15 @@ final class BinaryImageDecoderTest extends BaseTestCase
         $this->assertInstanceOf(BufferSource::class, $stash);
         $this->assertSame($bytes, $stash->buffer);
     }
+
+    /**
+     * The decoder converts a grayscale source to sRGB. It is stashed all the
+     * same, whoever reopens the stash replays the conversion.
+     */
+    public function testDecodeStashesBufferSourceForGrayscale(): void
+    {
+        $image = $this->decoder->decode($this->getTestResourceData('grayscale.jpg'));
+
+        $this->assertInstanceOf(BufferSource::class, $image->core()->stashedSource());
+    }
 }

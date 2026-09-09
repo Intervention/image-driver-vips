@@ -8,7 +8,7 @@ use Intervention\Image\Drivers\Vips\ColorProcessor;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Source\BufferSource;
 use Intervention\Image\Drivers\Vips\Source\PathSource;
-use Intervention\Image\Drivers\Vips\Traits\CanNormalizeBands;
+use Intervention\Image\Drivers\Vips\Traits\CanNormalizeSource;
 use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Interfaces\ColorspaceInterface;
@@ -22,7 +22,7 @@ use Jcupitt\Vips\Interpretation;
 
 class ResizeModifier extends GenericResizeModifier implements SpecializedInterface
 {
-    use CanNormalizeBands;
+    use CanNormalizeSource;
 
     /**
      * {@inheritdoc}
@@ -41,7 +41,7 @@ class ResizeModifier extends GenericResizeModifier implements SpecializedInterfa
 
         if ($stash !== null && !$image->isAnimated()) {
             $core->setNative(
-                $this->normalizeBands($this->thumbnailFromStash(
+                $this->normalizeSource($this->thumbnailFromStash(
                     $stash,
                     $resizeTo,
                     $image->colorspace(),

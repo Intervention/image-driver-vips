@@ -1,6 +1,6 @@
 FROM php:8.3-cli
 
-ARG LIBVIPS_VERSION=8.18.1
+ARG LIBVIPS_VERSION=8.18.6
 
 # install dependencies
 RUN apt update \

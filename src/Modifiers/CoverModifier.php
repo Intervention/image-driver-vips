@@ -9,7 +9,7 @@ use Intervention\Image\Drivers\Vips\ColorProcessor;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Source\BufferSource;
 use Intervention\Image\Drivers\Vips\Source\PathSource;
-use Intervention\Image\Drivers\Vips\Traits\CanNormalizeBands;
+use Intervention\Image\Drivers\Vips\Traits\CanNormalizeSource;
 use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Exceptions\ModifierException;
@@ -26,7 +26,7 @@ use Jcupitt\Vips\Interpretation;
 
 class CoverModifier extends GenericCoverModifier implements SpecializedInterface
 {
-    use CanNormalizeBands;
+    use CanNormalizeSource;
 
     /**
      * {@inheritdoc}
@@ -57,7 +57,7 @@ class CoverModifier extends GenericCoverModifier implements SpecializedInterface
         // Fastest path: stash-based thumbnail* (combines load + resize + crop)
         if ($stash !== null && $isCenter && !$image->isAnimated()) {
             try {
-                $native = $this->normalizeBands(
+                $native = $this->normalizeSource(
                     $this->coverFromStash($stash, $resize, $colorspace),
                 );
             } catch (VipsException $e) {

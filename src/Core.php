@@ -8,6 +8,7 @@ use ArrayIterator;
 use Intervention\Image\Collection;
 use Intervention\Image\Drivers\Vips\Source\BufferSource;
 use Intervention\Image\Drivers\Vips\Source\PathSource;
+use Intervention\Image\Drivers\Vips\Traits\CanNormalizeSource;
 use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\ImageException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
@@ -16,6 +17,7 @@ use Intervention\Image\Interfaces\CollectionInterface;
 use Intervention\Image\Interfaces\CoreInterface;
 use Intervention\Image\Interfaces\FrameInterface;
 use Iterator;
+use Jcupitt\Vips\Access;
 use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Image as VipsImage;
 use Traversable;
@@ -25,6 +27,8 @@ use Traversable;
  */
 class Core implements CoreInterface, Iterator
 {
+    use CanNormalizeSource;
+
     /**
      * Number of operations that may be chained onto the image before its
      * pipeline is rendered into memory.
@@ -47,7 +51,9 @@ class Core implements CoreInterface, Iterator
      *
      * This counts calls, not libvips nodes, so it is a bound rather than a
      * measurement. A modifier that chains several nodes per call spends the
-     * budget faster than one node per call.
+     * budget faster than one node per call. The frame round trip of add()
+     * and slice() is the deepest, four nodes per call: extract_area() and
+     * arrayjoin(), each followed by the header copy their fields go on.
      */
     public const MAX_CHAINED_OPERATIONS = 32;
 
@@ -82,7 +88,11 @@ class Core implements CoreInterface, Iterator
         }
 
         try {
-            $vipsImage = VipsImage::arrayjoin($natives, ['across' => 1]);
+            // the joined image comes out of the libvips operation cache, the
+            // same frames give the same image again. Set the fields on a
+            // private copy of the header, or they reach every core built from
+            // these frames
+            $vipsImage = VipsImage::arrayjoin($natives, ['across' => 1])->copy();
             $vipsImage->set('delay', $delay);
             $vipsImage->set('loop', $loops);
             $vipsImage->set('n-pages', count($frames));
@@ -188,12 +198,7 @@ class Core implements CoreInterface, Iterator
         $this->stashedSource = null;
 
         if (++$this->chainedOperations >= static::MAX_CHAINED_OPERATIONS) {
-            try {
-                $this->vipsImage = $this->vipsImage->copyMemory();
-            } catch (VipsException $e) {
-                throw new DriverException('Failed to render image pipeline into memory', previous: $e);
-            }
-
+            $this->vipsImage = self::renderToMemory($this->vipsImage);
             $this->chainedOperations = 0;
         }
 
@@ -259,15 +264,17 @@ class Core implements CoreInterface, Iterator
      */
     public static function ensureInMemory(CoreInterface $core): CoreInterface
     {
-        if (!in_array('vips-sequential', $core->native()->getFields())) {
-            return $core;
+        $native = $core->native();
+
+        if (!$native instanceof VipsImage) {
+            throw new DriverException(
+                'Failed to render image pipeline into memory, core is not backed by ' . VipsImage::class,
+            );
         }
 
-        if (false === (bool) $core->native()->get('vips-sequential')) {
-            return $core;
+        if (self::isSequential($native)) {
+            $core->setNative(self::renderToMemory($native));
         }
-
-        $core->setNative($core->native()->copyMemory());
 
         return $core;
     }
@@ -324,11 +331,8 @@ class Core implements CoreInterface, Iterator
         }
 
         try {
-            $sequential = in_array('vips-sequential', $this->vipsImage->getFields()) ?
-                $this->vipsImage->get('vips-sequential') : null;
-
-            if ($sequential) {
-                $this->vipsImage = $this->vipsImage->copyMemory();
+            if (self::isSequential($this->vipsImage)) {
+                $this->vipsImage = self::renderToMemory($this->vipsImage);
             }
 
             $delay = in_array('delay', $this->vipsImage->getFields()) ?
@@ -337,13 +341,15 @@ class Core implements CoreInterface, Iterator
             $height = $this->vipsImage->getType('page-height') === 0 ?
                 $this->vipsImage->height : $this->vipsImage->get('page-height');
 
-            // extract only certain frame
+            // extract only certain frame, on a private copy of the header: the
+            // extracted area comes out of the libvips operation cache and a
+            // later extraction of the same area would get the fields set below
             $vipsImage = $this->vipsImage->extract_area(
                 0,
                 $height * $position,
                 $this->vipsImage->width,
                 $height,
-            );
+            )->copy();
 
             $vipsImage->set('n-pages', 1);
             if (!is_null($delay)) {
@@ -386,6 +392,12 @@ class Core implements CoreInterface, Iterator
     public function loops(): int
     {
         try {
+            // an image decoded from a still source carries no loop field, GD
+            // and Imagick report 0 there
+            if ($this->vipsImage->getType('loop') === 0) {
+                return 0;
+            }
+
             return (int) $this->vipsImage->get('loop');
         } catch (VipsException $e) {
             throw new DriverException('Failed to load loop count', previous: $e);
@@ -402,10 +414,18 @@ class Core implements CoreInterface, Iterator
     public function setLoops(int $loops): CoreInterface
     {
         try {
-            $this->vipsImage->set('loop', $loops);
+            // work on a copy, the vips image is shared with any clone of the
+            // image and setting the field in place would change both
+            $native = $this->vipsImage->copy();
+            $native->set('loop', $loops);
         } catch (VipsException $e) {
             throw new DriverException('Failed to set loop count', previous: $e);
         }
+
+        // this also clears the stashed source, a clone reopens it and would
+        // otherwise come back with the loop count of the file
+        // @phpstan-ignore missingType.checkedException
+        $this->setNative($native);
 
         return $this;
     }
@@ -486,10 +506,21 @@ class Core implements CoreInterface, Iterator
      * {@inheritdoc}
      *
      * @see CollectionInterface::empty()
+     *
+     * @throws DriverException
      */
     public function empty(): CollectionInterface
     {
-        $this->vipsImage = VipsImage::black(1, 1)->cast($this->vipsImage->format);
+        try {
+            $empty = VipsImage::black(1, 1)->cast($this->vipsImage->format);
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to empty image core', previous: $e);
+        }
+
+        // this also clears the stashed source, a clone reopens it and would
+        // otherwise bring the emptied source back
+        // @phpstan-ignore missingType.checkedException
+        $this->setNative($empty);
 
         return $this;
     }
@@ -592,6 +623,77 @@ class Core implements CoreInterface, Iterator
     }
 
     /**
+     * Reopen the stashed source the way the decoder loaded it: the same
+     * option string, sequential access, and the decoder's normalisation on
+     * top.
+     *
+     * @throws DriverException
+     */
+    private function reopenStashedSource(PathSource|BufferSource $source): VipsImage
+    {
+        try {
+            $vipsImage = $source instanceof PathSource
+                ? VipsImage::newFromFile($source->pathWithOptions(), ['access' => Access::SEQUENTIAL])
+                : VipsImage::newFromBuffer($source->buffer, $source->optionString, ['access' => Access::SEQUENTIAL]);
+
+            return $this->normalizeSource($vipsImage);
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to reopen the image source for the clone', previous: $e);
+        }
+    }
+
+    /**
+     * Whether the given vips image still has to be read in a single
+     * sequential pass, the way the decoders load it.
+     *
+     * @throws DriverException
+     */
+    private static function isSequential(VipsImage $vipsImage): bool
+    {
+        if ($vipsImage->getType('vips-sequential') === 0) {
+            return false;
+        }
+
+        try {
+            return (bool) $vipsImage->get('vips-sequential');
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to read the sequential flag of the image', previous: $e);
+        }
+    }
+
+    /**
+     * Render the pipeline behind the given vips image into memory and drop
+     * the sequential claim from the result.
+     *
+     * The rendered image carries the vips-sequential field of its source
+     * along. That is a stale claim on an image that serves any request from
+     * memory. Left in place, the next check renders the image all over again
+     * and every operation chained on top inherits it. The field is removed
+     * from a copy of the header, never from the rendered image itself:
+     * copyMemory() hands the source back as it is when that one is already
+     * in memory, and it may be shared.
+     *
+     * @throws DriverException
+     */
+    private static function renderToMemory(VipsImage $vipsImage): VipsImage
+    {
+        try {
+            $rendered = $vipsImage->copyMemory();
+
+            if ($rendered->getType('vips-sequential') === 0) {
+                return $rendered;
+            }
+
+            $rendered = $rendered->copy();
+            $rendered->remove('vips-sequential');
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to render image pipeline into memory', previous: $e);
+        }
+
+        return $rendered;
+    }
+
+    /**
      * Show debug info for the current image
      *
      * @throws DriverException
@@ -617,5 +719,33 @@ class Core implements CoreInterface, Iterator
         }
 
         return $debug;
+    }
+
+    /**
+     * Clone instance
+     *
+     * Operations on a vips image return new images and the core itself never
+     * writes to the one it holds, so sharing it with the clone is fine on
+     * its own. What is not is the pipeline behind a decoded image: the
+     * decoders open the source for a single sequential pass, and only one of
+     * the two images could walk it. While the stash is in place the clone
+     * reopens the source instead, a fresh pipeline at no raster cost. That
+     * is a header read, or for a buffer a copy of the encoded bytes into
+     * memory libvips owns, and it can fail: a file that went away since the
+     * decode throws here rather than at the encode. Once the stash is gone
+     * the vips image is shared, and if it is still sequential the first of
+     * the two images to be evaluated consumes it. Core::ensureInMemory()
+     * before cloning renders it once for both.
+     *
+     * @throws DriverException
+     */
+    public function __clone(): void
+    {
+        $this->meta = clone $this->meta;
+
+        if ($this->stashedSource !== null) {
+            $this->vipsImage = $this->reopenStashedSource($this->stashedSource);
+            $this->chainedOperations = 0;
+        }
     }
 }
