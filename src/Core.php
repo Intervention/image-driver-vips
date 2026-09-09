@@ -198,12 +198,7 @@ class Core implements CoreInterface, Iterator
         $this->stashedSource = null;
 
         if (++$this->chainedOperations >= static::MAX_CHAINED_OPERATIONS) {
-            try {
-                $this->vipsImage = $this->vipsImage->copyMemory();
-            } catch (VipsException $e) {
-                throw new DriverException('Failed to render image pipeline into memory', previous: $e);
-            }
-
+            $this->vipsImage = self::renderToMemory($this->vipsImage);
             $this->chainedOperations = 0;
         }
 
@@ -269,15 +264,17 @@ class Core implements CoreInterface, Iterator
      */
     public static function ensureInMemory(CoreInterface $core): CoreInterface
     {
-        if (!in_array('vips-sequential', $core->native()->getFields())) {
-            return $core;
+        $native = $core->native();
+
+        if (!$native instanceof VipsImage) {
+            throw new DriverException(
+                'Failed to render image pipeline into memory, core is not backed by ' . VipsImage::class,
+            );
         }
 
-        if (false === (bool) $core->native()->get('vips-sequential')) {
-            return $core;
+        if (self::isSequential($native)) {
+            $core->setNative(self::renderToMemory($native));
         }
-
-        $core->setNative($core->native()->copyMemory());
 
         return $core;
     }
@@ -334,11 +331,8 @@ class Core implements CoreInterface, Iterator
         }
 
         try {
-            $sequential = in_array('vips-sequential', $this->vipsImage->getFields()) ?
-                $this->vipsImage->get('vips-sequential') : null;
-
-            if ($sequential) {
-                $this->vipsImage = $this->vipsImage->copyMemory();
+            if (self::isSequential($this->vipsImage)) {
+                $this->vipsImage = self::renderToMemory($this->vipsImage);
             }
 
             $delay = in_array('delay', $this->vipsImage->getFields()) ?
@@ -646,6 +640,57 @@ class Core implements CoreInterface, Iterator
         } catch (VipsException $e) {
             throw new DriverException('Failed to reopen the image source for the clone', previous: $e);
         }
+    }
+
+    /**
+     * Whether the given vips image still has to be read in a single
+     * sequential pass, the way the decoders load it.
+     *
+     * @throws DriverException
+     */
+    private static function isSequential(VipsImage $vipsImage): bool
+    {
+        if ($vipsImage->getType('vips-sequential') === 0) {
+            return false;
+        }
+
+        try {
+            return (bool) $vipsImage->get('vips-sequential');
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to read the sequential flag of the image', previous: $e);
+        }
+    }
+
+    /**
+     * Render the pipeline behind the given vips image into memory and drop
+     * the sequential claim from the result.
+     *
+     * The rendered image carries the vips-sequential field of its source
+     * along. That is a stale claim on an image that serves any request from
+     * memory. Left in place, the next check renders the image all over again
+     * and every operation chained on top inherits it. The field is removed
+     * from a copy of the header, never from the rendered image itself:
+     * copyMemory() hands the source back as it is when that one is already
+     * in memory, and it may be shared.
+     *
+     * @throws DriverException
+     */
+    private static function renderToMemory(VipsImage $vipsImage): VipsImage
+    {
+        try {
+            $rendered = $vipsImage->copyMemory();
+
+            if ($rendered->getType('vips-sequential') === 0) {
+                return $rendered;
+            }
+
+            $rendered = $rendered->copy();
+            $rendered->remove('vips-sequential');
+        } catch (VipsException $e) {
+            throw new DriverException('Failed to render image pipeline into memory', previous: $e);
+        }
+
+        return $rendered;
     }
 
     /**

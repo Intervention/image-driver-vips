@@ -15,6 +15,7 @@ use Intervention\Image\Exceptions\DriverException;
 use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Interfaces\AnimationFactoryInterface;
+use Intervention\Image\Interfaces\CoreInterface;
 use Intervention\Image\Interfaces\FrameInterface;
 use Jcupitt\Vips\Config;
 use Jcupitt\Vips\BandFormat;
@@ -601,6 +602,72 @@ class CoreTest extends BaseTestCase
 
         $this->assertSame(3, $area->get('n-pages'));
         $this->assertSame([300, 300, 300], $area->get('delay'));
+    }
+
+    /**
+     * The rendered image inherits the sequential claim of its source. Left
+     * there, the next check renders the image all over again.
+     */
+    public function testEnsureInMemoryDropsTheSequentialClaimOnceRendered(): void
+    {
+        $core = $this->readTestImage('test.jpg')->core();
+        $this->assertInstanceOf(Core::class, $core);
+        $this->assertNotSame(0, $core->native()->getType('vips-sequential'));
+
+        Core::ensureInMemory($core);
+        $rendered = $core->native();
+
+        $this->assertSame(0, $rendered->getType('vips-sequential'));
+        Core::ensureInMemory($core);
+        $this->assertSame($rendered, $core->native());
+    }
+
+    /**
+     * An operation chained on a rendered image inherits its fields. With the
+     * claim gone, the chain is left lazy instead of being rendered again.
+     */
+    public function testEnsureInMemoryDoesNotRenderAgainAfterAnOperation(): void
+    {
+        $core = $this->readTestImage('test.jpg')->core();
+        $this->assertInstanceOf(Core::class, $core);
+        Core::ensureInMemory($core);
+
+        $core->setNative($core->native()->flip('horizontal'));
+        $flipped = $core->native();
+        Core::ensureInMemory($core);
+
+        $this->assertSame(0, $flipped->getType('vips-sequential'));
+        $this->assertSame($flipped, $core->native());
+    }
+
+    public function testEnsureInMemoryLeavesAnImageWithoutSequentialClaimAlone(): void
+    {
+        $core = new Core($this->vipsImage(10, 10, [255, 0, 0]));
+        $native = $core->native();
+
+        Core::ensureInMemory($core);
+
+        $this->assertSame($native, $core->native());
+    }
+
+    public function testEnsureInMemoryRejectsACoreWithoutVipsImage(): void
+    {
+        $core = $this->createStub(CoreInterface::class);
+        $core->method('native')->willReturn('not a vips image');
+
+        $this->expectException(DriverException::class);
+        Core::ensureInMemory($core);
+    }
+
+    public function testFrameDropsTheSequentialClaimOnceRendered(): void
+    {
+        $core = $this->readTestImage('animation.gif')->core();
+        $this->assertInstanceOf(Core::class, $core);
+        $this->assertNotSame(0, $core->native()->getType('vips-sequential'));
+
+        $core->frame(0);
+
+        $this->assertSame(0, $core->native()->getType('vips-sequential'));
     }
 
     /**
