@@ -16,12 +16,7 @@ use Jcupitt\Vips\Image as VipsImage;
 class Frame implements FrameInterface
 {
     /**
-     * The offset is kept on the frame, as the GD driver does, not on the
-     * vips image. libvips has xoffset and yoffset header properties, but
-     * they are pipeline bookkeeping: crop, extract_area, flip or rotate
-     * overwrite them with values of their own, and no encoder writes them
-     * out. Nothing in the driver reads the offset either, it is reported
-     * as set.
+     * Frame offsets.
      */
     protected int $offsetLeft = 0;
     protected int $offsetTop = 0;
