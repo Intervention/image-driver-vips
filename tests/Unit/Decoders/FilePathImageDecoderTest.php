@@ -17,7 +17,6 @@ use Intervention\Image\Exceptions\InvalidArgumentException;
 use Intervention\Image\Image;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-/** @package Intervention\Image\Drivers\Vips\Tests\Unit\Decoders */
 #[CoversClass(\Intervention\Image\Drivers\Vips\Decoders\FilePathImageDecoder::class)]
 final class FilePathImageDecoderTest extends BaseTestCase
 {
