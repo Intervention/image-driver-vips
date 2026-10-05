@@ -21,7 +21,7 @@ class RotateModifier extends GenericRotateModifier implements SpecializedInterfa
      * Angles served by rot90/rot180/rot270. They expose no new area and
      * therefore paint no background, unlike the similarity() fallback.
      */
-    private const ANGLES_WITHOUT_BACKGROUND = [0.0, 90.0, -270.0, 180.0, -180.0, -90.0, 270.0];
+    private const array ANGLES_WITHOUT_BACKGROUND = [0.0, 90.0, -270.0, 180.0, -180.0, -90.0, 270.0];
 
     /**
      * {@inheritdoc}

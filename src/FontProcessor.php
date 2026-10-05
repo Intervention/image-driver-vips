@@ -95,7 +95,7 @@ class FontProcessor extends AbstractFontProcessor
         ];
 
         // format pango attributes
-        return implode(' ', array_map(function ($value, $key): string {
+        return implode(' ', array_map(function (mixed $value, mixed $key): string {
             return $key . '="' . $value . '"';
         }, $pangoAttributes, array_keys($pangoAttributes)));
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
+use Intervention\Image\AnimationFactory;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Modifiers\FillTransparentAreasModifier;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
@@ -26,11 +27,12 @@ class FillTransparentAreasModifierTest extends BaseTestCase
 
     public function testApplyAnimated(): void
     {
-        $image = ImageManager::usingDriver(Driver::class)->createImage(16, 16, function ($animation): void {
-            $animation->add($this->getTestResourcePath('red.gif'), .25);
-            $animation->add($this->getTestResourcePath('green.gif'), .25);
-            $animation->add($this->getTestResourcePath('blue.gif'), .25);
-        })->setLoops(5);
+        $image = ImageManager::usingDriver(Driver::class)
+            ->createImage(16, 16, function (AnimationFactory $animation): void {
+                $animation->add($this->getTestResourcePath('red.gif'), .25);
+                $animation->add($this->getTestResourcePath('green.gif'), .25);
+                $animation->add($this->getTestResourcePath('blue.gif'), .25);
+            })->setLoops(5);
 
         $image->modify(new FillTransparentAreasModifier('f00'));
         $this->assertEquals(3, count($image));

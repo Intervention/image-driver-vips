@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
+use Intervention\Image\AnimationFactory;
 use Intervention\Image\Drivers\Vips\Core;
 use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
@@ -44,10 +45,11 @@ final class InsertModifierTest extends BaseTestCase
 
     public function testColorChangeAnimated(): void
     {
-        $image = ImageManager::usingDriver(Driver::class)->createImage(320, 240, function ($animation): void {
-            $animation->add($this->getTestResourcePath('test.jpg'), .25);
-            $animation->add($this->getTestResourcePath('test.jpg'), .25);
-        })->setLoops(5);
+        $image = ImageManager::usingDriver(Driver::class)
+            ->createImage(320, 240, function (AnimationFactory $animation): void {
+                $animation->add($this->getTestResourcePath('test.jpg'), .25);
+                $animation->add($this->getTestResourcePath('test.jpg'), .25);
+            })->setLoops(5);
 
         $image->modify(new InsertModifier($this->getTestResourcePath('circle.png'), 0, 0, 'top-right'));
 

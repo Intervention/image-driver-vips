@@ -92,7 +92,7 @@ class Driver extends AbstractDriver
         $xmlAttributes = implode(
             ' ',
             array_map(
-                fn($key, $value) => sprintf('%s="%s"', $key, htmlspecialchars((string) $value)),
+                fn(mixed $key, mixed $value): string => sprintf('%s="%s"', $key, htmlspecialchars((string) $value)),
                 array_keys($attributes),
                 $attributes,
             ),

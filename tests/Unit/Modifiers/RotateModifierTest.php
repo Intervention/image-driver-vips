@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Vips\Tests\Unit\Modifiers;
 
+use Intervention\Image\AnimationFactory;
 use Intervention\Image\Colors\Rgb\Color;
 use Intervention\Image\Drivers\Vips\Decoders\BinaryImageDecoder;
 use Intervention\Image\Drivers\Vips\Driver;
@@ -40,10 +41,11 @@ final class RotateModifierTest extends BaseTestCase
 
     public function testRotateAnimated(): void
     {
-        $image = ImageManager::usingDriver(Driver::class)->createImage(320, 240, function ($animation): void {
-            $animation->add($this->getTestResourcePath('test.jpg'), .25);
-            $animation->add($this->getTestResourcePath('test.jpg'), .25);
-        })->setLoops(5);
+        $image = ImageManager::usingDriver(Driver::class)
+            ->createImage(320, 240, function (AnimationFactory $animation): void {
+                $animation->add($this->getTestResourcePath('test.jpg'), .25);
+                $animation->add($this->getTestResourcePath('test.jpg'), .25);
+            })->setLoops(5);
 
         $image->modify(new RotateModifier(90, 'fff'));
         $this->assertEquals(240, $image->width());

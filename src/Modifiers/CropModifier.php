@@ -22,7 +22,7 @@ use Jcupitt\Vips\Exception as VipsException;
 
 class CropModifier extends GenericCropModifier implements SpecializedInterface
 {
-    public const INTERESTING_PREFIX = 'interesting-';
+    public const string INTERESTING_PREFIX = 'interesting-';
 
     /**
      * {@inheritdoc}

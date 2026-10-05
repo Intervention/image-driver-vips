@@ -55,7 +55,7 @@ class Core implements CoreInterface, Iterator
      * and slice() is the deepest, four nodes per call: extract_area() and
      * arrayjoin(), each followed by the header copy their fields go on.
      */
-    public const MAX_CHAINED_OPERATIONS = 32;
+    public const int MAX_CHAINED_OPERATIONS = 32;
 
     protected int $iteratorIndex = 0;
     protected int $chainedOperations = 0;

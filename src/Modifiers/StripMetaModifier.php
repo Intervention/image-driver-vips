@@ -22,7 +22,7 @@ class StripMetaModifier implements ModifierInterface, SpecializedInterface
      * it, in line with what the encoders of this driver do for their strip
      * parameter.
      */
-    private const META_FIELDS = [
+    private const array META_FIELDS = [
         'image-description',
         'iptc-data',
         'jpeg-thumbnail-data',
@@ -34,7 +34,7 @@ class StripMetaModifier implements ModifierInterface, SpecializedInterface
      * Prefixes of meta data fields that libvips numbers or names after the tag
      * they hold, "exif-ifd0-Artist" or "png-comment-0-Software" for instance.
      */
-    private const META_FIELD_PREFIXES = [
+    private const array META_FIELD_PREFIXES = [
         'exif-',
         'png-comment-',
     ];
