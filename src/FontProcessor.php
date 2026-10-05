@@ -65,11 +65,14 @@ class FontProcessor extends AbstractFontProcessor
         FontInterface $font,
         ColorInterface $color = new Color(0, 0, 0),
     ): VipsImage {
+        $trueTypeFont = TrueTypeFont::fromPath($font->filepath());
+        $fontDescription = $trueTypeFont->familyName() . ', ' . $trueTypeFont->subfamilyName();
+
         return VipsImage::text(
             '<span ' . $this->pangoAttributes($font, $color) . '>' . htmlspecialchars($text) . '</span>',
             [
                 'fontfile' => $font->filepath(),
-                'font' => TrueTypeFont::fromPath($font->filepath())->familyName() . ' ' . $font->size(),
+                'font' => $fontDescription . ' ' . $font->size(),
                 'dpi' => 72,
                 'rgba' => true,
                 'width' => $font->wrapWidth(),

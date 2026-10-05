@@ -11,6 +11,8 @@ use Intervention\Image\Interfaces\SizeInterface;
 use Intervention\Image\Typography\Font;
 use Intervention\Image\Typography\TextBlock;
 use Jcupitt\Vips\Image as VipsImage;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 
 class FontProcessorTest extends BaseTestCase
 {
@@ -68,6 +70,52 @@ class FontProcessorTest extends BaseTestCase
     {
         $processor = new FontProcessor();
         $this->assertInstanceOf(VipsImage::class, $processor->textToVipsImage('test', $this->testFont()));
+    }
+
+    /**
+     * @param array<array{string, string}> $faces
+     */
+    #[DataProvider('fontFacesProvider')]
+    #[RunInSeparateProcess]
+    public function testTextToVipsImageSelectsFontFace(array $faces): void
+    {
+        $processor = new FontProcessor();
+
+        foreach ($faces as $index => [$filename, $description]) {
+            $font = new Font($this->getTestResourcePath($filename));
+            $font->setSize(40);
+            $font->setLineHeight(1.62);
+            $text = str_repeat('ABC ', $index + 1);
+            $actual = $processor->textToVipsImage($text, $font);
+            $expected = VipsImage::text(
+                '<span line_height="1" foreground="#000000">' . $text . '</span>',
+                [
+                    'fontfile' => $font->filepath(),
+                    'font' => $description . ' 40',
+                    'dpi' => 72,
+                    'rgba' => true,
+                ],
+            );
+
+            $this->assertSame($expected->width, $actual->width, $filename);
+            $this->assertSame($expected->height, $actual->height, $filename);
+            $this->assertSame($expected->writeToMemory(), $actual->writeToMemory(), $filename);
+        }
+    }
+
+    /**
+     * @return array<string, array{array<array{string, string}>}>
+     */
+    public static function fontFacesProvider(): array
+    {
+        $regular = ['test.ttf', 'Intervention Test, Regular'];
+        $bold = ['test-bold.ttf', 'Intervention Test, Bold'];
+        $medium = ['test-medium.ttf', 'Intervention Test, Medium'];
+
+        return [
+            'regular first' => [[$regular, $bold, $medium, $regular, $bold]],
+            'bold first' => [[$bold, $regular, $medium, $bold, $regular]],
+        ];
     }
 
     private function testFont(): Font

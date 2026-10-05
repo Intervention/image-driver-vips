@@ -20,4 +20,13 @@ class TrueTypeFontTest extends BaseTestCase
     {
         $this->assertEquals('Intervention Test', $this->font->familyName());
     }
+
+    public function testSubfamilyName(): void
+    {
+        $this->assertEquals('Regular', $this->font->subfamilyName());
+        $this->assertEquals(
+            'Bold',
+            TrueTypeFont::fromPath($this->getTestResourcePath('test-bold.ttf'))->subfamilyName(),
+        );
+    }
 }
