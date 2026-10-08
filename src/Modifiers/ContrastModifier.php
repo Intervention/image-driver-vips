@@ -10,6 +10,8 @@ use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\ContrastModifier as GenericContrastModifier;
 use Jcupitt\Vips\Exception as VipsException;
+use Jcupitt\Vips\Image as VipsImage;
+use Jcupitt\Vips\Interpretation;
 
 class ContrastModifier extends GenericContrastModifier implements SpecializedInterface
 {
@@ -23,9 +25,11 @@ class ContrastModifier extends GenericContrastModifier implements SpecializedInt
      */
     public function apply(ImageInterface $image): ImageInterface
     {
-        // calculate a and b for linear
+        // calculate a and b for linear, pivoting on mid grey so that it stays
+        // unchanged while the other tones are pushed away from it or pulled
+        // towards it
         $a = 1 + $this->level / 100;
-        $b = 255 * (1 - $a);
+        $b = $this->midGrey($image->core()->native()) * (1 - $a);
 
         if ($image->core()->native()->hasAlpha()) {
             try {
@@ -58,5 +62,19 @@ class ContrastModifier extends GenericContrastModifier implements SpecializedInt
         $image->core()->setNative($brightened);
 
         return $image;
+    }
+
+    /**
+     * Return mid grey on the value range that goes with the interpretation of
+     * the given image: 0-65535 for 16-bit sources, 0-1 for scRGB ones and
+     * 0-255 for all others.
+     */
+    private function midGrey(VipsImage $vipsImage): float
+    {
+        return match ($vipsImage->interpretation) {
+            Interpretation::RGB16, Interpretation::GREY16 => 65535,
+            Interpretation::SCRGB => 1,
+            default => 255,
+        } / 2;
     }
 }
