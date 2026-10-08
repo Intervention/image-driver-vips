@@ -111,10 +111,37 @@ class FontProcessorTest extends BaseTestCase
         $regular = ['test.ttf', 'Intervention Test, Regular'];
         $bold = ['test-bold.ttf', 'Intervention Test, Bold'];
         $medium = ['test-medium.ttf', 'Intervention Test, Medium'];
+        $semibold = ['test-semibold.ttf', 'Intervention Test, Semi-Bold'];
+        $italic = ['test-italic.ttf', 'Intervention Test, Italic'];
+        $boldItalic = ['test-bold-italic.ttf', 'Intervention Test, Bold Italic'];
+        $custom = ['test-custom.ttf', 'Intervention Bold,'];
+        $noSubfamily = ['test-no-subfamily.ttf', 'Intervention Medium,'];
 
         return [
-            'regular first' => [[$regular, $bold, $medium, $regular, $bold]],
-            'bold first' => [[$bold, $regular, $medium, $bold, $regular]],
+            'regular first' => [[
+                $regular,
+                $bold,
+                $medium,
+                $semibold,
+                $italic,
+                $boldItalic,
+                $custom,
+                $noSubfamily,
+                $regular,
+                $bold,
+            ]],
+            'bold first' => [[
+                $bold,
+                $regular,
+                $medium,
+                $semibold,
+                $italic,
+                $boldItalic,
+                $custom,
+                $noSubfamily,
+                $bold,
+                $regular,
+            ]],
         ];
     }
 

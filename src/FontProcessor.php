@@ -23,6 +23,34 @@ use Jcupitt\Vips\TextWrap;
 
 class FontProcessor extends AbstractFontProcessor
 {
+    private const PANGO_FONT_WEIGHTS = [
+        'thin' => 'Thin',
+        'ultralight' => 'Ultra-Light',
+        'extralight' => 'Extra-Light',
+        'light' => 'Light',
+        'semilight' => 'Semi-Light',
+        'demilight' => 'Demi-Light',
+        'book' => 'Book',
+        'regular' => 'Regular',
+        'medium' => 'Medium',
+        'semibold' => 'Semi-Bold',
+        'demibold' => 'Demi-Bold',
+        'bold' => 'Bold',
+        'ultrabold' => 'Ultra-Bold',
+        'extrabold' => 'Extra-Bold',
+        'heavy' => 'Heavy',
+        'black' => 'Black',
+        'ultrablack' => 'Ultra-Black',
+        'extrablack' => 'Extra-Black',
+    ];
+
+    private const PANGO_FONT_STYLES = [
+        'normal' => 'Normal',
+        'roman' => 'Roman',
+        'oblique' => 'Oblique',
+        'italic' => 'Italic',
+    ];
+
     /**
      * {@inheritdoc}
      *
@@ -66,7 +94,17 @@ class FontProcessor extends AbstractFontProcessor
         ColorInterface $color = new Color(0, 0, 0),
     ): VipsImage {
         $trueTypeFont = TrueTypeFont::fromPath($font->filepath());
-        $fontDescription = $trueTypeFont->familyName() . ', ' . $trueTypeFont->subfamilyName();
+        $fontDescription = $trueTypeFont->familyName() . ',';
+
+        try {
+            $subfamilyName = $this->pangoSubfamilyName($trueTypeFont->subfamilyName());
+        } catch (DriverException) {
+            $subfamilyName = null;
+        }
+
+        if ($subfamilyName !== null) {
+            $fontDescription .= ' ' . $subfamilyName;
+        }
 
         return VipsImage::text(
             '<span ' . $this->pangoAttributes($font, $color) . '>' . htmlspecialchars($text) . '</span>',
@@ -85,6 +123,40 @@ class FontProcessor extends AbstractFontProcessor
                 'spacing' => 0,
             ],
         );
+    }
+
+    /**
+     * Return a Pango-compatible weight/style description for a font subfamily.
+     */
+    private function pangoSubfamilyName(string $subfamilyName): ?string
+    {
+        $name = preg_replace('/[\s_-]+/', '', strtolower(trim($subfamilyName))) ?? '';
+
+        if ($name === '') {
+            return null;
+        }
+
+        if (isset(self::PANGO_FONT_WEIGHTS[$name])) {
+            return self::PANGO_FONT_WEIGHTS[$name];
+        }
+
+        if (isset(self::PANGO_FONT_STYLES[$name])) {
+            return self::PANGO_FONT_STYLES[$name];
+        }
+
+        foreach (self::PANGO_FONT_STYLES as $key => $style) {
+            if (!str_ends_with($name, $key)) {
+                continue;
+            }
+
+            $weight = substr($name, 0, -strlen($key));
+
+            if (isset(self::PANGO_FONT_WEIGHTS[$weight])) {
+                return self::PANGO_FONT_WEIGHTS[$weight] . ' ' . $style;
+            }
+        }
+
+        return null;
     }
 
     /**
