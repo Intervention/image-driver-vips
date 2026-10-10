@@ -30,6 +30,36 @@ class TrueTypeFont extends File
     }
 
     /**
+     * Return subfamily name of current font
+     *
+     * @throws DriverException
+     */
+    public function subfamilyName(): string
+    {
+        return $this->queryNameTable(2);
+    }
+
+    /**
+     * Return typographic family name.
+     *
+     * @throws DriverException
+     */
+    public function typographicFamilyName(): string
+    {
+        return $this->queryNameTable(16);
+    }
+
+    /**
+     * Return typographic subfamily name.
+     *
+     * @throws DriverException
+     */
+    public function typographicSubfamilyName(): string
+    {
+        return $this->queryNameTable(17);
+    }
+
+    /**
      * Query name table of current font file
      *
      * @throws DriverException
