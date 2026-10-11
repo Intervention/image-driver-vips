@@ -10,14 +10,100 @@ use Intervention\Image\Drivers\Vips\Driver;
 use Intervention\Image\Drivers\Vips\Tests\BaseTestCase;
 use Intervention\Image\Encoders\PngEncoder;
 use Intervention\Image\Encoders\WebpEncoder;
+use Intervention\Image\Image;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Modifiers\InsertModifier;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 #[CoversClass(InsertModifier::class)]
 #[CoversClass(\Intervention\Image\Drivers\Vips\Modifiers\InsertModifier::class)]
 final class InsertModifierTest extends BaseTestCase
 {
+    /**
+     * Placements of a 10x5 element on a 40x30 image that leave nothing of it
+     * on the canvas.
+     *
+     * @return array<string, array{string, int, int, float}>
+     */
+    public static function offCanvasProvider(): array
+    {
+        return [
+            'past the right edge' => ['top-left', 40, 0, 1.0],
+            'past the bottom edge' => ['top-left', 0, 30, 1.0],
+            'past the left edge' => ['top-left', -10, 0, 1.0],
+            'past the top edge' => ['top-left', 0, -5, 1.0],
+            'pushed out from the bottom-right' => ['bottom-right', 50, 0, 1.0],
+            'far from the center' => ['center', 100, 100, 1.0],
+            'just past the right edge from the center' => ['center', 25, 0, 1.0],
+            'faded, past the right edge' => ['top-left', 40, 0, .5],
+        ];
+    }
+
+    #[DataProvider('offCanvasProvider')]
+    public function testApplyElementWhollyOffTheCanvasLeavesTheImageUntouched(
+        string $position,
+        int $x,
+        int $y,
+        float $transparency,
+    ): void {
+        $image = $this->createTestImage(40, 30);
+        $native = $image->core()->native();
+        $element = new Image(new Driver(), new Core(self::vipsImage(10, 5, [0, 255, 0, 255])));
+
+        $image->modify(new InsertModifier($element, $x, $y, $position, $transparency));
+
+        $this->assertSame($native, $image->core()->native());
+    }
+
+    public function testApplyElementBelowTheFramesOfAnAnimationLeavesTheImageUntouched(): void
+    {
+        // The frames of an animation are stacked in one tall native image, an
+        // element past the bottom of a frame still lies within that image.
+        $image = $this->readTestImage('animation.gif');
+        $native = $image->core()->native();
+        $element = new Image(new Driver(), new Core(self::vipsImage(10, 5, [0, 255, 0, 255])));
+
+        $image->modify(new InsertModifier($element, 0, $image->height()));
+
+        $this->assertSame($native, $image->core()->native());
+    }
+
+    /**
+     * Placements of a 10x5 element on a 40x30 image that leave a single row
+     * or column of it on the canvas, with the pixel it covers and its
+     * neighbour inwards, which it must not cover.
+     *
+     * @return array<string, array{int, int, int, int, int, int}>
+     */
+    public static function edgeOfCanvasProvider(): array
+    {
+        return [
+            'last column' => [39, 0, 39, 0, 38, 0],
+            'last row' => [0, 29, 0, 29, 0, 28],
+            'first column' => [-9, 0, 0, 0, 1, 0],
+            'first row' => [0, -4, 0, 0, 0, 1],
+        ];
+    }
+
+    #[DataProvider('edgeOfCanvasProvider')]
+    public function testApplyElementOnTheEdgeOfTheCanvasInsertsWhatOverlaps(
+        int $x,
+        int $y,
+        int $coveredX,
+        int $coveredY,
+        int $uncoveredX,
+        int $uncoveredY,
+    ): void {
+        $image = $this->createTestImage(40, 30);
+        $element = new Image(new Driver(), new Core(self::vipsImage(10, 5, [0, 255, 0, 255])));
+
+        $image->modify(new InsertModifier($element, $x, $y));
+
+        $this->assertColor(0, 255, 0, 255, $image->colorAt($coveredX, $coveredY));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt($uncoveredX, $uncoveredY));
+    }
+
     public function testColorChange(): void
     {
         $image = $this->readTestImage('test.jpg');
