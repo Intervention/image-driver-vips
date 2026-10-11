@@ -58,6 +58,72 @@ final class InsertModifierTest extends BaseTestCase
         }
     }
 
+    public function testApplyAnimatedElementInsertsItsFirstFrame(): void
+    {
+        // The frames of an animation are stacked in one tall native image.
+        // Only the first frame is inserted, the others must not run down the
+        // image below it.
+        $image = $this->createTestImage(40, 30);
+        $image->modify(new InsertModifier($this->getTestResourcePath('animation.gif')));
+
+        $this->assertEquals('ffa601', $image->colorAt(10, 7)->toHex());
+
+        $below = $image->core()->native()->crop(0, 15, 40, 15);
+        $this->assertEquals(0, $below->extract_band(1, ['n' => 2])->max());
+        $this->assertEquals(255, $below->extract_band(0)->min());
+    }
+
+    public function testApplyAnimatedElementKeepsAStillImageStill(): void
+    {
+        // The image takes over the fields that only the element has. With
+        // the animation fields of the element, a still image would report the
+        // frame height and the loop count of the element.
+        $image = $this->createTestImage(40, 30);
+        $image->modify(new InsertModifier($this->getTestResourcePath('animation.gif')));
+
+        $this->assertSame(30, $image->height());
+        $this->assertSame(0, $image->loops());
+        $this->assertFalse($image->isAnimated());
+        foreach (['page-height', 'n-pages', 'delay', 'loop'] as $field) {
+            $this->assertSame(0, $image->core()->native()->getType($field), $field);
+        }
+    }
+
+    public function testApplyLeavesTheFieldsOfTheElementAlone(): void
+    {
+        // The first frame of a still element is its own native image, the
+        // fields are removed from a copy of it.
+        $element = $this->readTestImage('blue.gif');
+        $this->assertSame(1, $element->loops());
+
+        $image = $this->createTestImage(40, 30);
+        $image->modify(new InsertModifier($element));
+
+        $this->assertSame(1, $element->loops());
+    }
+
+    public function testApplyAnimatedElementOnAnAnimatedImage(): void
+    {
+        $image = ImageManager::usingDriver(Driver::class)
+            ->createImage(40, 30, function (AnimationFactory $animation): void {
+                $animation->add($this->createTestImage(40, 30), .1);
+                $animation->add($this->createTestImage(40, 30), .2);
+            })->setLoops(2);
+
+        $image->modify(new InsertModifier($this->getTestResourcePath('animation.gif')));
+
+        $this->assertCount(2, $image);
+        $this->assertSame(30, $image->height());
+        $this->assertSame(2, $image->loops());
+        foreach ($image as $frame) {
+            $this->assertEquals('ffa601', $frame->toImage(new Driver())->colorAt(10, 7)->toHex());
+
+            $below = $frame->native()->crop(0, 15, 40, 15);
+            $this->assertEquals(0, $below->extract_band(1, ['n' => 2])->max());
+            $this->assertEquals(255, $below->extract_band(0)->min());
+        }
+    }
+
     public function testApplyAnimatedWithBinaryWatermarkEncodes(): void
     {
         // Regression for: animated base + watermark decoded from binary

@@ -40,7 +40,19 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
         // inserted many times only pays for this once.
         Core::ensureInMemory($watermark->core());
 
-        $elementNative = $watermark->core()->native();
+        // An animated element is one tall image with its frames stacked, only
+        // its first frame is inserted, as the GD driver does. Its size is the
+        // size of one frame already, so the position below matches. The image
+        // takes over the fields that only the element has, so the animation
+        // fields go too, on a copy: a still image would otherwise report the
+        // frame height and the loop count of the element.
+        $elementNative = $watermark->core()->first()->native()->copy();
+        foreach (['page-height', 'n-pages', 'delay', 'loop'] as $field) {
+            if ($elementNative->getType($field) !== 0) {
+                $elementNative->remove($field);
+            }
+        }
+
         $position = $this->position($image, $watermark);
 
         if ($this->transparency < 1) {
