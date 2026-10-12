@@ -10,6 +10,7 @@ use Intervention\Image\Exceptions\StateException;
 use Intervention\Image\Interfaces\FrameInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Interfaces\PointInterface;
+use Intervention\Image\Interfaces\SizeInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\InsertModifier as GenericInsertModifier;
 use Jcupitt\Vips\BlendMode;
@@ -31,15 +32,7 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
         $watermark = $this->driver()->decodeImage($this->image);
         $position = $this->position($image, $watermark);
 
-        // libvips refuses to embed an element that does not overlap the frame
-        // at all ("embed: bad dimensions"), where the other drivers clip it
-        // away. Nothing of it would be drawn, so the image is left as it is.
-        if (
-            $position->x() >= $image->width()
-            || $position->y() >= $image->height()
-            || $position->x() + $watermark->width() <= 0
-            || $position->y() + $watermark->height() <= 0
-        ) {
+        if (!$this->overlap($image->size(), $watermark->size(), $position)) {
             return $image;
         }
 
@@ -148,5 +141,29 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
         }
 
         return $frame;
+    }
+
+    /**
+     * Determine if the canvas and watermark areas overlap.
+     */
+    private function overlap(SizeInterface $canvas, SizeInterface $watermark, PointInterface $position): bool
+    {
+        if ($position->x() >= $canvas->width()) {
+            return false;
+        }
+
+        if ($position->y() >= $canvas->height()) {
+            return false;
+        }
+
+        if ($position->x() + $watermark->width() <= 0) {
+            return false;
+        }
+
+        if ($position->y() + $watermark->height() <= 0) {
+            return false;
+        }
+
+        return true;
     }
 }
