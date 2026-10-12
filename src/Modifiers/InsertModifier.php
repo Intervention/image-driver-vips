@@ -57,6 +57,27 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
             $elementNative = $this->fitElement($elementNative, $image->core()->native(), $blend);
         }
 
+        // An animated element is one tall image with its frames stacked, only
+        // its first frame is inserted, as the GD driver does. Its size is the
+        // size of one frame already, so the position below matches. The image
+        // takes over the fields that only the element has, so the animation
+        // fields go too, on a copy: a still image would otherwise report the
+        // frame height and the loop count of the element.
+        $elementNative = $watermark->core()->first()->native()->copy();
+        foreach (['page-height', 'n-pages', 'delay', 'loop'] as $field) {
+            if ($elementNative->getType($field) !== 0) {
+                $elementNative->remove($field);
+            }
+        }
+
+        // An element without alpha, at full opacity, is copied into the image
+        // with insert(), anything else is blended with composite2().
+        $blend = $elementNative->hasAlpha() || $this->transparency < 1;
+
+        if (!$elementNative->hasAlpha()) {
+            $elementNative = $this->fitElement($elementNative, $image->core()->native(), $blend);
+        }
+
         if ($this->transparency < 1) {
             $elementNative = $elementNative->multiply([
                 ...array_fill(0, $elementNative->bands - 1, 1.0),
