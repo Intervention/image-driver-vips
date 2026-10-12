@@ -29,6 +29,19 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
     public function apply(ImageInterface $image): ImageInterface
     {
         $watermark = $this->driver()->decodeImage($this->image);
+        $position = $this->position($image, $watermark);
+
+        // libvips refuses to embed an element that does not overlap the frame
+        // at all ("embed: bad dimensions"), where the other drivers clip it
+        // away. Nothing of it would be drawn, so the image is left as it is.
+        if (
+            $position->x() >= $image->width()
+            || $position->y() >= $image->height()
+            || $position->x() + $watermark->width() <= 0
+            || $position->y() + $watermark->height() <= 0
+        ) {
+            return $image;
+        }
 
         // A libvips sequential source may only be read once, in order. The
         // element is folded into the target's pipeline by reference, so it is
