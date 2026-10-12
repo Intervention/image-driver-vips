@@ -14,6 +14,7 @@ use Intervention\Image\Interfaces\SizeInterface;
 use Intervention\Image\Interfaces\SpecializedInterface;
 use Intervention\Image\Modifiers\InsertModifier as GenericInsertModifier;
 use Jcupitt\Vips\BlendMode;
+use Jcupitt\Vips\Exception as VipsException;
 use Jcupitt\Vips\Extend;
 use Jcupitt\Vips\Image as VipsImage;
 
@@ -61,15 +62,17 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
 
         $position = $this->position($image, $watermark);
 
-        if ($this->transparency < 1) {
-            if (!$elementNative->hasAlpha()) {
-                $elementNative = $elementNative->bandjoin_const(255);
-            }
+        // An element without alpha, at full opacity, is copied into the image
+        // with insert(), anything else is blended with composite2().
+        $blend = $elementNative->hasAlpha() || $this->transparency < 1;
 
+        if (!$elementNative->hasAlpha()) {
+            $elementNative = $this->fitElement($elementNative, $image->core()->native(), $blend);
+        }
+
+        if ($this->transparency < 1) {
             $elementNative = $elementNative->multiply([
-                1.0,
-                1.0,
-                1.0,
+                ...array_fill(0, $elementNative->bands - 1, 1.0),
                 $this->transparency,
             ]);
         }
@@ -79,6 +82,7 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
                 $elementNative,
                 $position,
                 $image->core()->first(),
+                $blend,
             )->native();
         } else {
             // Materialise the watermark so every frame composites against an
@@ -93,6 +97,7 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
                     $elementNative,
                     $position,
                     $frame,
+                    $blend,
                 );
             }
 
@@ -105,14 +110,41 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
     }
 
     /**
+     * Bring an element without alpha to the colour space of the image, and
+     * give it an alpha band when it is blended or when the image has one.
+     * insert() copies the values of the element as they are: a CMYK element
+     * would land as raw ink values, with K in the alpha band, and a 16-bit
+     * one would not fit the bands of the image. composite2() converts colours
+     * itself, but a 16-bit element would make its result 16-bit. addalpha()
+     * picks the opaque value that goes with the interpretation, 255, 65535 or
+     * 1.0.
+     */
+    private function fitElement(VipsImage $element, VipsImage $image, bool $blend): VipsImage
+    {
+        if ($element->interpretation !== $image->interpretation) {
+            try {
+                $element = $element->colourspace($image->interpretation);
+            } catch (VipsException) {
+                // Interpretations like multiband, matrix or rgb are tags rather
+                // than colour spaces, and colourspace() has no route to them.
+                // The element is placed as it is then.
+                return $blend ? $element->addalpha() : $element;
+            }
+        }
+
+        return $blend || $image->hasAlpha() ? $element->addalpha() : $element;
+    }
+
+    /**
      * Place element at position on frame.
      */
     private function placeElement(
         VipsImage $element,
         PointInterface $position,
         FrameInterface $frame,
+        bool $blend,
     ): FrameInterface {
-        if ($element->hasAlpha()) {
+        if ($blend) {
             $element = $element->embed(
                 $position->x(),
                 $position->y(),
@@ -120,7 +152,7 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
                 $frame->size()->height(),
                 [
                     'extend' => Extend::BACKGROUND,
-                    'background' => [0, 0, 0, 0],
+                    'background' => array_fill(0, $element->bands, 0),
                 ],
             );
 
