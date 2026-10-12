@@ -47,19 +47,9 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
         // inserted many times only pays for this once.
         Core::ensureInMemory($watermark->core());
 
-        $watermarkNative = $watermark->core()->native();
-
-        // An watermark without alpha, at full opacity, is copied into the image
-        // with insert(), anything else is blended with composite2().
-        $blend = $watermarkNative->hasAlpha() || $this->transparency < 1;
-
-        if (!$watermarkNative->hasAlpha()) {
-            $watermarkNative = $this->fitWatermark($watermarkNative, $image->core()->native(), $blend);
-        }
-
         // An animated watermark is one tall image with its frames stacked, only
         // its first frame is inserted, as the GD driver does. Its size is the
-        // size of one frame already, so the position below matches. The image
+        // size of one frame already, so the position above matches. The image
         // takes over the fields that only the watermark has, so the animation
         // fields go too, on a copy: a still image would otherwise report the
         // frame height and the loop count of the watermark.
@@ -70,7 +60,7 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
             }
         }
 
-        // An watermark without alpha, at full opacity, is copied into the image
+        // A watermark without alpha, at full opacity, is copied into the image
         // with insert(), anything else is blended with composite2().
         $blend = $watermarkNative->hasAlpha() || $this->transparency < 1;
 
@@ -118,7 +108,7 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
     }
 
     /**
-     * Bring an watermark without alpha to the colour space of the image, and
+     * Bring a watermark without alpha to the colour space of the image, and
      * give it an alpha band when it is blended or when the image has one.
      * insert() copies the values of the watermark as they are: a CMYK watermark
      * would land as raw ink values, with K in the alpha band, and a 16-bit
