@@ -38,56 +38,56 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
         }
 
         // A libvips sequential source may only be read once, in order. The
-        // element is folded into the target's pipeline by reference, so it is
+        // watermark is folded into the target's pipeline by reference, so it is
         // read again every time that pipeline is evaluated: inserting the same
         // decoded image twice, or encoding the result twice, fails with "out
-        // of order read". Materialising the element on its own core spends
+        // of order read". Materialising the watermark on its own core spends
         // that single read here, and leaves every later evaluation reading
         // from memory. Decoded images are shared by reference, so an image
         // inserted many times only pays for this once.
         Core::ensureInMemory($watermark->core());
 
-        $elementNative = $watermark->core()->native();
+        $watermarkNative = $watermark->core()->native();
 
-        // An element without alpha, at full opacity, is copied into the image
+        // An watermark without alpha, at full opacity, is copied into the image
         // with insert(), anything else is blended with composite2().
-        $blend = $elementNative->hasAlpha() || $this->transparency < 1;
+        $blend = $watermarkNative->hasAlpha() || $this->transparency < 1;
 
-        if (!$elementNative->hasAlpha()) {
-            $elementNative = $this->fitElement($elementNative, $image->core()->native(), $blend);
+        if (!$watermarkNative->hasAlpha()) {
+            $watermarkNative = $this->fitWatermark($watermarkNative, $image->core()->native(), $blend);
         }
 
-        // An animated element is one tall image with its frames stacked, only
+        // An animated watermark is one tall image with its frames stacked, only
         // its first frame is inserted, as the GD driver does. Its size is the
         // size of one frame already, so the position below matches. The image
-        // takes over the fields that only the element has, so the animation
+        // takes over the fields that only the watermark has, so the animation
         // fields go too, on a copy: a still image would otherwise report the
-        // frame height and the loop count of the element.
-        $elementNative = $watermark->core()->first()->native()->copy();
+        // frame height and the loop count of the watermark.
+        $watermarkNative = $watermark->core()->first()->native()->copy();
         foreach (['page-height', 'n-pages', 'delay', 'loop'] as $field) {
-            if ($elementNative->getType($field) !== 0) {
-                $elementNative->remove($field);
+            if ($watermarkNative->getType($field) !== 0) {
+                $watermarkNative->remove($field);
             }
         }
 
-        // An element without alpha, at full opacity, is copied into the image
+        // An watermark without alpha, at full opacity, is copied into the image
         // with insert(), anything else is blended with composite2().
-        $blend = $elementNative->hasAlpha() || $this->transparency < 1;
+        $blend = $watermarkNative->hasAlpha() || $this->transparency < 1;
 
-        if (!$elementNative->hasAlpha()) {
-            $elementNative = $this->fitElement($elementNative, $image->core()->native(), $blend);
+        if (!$watermarkNative->hasAlpha()) {
+            $watermarkNative = $this->fitWatermark($watermarkNative, $image->core()->native(), $blend);
         }
 
         if ($this->transparency < 1) {
-            $elementNative = $elementNative->multiply([
-                ...array_fill(0, $elementNative->bands - 1, 1.0),
+            $watermarkNative = $watermarkNative->multiply([
+                ...array_fill(0, $watermarkNative->bands - 1, 1.0),
                 $this->transparency,
             ]);
         }
 
         if (!$image->isAnimated()) {
-            $watermarked = $this->placeElement(
-                $elementNative,
+            $watermarked = $this->placeWatermark(
+                $watermarkNative,
                 $position,
                 $image->core()->first(),
                 $blend,
@@ -97,12 +97,12 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
             // in-memory image. Without this, the pipeline references the same
             // lazy source N times, which breaks sequential libvips loaders
             // (e.g. pngload_buffer) that cannot be re-read out of order.
-            $elementNative = $elementNative->copyMemory();
+            $watermarkNative = $watermarkNative->copyMemory();
 
             $frames = [];
             foreach ($image as $frame) {
-                $frames[] = $this->placeElement(
-                    $elementNative,
+                $frames[] = $this->placeWatermark(
+                    $watermarkNative,
                     $position,
                     $frame,
                     $blend,
@@ -118,62 +118,62 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
     }
 
     /**
-     * Bring an element without alpha to the colour space of the image, and
+     * Bring an watermark without alpha to the colour space of the image, and
      * give it an alpha band when it is blended or when the image has one.
-     * insert() copies the values of the element as they are: a CMYK element
+     * insert() copies the values of the watermark as they are: a CMYK watermark
      * would land as raw ink values, with K in the alpha band, and a 16-bit
      * one would not fit the bands of the image. composite2() converts colours
-     * itself, but a 16-bit element would make its result 16-bit. addalpha()
+     * itself, but a 16-bit watermark would make its result 16-bit. addalpha()
      * picks the opaque value that goes with the interpretation, 255, 65535 or
      * 1.0.
      */
-    private function fitElement(VipsImage $element, VipsImage $image, bool $blend): VipsImage
+    private function fitWatermark(VipsImage $watermark, VipsImage $image, bool $blend): VipsImage
     {
-        if ($element->interpretation !== $image->interpretation) {
+        if ($watermark->interpretation !== $image->interpretation) {
             try {
-                $element = $element->colourspace($image->interpretation);
+                $watermark = $watermark->colourspace($image->interpretation);
             } catch (VipsException) {
                 // Interpretations like multiband, matrix or rgb are tags rather
                 // than colour spaces, and colourspace() has no route to them.
-                // The element is placed as it is then.
-                return $blend ? $element->addalpha() : $element;
+                // The watermark is placed as it is then.
+                return $blend ? $watermark->addalpha() : $watermark;
             }
         }
 
-        return $blend || $image->hasAlpha() ? $element->addalpha() : $element;
+        return $blend || $image->hasAlpha() ? $watermark->addalpha() : $watermark;
     }
 
     /**
-     * Place element at position on frame.
+     * Place watermark at position on frame.
      */
-    private function placeElement(
-        VipsImage $element,
+    private function placeWatermark(
+        VipsImage $watermark,
         PointInterface $position,
         FrameInterface $frame,
         bool $blend,
     ): FrameInterface {
         if ($blend) {
-            $element = $element->embed(
+            $watermark = $watermark->embed(
                 $position->x(),
                 $position->y(),
                 $frame->size()->width(),
                 $frame->size()->height(),
                 [
                     'extend' => Extend::BACKGROUND,
-                    'background' => array_fill(0, $element->bands, 0),
+                    'background' => array_fill(0, $watermark->bands, 0),
                 ],
             );
 
             $frame->setNative(
                 $frame->native()->composite2(
-                    $element,
+                    $watermark,
                     BlendMode::OVER,
                 ),
             );
         } else {
             $frame->setNative(
                 $frame->native()->insert(
-                    $element,
+                    $watermark,
                     $position->x(),
                     $position->y(),
                 ),
