@@ -33,7 +33,7 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
         $watermark = $this->driver()->decodeImage($this->image);
         $position = $this->position($image, $watermark);
 
-        if (!$this->overlap($image->size(), $watermark->size(), $position)) {
+        if (!$this->hasIntersections($image->size(), $watermark->size(), $position)) {
             return $image;
         }
 
@@ -65,7 +65,7 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
         $blend = $watermarkNative->hasAlpha() || $this->transparency < 1;
 
         if (!$watermarkNative->hasAlpha()) {
-            $watermarkNative = $this->fitWatermark($watermarkNative, $image->core()->native(), $blend);
+            $watermarkNative = $this->prepareWatermark($watermarkNative, $image->core()->native(), $blend);
         }
 
         if ($this->transparency < 1) {
@@ -117,7 +117,7 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
      * picks the opaque value that goes with the interpretation, 255, 65535 or
      * 1.0.
      */
-    private function fitWatermark(VipsImage $watermark, VipsImage $image, bool $blend): VipsImage
+    private function prepareWatermark(VipsImage $watermark, VipsImage $image, bool $blend): VipsImage
     {
         if ($watermark->interpretation !== $image->interpretation) {
             try {
@@ -160,15 +160,17 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
                     BlendMode::OVER,
                 ),
             );
-        } else {
-            $frame->setNative(
-                $frame->native()->insert(
-                    $watermark,
-                    $position->x(),
-                    $position->y(),
-                ),
-            );
+
+            return $frame;
         }
+
+        $frame->setNative(
+            $frame->native()->insert(
+                $watermark,
+                $position->x(),
+                $position->y(),
+            ),
+        );
 
         return $frame;
     }
@@ -176,7 +178,7 @@ class InsertModifier extends GenericInsertModifier implements SpecializedInterfa
     /**
      * Determine if the canvas and watermark areas overlap.
      */
-    private function overlap(SizeInterface $canvas, SizeInterface $watermark, PointInterface $position): bool
+    private function hasIntersections(SizeInterface $canvas, SizeInterface $watermark, PointInterface $position): bool
     {
         if ($position->x() >= $canvas->width()) {
             return false;
