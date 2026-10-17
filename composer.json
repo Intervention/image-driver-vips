@@ -28,7 +28,8 @@
         "ext-fileinfo": "*",
         "phpunit/phpunit": "^12.0",
         "phpstan/phpstan": "^2",
-        "intervention/coding-standard": "^1"
+        "intervention/coding-standard": "^1",
+        "psr/http-message": "^2"
     },
     "autoload": {
         "psr-4": {
